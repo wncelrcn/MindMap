@@ -2,6 +2,20 @@ import Head from "next/head";
 import styles from "@/styles/Login.module.css";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import { Raleway } from "next/font/google";
+import { Poppins } from "next/font/google";
+
+const raleway = Raleway({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-raleway",
+});
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
+});
 
 export default function Login() {
   const router = useRouter();
@@ -37,11 +51,20 @@ export default function Login() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className={styles.container}>
+      <div
+        className={`${styles.container} ${raleway.variable} ${poppins.variable}`}
+      >
         <form onSubmit={handleSubmit} className={styles.form}>
-          <h1 className={styles.title}>Login</h1>
+          <div className={styles.header}>
+            <img src="/assets/logo.png" alt="Logo" className={styles.logo} />
+            <p className={styles.title}>MindMap</p>
+          </div>
+          <p className={styles.subtitle}>
+            The Journal Where Every Thought Maps Its Purpose
+          </p>
+
           <label htmlFor="email" className={styles.label}>
-            Email
+            EMAIL
           </label>
           <input
             type="email"
@@ -53,7 +76,7 @@ export default function Login() {
           />
 
           <label htmlFor="password" className={styles.label}>
-            Password
+            PASSWORD
           </label>
           <input
             type="password"
@@ -67,6 +90,16 @@ export default function Login() {
           <button type="submit" className={styles.button}>
             Login
           </button>
+
+          <p className={styles.registerText}>
+            Don't have an account?{" "}
+            <span
+              onClick={() => router.push("/register")}
+              className={styles.registerLink}
+            >
+              Register here.
+            </span>
+          </p>
         </form>
       </div>
     </>
