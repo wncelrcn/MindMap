@@ -1,4 +1,5 @@
 import Head from "next/head";
+import Footer from "@/components/footer";
 
 export default function Login() {
   return (
@@ -10,6 +11,7 @@ export default function Login() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div>Dashboard Page</div>
+      <Footer />
     </>
   );
 }

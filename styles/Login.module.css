@@ -31,7 +31,8 @@
 .logo {
   object-fit: contain;
   display: block;
-  width: 7rem;
+  width: 4.5rem;
+  margin-right: 1rem;
 }
 
 .title {
@@ -45,7 +46,7 @@
 .subtitle {
   text-align: center;
   font-size: 1.1rem;
-  margin-top: -1.5rem;
+  margin-top: -0.5rem;
   margin-bottom: 2rem;
   color: #2D1B6B;
   font-family: var(--font-raleway), sans-serif;

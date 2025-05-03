@@ -1,0 +1,53 @@
+.footer {
+    background-color: #5c35c2;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4rem 8rem;
+    flex-wrap: wrap;
+}
+  
+.leftSection {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+  
+.logoArea {
+    display: flex;
+    align-items: center;
+}
+  
+.brand {
+    font-size: 40px;
+    font-weight: 400;
+    margin-bottom: 12px;
+}
+
+.contact {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    font-family: var(--font-poppins), sans-serif;
+}
+
+.label {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-bottom: 4px;
+}
+
+.info {
+    font-size: 16px;
+}
+
+.rightSection {
+    text-align: right;
+    max-width: 400px;
+    font-size: 32px;
+    font-weight: 200;
+}
+
+.logo {
+}
