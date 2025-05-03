@@ -1,9 +1,19 @@
 import Head from "next/head";
 import { useState } from "react";
 import { useRouter } from "next/router";
-import styles from "@/styles/Register.module.css";
-import { Raleway } from "next/font/google";
-import { Poppins } from "next/font/google";
+import {
+  Box,
+  Button,
+  Container,
+  TextField,
+  Typography,
+  Paper,
+  Link,
+  Stack,
+  MenuItem,
+} from "@mui/material";
+import Image from "next/image";
+import { Raleway, Poppins } from "next/font/google";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -19,7 +29,6 @@ const poppins = Poppins({
 
 export default function Register() {
   const router = useRouter();
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [birthday, setBirthday] = useState("");
@@ -39,19 +48,12 @@ export default function Register() {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        email,
-        birthday,
-        gender,
-        password,
-      }),
+      body: JSON.stringify({ name, email, birthday, gender, password }),
     });
 
     const data = await res.json();
 
     if (res.ok) {
-      // Redirect to login page after successful registration
       router.push("/login");
     } else {
       setError(data.message || "Registration failed");
@@ -67,131 +69,227 @@ export default function Register() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className={`${styles.container}`}>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={`${raleway.className}`}>
-            <div className={styles.header}>
-              <img src="/assets/logo.png" alt="Logo" className={styles.logo} />
-              <p className={styles.title}>MindMap</p>
-            </div>
-            <p className={styles.subtitle}>
-              The Journal Where Every Thought Maps Its Purpose
-            </p>
-          </div>
-
-          {error && <div className={styles.error}>{error}</div>}
-
-          <label
-            htmlFor="name"
-            className={`${styles.label} ${poppins.className}`}
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundImage: `url('/assets/login_bg.png')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          fontFamily: "var(--font-poppins), sans-serif",
+        }}
+        className={`${raleway.variable} ${poppins.variable}`}
+      >
+        <Container maxWidth="sm">
+          <Paper
+            elevation={6}
+            sx={{ p: 5, borderRadius: 4, backdropFilter: "blur(10px)" }}
           >
-            NAME
-          </label>
-          <input
-            type="text"
-            id="name"
-            className={styles.input}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
+            <form onSubmit={handleSubmit}>
+              <Stack spacing={3}>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="center"
+                  spacing={2}
+                >
+                  <Image
+                    src="/assets/logo.png"
+                    alt="Logo"
+                    width={70}
+                    height={70}
+                  />
+                  <Typography
+                    variant="h4"
+                    fontWeight={600}
+                    sx={{ color: "#2D1B6B", fontFamily: "var(--font-raleway)" }}
+                  >
+                    MindMap
+                  </Typography>
+                </Stack>
 
-          <label
-            htmlFor="email"
-            className={`${styles.label} ${poppins.className}`}
-          >
-            EMAIL
-          </label>
-          <input
-            type="email"
-            id="email"
-            className={styles.input}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+                <Typography
+                  variant="body1"
+                  align="center"
+                  sx={{ color: "#2D1B6B", fontFamily: "var(--font-raleway)" }}
+                >
+                  The Journal Where Every Thought Maps Its Purpose
+                </Typography>
 
-          <label
-            htmlFor="birthday"
-            className={`${styles.label} ${poppins.className}`}
-          >
-            BIRTHDAY
-          </label>
-          <input
-            type="date"
-            id="birthday"
-            className={styles.input}
-            value={birthday}
-            onChange={(e) => setBirthday(e.target.value)}
-            required
-          />
+                {error && (
+                  <Typography color="error" variant="body2" align="center">
+                    {error}
+                  </Typography>
+                )}
 
-          <label
-            htmlFor="gender"
-            className={`${styles.label} ${poppins.className}`}
-          >
-            GENDER
-          </label>
-          <select
-            id="gender"
-            className={styles.input}
-            value={gender}
-            onChange={(e) => setGender(e.target.value)}
-            required
-          >
-            <option value="">Select Gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-          </select>
+                <TextField
+                  label="Name"
+                  variant="standard"
+                  fullWidth
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  InputLabelProps={{ style: { color: "#2D1B6B" } }}
+                  inputProps={{ style: { color: "#5F518E" } }}
+                  sx={{
+                    "& .MuiInput-underline:before": {
+                      borderBottom: "2px solid #2D1B6B",
+                    },
+                    "& .MuiInput-underline:after": {
+                      borderBottom: "2px solid #1e1474",
+                    },
+                  }}
+                />
 
-          <label
-            htmlFor="password"
-            className={`${styles.label} ${poppins.className}`}
-          >
-            PASSWORD
-          </label>
-          <input
-            type="password"
-            id="password"
-            className={styles.input}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+                <TextField
+                  label="Email"
+                  type="email"
+                  variant="standard"
+                  fullWidth
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  InputLabelProps={{ style: { color: "#2D1B6B" } }}
+                  inputProps={{ style: { color: "#5F518E" } }}
+                  sx={{
+                    "& .MuiInput-underline:before": {
+                      borderBottom: "2px solid #2D1B6B",
+                    },
+                    "& .MuiInput-underline:after": {
+                      borderBottom: "2px solid #1e1474",
+                    },
+                  }}
+                />
 
-          <label
-            htmlFor="confirmPassword"
-            className={`${styles.label} ${poppins.className}`}
-          >
-            CONFIRM PASSWORD
-          </label>
-          <input
-            type="password"
-            id="confirmPassword"
-            className={styles.input}
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
+                <TextField
+                  label="Birthday"
+                  type="date"
+                  variant="standard"
+                  fullWidth
+                  required
+                  value={birthday}
+                  onChange={(e) => setBirthday(e.target.value)}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  inputProps={{ style: { color: "#5F518E" } }}
+                  sx={{
+                    "& .MuiInputLabel-root": {
+                      color: "#2D1B6B",
+                      fontSize: "18px",
+                    },
+                    "& .MuiInput-underline:before": {
+                      borderBottom: "2px solid #2D1B6B",
+                    },
+                    "& .MuiInput-underline:after": {
+                      borderBottom: "2px solid #1e1474",
+                    },
+                  }}
+                />
 
-          <button
-            type="submit"
-            className={`${styles.button} ${poppins.className}`}
-          >
-            Register
-          </button>
-          <p className={`${styles.loginText} ${poppins.className}`}>
-            Already have an account?{" "}
-            <span
-              onClick={() => router.push("/login")}
-              className={styles.loginLink}
-            >
-              Login here.
-            </span>
-          </p>
-        </form>
-      </div>
+                <TextField
+                  label="Gender"
+                  select
+                  variant="standard"
+                  fullWidth
+                  required
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  InputLabelProps={{ style: { color: "#2D1B6B" } }}
+                  inputProps={{ style: { color: "#5F518E" } }}
+                  sx={{
+                    "& .MuiInput-underline:before": {
+                      borderBottom: "2px solid #2D1B6B",
+                    },
+                    "& .MuiInput-underline:after": {
+                      borderBottom: "2px solid #1e1474",
+                    },
+                  }}
+                >
+                  <MenuItem value="">Select Gender</MenuItem>
+                  <MenuItem value="male">Male</MenuItem>
+                  <MenuItem value="female">Female</MenuItem>
+                  <MenuItem value="other">Other</MenuItem>
+                </TextField>
+
+                <TextField
+                  label="Password"
+                  type="password"
+                  variant="standard"
+                  fullWidth
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  InputLabelProps={{ style: { color: "#2D1B6B" } }}
+                  inputProps={{ style: { color: "#5F518E" } }}
+                  sx={{
+                    "& .MuiInput-underline:before": {
+                      borderBottom: "2px solid #2D1B6B",
+                    },
+                    "& .MuiInput-underline:after": {
+                      borderBottom: "2px solid #1e1474",
+                    },
+                  }}
+                />
+
+                <TextField
+                  label="Confirm Password"
+                  type="password"
+                  variant="standard"
+                  fullWidth
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  InputLabelProps={{ style: { color: "#2D1B6B" } }}
+                  inputProps={{ style: { color: "#5F518E" } }}
+                  sx={{
+                    "& .MuiInput-underline:before": {
+                      borderBottom: "2px solid #2D1B6B",
+                    },
+                    "& .MuiInput-underline:after": {
+                      borderBottom: "2px solid #1e1474",
+                    },
+                    paddingBottom: "24px",
+                  }}
+                />
+
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{
+                    bgcolor: "#4E2BBD",
+                    borderRadius: "12px",
+                    height: "3.3rem",
+                    marginTop: "32px",
+                    "&:hover": { bgcolor: "#3d22a3" },
+                  }}
+                >
+                  Register
+                </Button>
+
+                <Typography align="center" variant="body2">
+                  Already have an account?{" "}
+                  <Link
+                    component="button"
+                    variant="body2"
+                    onClick={() => router.push("/login")}
+                    sx={{
+                      color: "#0F54F8",
+                      textDecoration: "underline",
+                      "&:hover": { color: "#1e1474" },
+                    }}
+                  >
+                    Login here.
+                  </Link>
+                </Typography>
+              </Stack>
+            </form>
+          </Paper>
+        </Container>
+      </Box>
     </>
   );
 }
