@@ -2,6 +2,20 @@ import Head from "next/head";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import styles from "@/styles/Register.module.css";
+import { Raleway } from "next/font/google";
+import { Poppins } from "next/font/google";
+
+const raleway = Raleway({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-raleway",
+});
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
+});
 
 export default function Register() {
   const router = useRouter();
@@ -53,14 +67,25 @@ export default function Register() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className={styles.container}>
+      <div className={`${styles.container}`}>
         <form onSubmit={handleSubmit} className={styles.form}>
-          <h1 className={styles.title}>Register</h1>
+          <div className={`${raleway.className}`}>
+            <div className={styles.header}>
+              <img src="/assets/logo.png" alt="Logo" className={styles.logo} />
+              <p className={styles.title}>MindMap</p>
+            </div>
+            <p className={styles.subtitle}>
+              The Journal Where Every Thought Maps Its Purpose
+            </p>
+          </div>
 
           {error && <div className={styles.error}>{error}</div>}
 
-          <label htmlFor="name" className={styles.label}>
-            Name
+          <label
+            htmlFor="name"
+            className={`${styles.label} ${poppins.className}`}
+          >
+            NAME
           </label>
           <input
             type="text"
@@ -71,8 +96,11 @@ export default function Register() {
             required
           />
 
-          <label htmlFor="email" className={styles.label}>
-            Email
+          <label
+            htmlFor="email"
+            className={`${styles.label} ${poppins.className}`}
+          >
+            EMAIL
           </label>
           <input
             type="email"
@@ -83,8 +111,11 @@ export default function Register() {
             required
           />
 
-          <label htmlFor="birthday" className={styles.label}>
-            Birthday
+          <label
+            htmlFor="birthday"
+            className={`${styles.label} ${poppins.className}`}
+          >
+            BIRTHDAY
           </label>
           <input
             type="date"
@@ -95,8 +126,11 @@ export default function Register() {
             required
           />
 
-          <label htmlFor="gender" className={styles.label}>
-            Gender
+          <label
+            htmlFor="gender"
+            className={`${styles.label} ${poppins.className}`}
+          >
+            GENDER
           </label>
           <select
             id="gender"
@@ -111,8 +145,11 @@ export default function Register() {
             <option value="other">Other</option>
           </select>
 
-          <label htmlFor="password" className={styles.label}>
-            Password
+          <label
+            htmlFor="password"
+            className={`${styles.label} ${poppins.className}`}
+          >
+            PASSWORD
           </label>
           <input
             type="password"
@@ -123,8 +160,11 @@ export default function Register() {
             required
           />
 
-          <label htmlFor="confirmPassword" className={styles.label}>
-            Confirm Password
+          <label
+            htmlFor="confirmPassword"
+            className={`${styles.label} ${poppins.className}`}
+          >
+            CONFIRM PASSWORD
           </label>
           <input
             type="password"
@@ -135,9 +175,21 @@ export default function Register() {
             required
           />
 
-          <button type="submit" className={styles.button}>
+          <button
+            type="submit"
+            className={`${styles.button} ${poppins.className}`}
+          >
             Register
           </button>
+          <p className={`${styles.loginText} ${poppins.className}`}>
+            Already have an account?{" "}
+            <span
+              onClick={() => router.push("/login")}
+              className={styles.loginLink}
+            >
+              Login here.
+            </span>
+          </p>
         </form>
       </div>
     </>
