@@ -1,9 +1,18 @@
 import Head from "next/head";
-import styles from "@/styles/Login.module.css";
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { Raleway } from "next/font/google";
-import { Poppins } from "next/font/google";
+import {
+  Box,
+  Button,
+  Container,
+  TextField,
+  Typography,
+  Paper,
+  Link,
+  Stack,
+} from "@mui/material";
+import Image from "next/image";
+import { Raleway, Poppins } from "next/font/google";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -19,7 +28,6 @@ const poppins = Poppins({
 
 export default function Login() {
   const router = useRouter();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -51,57 +59,139 @@ export default function Login() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div
-        className={`${styles.container} ${raleway.variable} ${poppins.variable}`}
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundImage: `url('/assets/login_bg.png')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          fontFamily: "var(--font-poppins), sans-serif",
+        }}
+        className={`${raleway.variable} ${poppins.variable}`}
       >
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.header}>
-            <img src="/assets/logo.png" alt="Logo" className={styles.logo} />
-            <p className={styles.title}>MindMap</p>
-          </div>
-          <p className={styles.subtitle}>
-            The Journal Where Every Thought Maps Its Purpose
-          </p>
+        <Container maxWidth="sm">
+          <Paper
+            elevation={6}
+            sx={{
+              p: 5,
+              borderRadius: 4,
+              backdropFilter: "blur(10px)",
+            }}
+          >
+            <form onSubmit={handleSubmit}>
+              <Stack spacing={3}>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="center"
+                  spacing={2}
+                >
+                  <Image
+                    src="/assets/logo.png"
+                    alt="Logo"
+                    width={70}
+                    height={70}
+                  />
+                  <Typography
+                    variant="h4"
+                    fontWeight={600}
+                    sx={{ color: "#2D1B6B", fontFamily: "var(--font-raleway)" }}
+                  >
+                    MindMap
+                  </Typography>
+                </Stack>
 
-          <label htmlFor="email" className={styles.label}>
-            EMAIL
-          </label>
-          <input
-            type="email"
-            id="email"
-            className={styles.input}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+                <Typography
+                  variant="body1"
+                  align="center"
+                  sx={{
+                    color: "#2D1B6B",
+                    fontFamily: "var(--font-raleway)",
+                  }}
+                >
+                  The Journal Where Every Thought Maps Its Purpose
+                </Typography>
 
-          <label htmlFor="password" className={styles.label}>
-            PASSWORD
-          </label>
-          <input
-            type="password"
-            id="password"
-            className={styles.input}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+                <TextField
+                  label="Email"
+                  variant="standard"
+                  fullWidth
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  InputLabelProps={{ style: { color: "#2D1B6B" } }}
+                  inputProps={{ style: { color: "#5F518E" } }}
+                  sx={{
+                    "& .MuiInput-underline:before": {
+                      borderBottom: "2px solid #2D1B6B",
+                    },
+                    "& .MuiInput-underline:after": {
+                      borderBottom: "2px solid #1e1474",
+                    },
+                  }}
+                />
 
-          <button type="submit" className={styles.button}>
-            Login
-          </button>
+                <TextField
+                  label="Password"
+                  type="password"
+                  variant="standard"
+                  fullWidth
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  InputLabelProps={{ style: { color: "#2D1B6B" } }}
+                  inputProps={{ style: { color: "#5F518E" } }}
+                  sx={{
+                    "& .MuiInput-underline:before": {
+                      borderBottom: "2px solid #2D1B6B",
+                    },
+                    "& .MuiInput-underline:after": {
+                      borderBottom: "2px solid #1e1474",
+                    },
+                    paddingBottom: "24px",
+                  }}
+                />
 
-          <p className={styles.registerText}>
-            Don't have an account?{" "}
-            <span
-              onClick={() => router.push("/register")}
-              className={styles.registerLink}
-            >
-              Register here.
-            </span>
-          </p>
-        </form>
-      </div>
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  sx={{
+                    bgcolor: "#4E2BBD",
+                    borderRadius: "12px",
+                    height: "3.3rem",
+                    marginTop: "32px",
+                    "&:hover": {
+                      bgcolor: "#3d22a3",
+                    },
+                  }}
+                >
+                  Login
+                </Button>
+
+                <Typography align="center" variant="body2">
+                  Don&apos;t have an account?{" "}
+                  <Link
+                    component="button"
+                    variant="body2"
+                    onClick={() => router.push("/register")}
+                    sx={{
+                      color: "#0F54F8",
+                      textDecoration: "underline",
+                      "&:hover": { color: "#1e1474" },
+                    }}
+                  >
+                    Register here.
+                  </Link>
+                </Typography>
+              </Stack>
+            </form>
+          </Paper>
+        </Container>
+      </Box>
     </>
   );
 }
