@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Footer from "@/components/footer";
+import SupportFooter from "@/components/support_footer";
 
 export default function Login() {
   return (
@@ -11,6 +12,7 @@ export default function Login() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div>Dashboard Page</div>
+      <SupportFooter />
       <Footer />
     </>
   );
