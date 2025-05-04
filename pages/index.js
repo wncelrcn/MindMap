@@ -1,5 +1,6 @@
 import Head from "next/head";
 import { Poppins } from "next/font/google";
+import { Quicksand } from "next/font/google";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
@@ -13,6 +14,10 @@ import {
   createTheme,
 } from "@mui/material";
 import LandingHeader from "@/components/landing_header";
+import FeatureCarousel from "@/components/feature_carousel";
+import TestimonialCarousel from "@/components/testimonial_carousel";
+import Footer from "@/components/footer";
+import SupportFooter from "@/components/support_footer";
 
 // Configure Poppins font
 const poppins = Poppins({
@@ -42,6 +47,71 @@ const theme = createTheme({
     },
   },
 });
+
+const myFeatures = [
+  {
+    id: 1,
+    title: "Guided Journaling",
+    description:
+      "Write freely or use guided prompts to explore your thoughts and emotions.",
+    image: "/assets/carousel/1.png",
+  },
+  {
+    id: 2,
+    title: "Personalized Coping Strategies",
+    description:
+      "Receive personalized mindfulness exercises and self-care tips based on your journal insights.",
+    image: "/assets/carousel/2.png",
+  },
+  {
+    id: 3,
+    title: "Gamified Wellness Goals",
+    description:
+      "Set personalized wellness goals, earn points, and unlock badges for self-care milestones.",
+    image: "/assets/carousel/3.png",
+  },
+  {
+    id: 4,
+    title: "Emotion Tracking",
+    description:
+      "Gain insights into your emotional patterns with analysis and visual graphs.",
+    image: "/assets/carousel/4.png",
+  },
+  {
+    id: 5,
+    title: "Emergency Support",
+    description:
+      "Quick access to crisis hotlines, emergency contacts, and guided calming exercises.",
+    image: "/assets/carousel/5.png",
+  },
+];
+
+const myTestimonials = [
+  {
+    id: 1,
+    name: "Michael Jones",
+    role: "Mapúa MCL Student",
+    quote:
+      "Using this app daily has significantly improved my productivity and mental well-being...",
+    image: "/assets/testimonials/1.png",
+  },
+  {
+    id: 2,
+    name: "Jane Doe",
+    role: "Mapúa MCL Student",
+    quote:
+      "MindMap has completely changed how I organize my thoughts. Being able to visually map out my ideas reduces my anxiety and helps me achieve my goals.",
+    image: "/assets/testimonials/2.png",
+  },
+  {
+    id: 3,
+    name: "Alex Smith",
+    role: "Mapúa MCL Student",
+    quote:
+      "I've tried many productivity apps, but this one stands out for its intuitive design and helpful features. It's become an essential part of my daily routine.",
+    image: "/assets/testimonials/1.png",
+  },
+];
 
 export default function Home() {
   const [status, setStatus] = useState("Checking...");
@@ -171,7 +241,7 @@ export default function Home() {
                 mt: 8,
                 mb: 4,
                 fontWeight: 700,
-                background: "linear-gradient(90deg, #563CA5 0%, #E25C59 100%)",
+                background: "linear-gradient(90deg, #563CA5 0%, #E25C59 30%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 textAlign: "left",
@@ -180,59 +250,32 @@ export default function Home() {
               What can it do?
             </Typography>
 
-            {/* Carousel Placeholder */}
-            <Box
+            <FeatureCarousel features={myFeatures} />
+
+            <Typography
+              variant="h4"
               sx={{
-                display: "flex",
-                overflowX: "auto",
-                gap: 4,
-                py: 4,
-                width: "100%",
-                pr: 2,
+                mt: 10,
+                mb: 4,
+                fontWeight: 700,
+                background: "linear-gradient(90deg, #563CA5 0%, #E25C59 50%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                textAlign: "left",
               }}
             >
-              {[1, 2, 3, 4].map((item) => (
-                <Box
-                  key={item}
-                  sx={{ minWidth: 260, flexShrink: 0, textAlign: "center" }}
-                >
-                  <Box
-                    component="img"
-                    src={`/assets/feature_placeholder_${item}.png`}
-                    alt="Feature Illustration Placeholder"
-                    sx={{ width: "100%", maxWidth: 200, mb: 2, mx: "auto" }}
-                  />
-                  <Typography
-                    variant="subtitle1"
-                    sx={{
-                      backgroundColor: "#E5E0FA",
-                      px: 2,
-                      py: 1,
-                      mb: 1,
-                      fontWeight: 600,
-                    }}
-                  >
-                    Feature Title
-                  </Typography>
-                  <Typography variant="body1">
-                    Brief description of this feature goes here, explaining the
-                    benefit to the user.
-                  </Typography>
-                </Box>
-              ))}
-            </Box>
-          </Container>
+              What do our users say?
+            </Typography>
 
-          {/* Connection Status - Only visible during development */}
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mt: 4, opacity: 0.7 }}
-          >
-            {status}
-          </Typography>
+            <TestimonialCarousel testimonials={myTestimonials} />
+          </Container>
         </Container>
       </div>
+      {/* Footer Section */}
+      <Box component="footer" sx={{ mt: 10 }}>
+        <SupportFooter />
+        <Footer />
+      </Box>
     </ThemeProvider>
   );
 }

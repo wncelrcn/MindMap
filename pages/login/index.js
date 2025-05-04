@@ -12,7 +12,7 @@ import {
   Stack,
 } from "@mui/material";
 import Image from "next/image";
-import { Raleway, Poppins } from "next/font/google";
+import { Raleway, Poppins, Quicksand } from "next/font/google";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -24,6 +24,12 @@ const poppins = Poppins({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-poppins",
+});
+
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-quicksand",
 });
 
 export default function Login() {
@@ -53,12 +59,14 @@ export default function Login() {
   return (
     <>
       <Head>
-        <title>Login</title>
-        <meta name="description" content="Login to your account" />
+        <title>MindMap - Login</title>
+        <meta
+          name="description"
+          content="Elevate your mental wellness, mindset, and cognitive strength with the next level of journaling."
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/assets/logo.png" />
       </Head>
-
       <Box
         sx={{
           minHeight: "100vh",
@@ -70,7 +78,7 @@ export default function Login() {
           backgroundPosition: "center",
           fontFamily: "var(--font-poppins), sans-serif",
         }}
-        className={`${raleway.variable} ${poppins.variable}`}
+        className={`${raleway.variable} ${poppins.variable} ${quicksand.variable}`}
       >
         <Container maxWidth="sm">
           <Paper
@@ -97,8 +105,11 @@ export default function Login() {
                   />
                   <Typography
                     variant="h4"
-                    fontWeight={600}
-                    sx={{ color: "#2D1B6B", fontFamily: "var(--font-raleway)" }}
+                    fontWeight={500}
+                    sx={{
+                      color: "#2D1B6B",
+                      fontFamily: "var(--font-quicksand)",
+                    }}
                   >
                     MindMap
                   </Typography>
@@ -107,9 +118,10 @@ export default function Login() {
                 <Typography
                   variant="body1"
                   align="center"
+                  fontWeight={400}
                   sx={{
                     color: "#2D1B6B",
-                    fontFamily: "var(--font-raleway)",
+                    fontFamily: "var(--font-quicksand)",
                   }}
                 >
                   The Journal Where Every Thought Maps Its Purpose
@@ -122,14 +134,26 @@ export default function Login() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  InputLabelProps={{ style: { color: "#2D1B6B" } }}
-                  inputProps={{ style: { color: "#5F518E" } }}
+                  InputLabelProps={{
+                    style: {
+                      color: "#2D1B6B",
+                      fontFamily: "var(--font-poppins)",
+                    },
+                  }}
+                  inputProps={{
+                    style: {
+                      color: "#5F518E",
+                      fontFamily: "var(--font-poppins)",
+                    },
+                  }}
                   sx={{
                     "& .MuiInput-underline:before": {
                       borderBottom: "2px solid #2D1B6B",
+                      fontFamily: "var(--font-poppins)",
                     },
                     "& .MuiInput-underline:after": {
                       borderBottom: "2px solid #1e1474",
+                      fontFamily: "var(--font-poppins)",
                     },
                   }}
                 />
@@ -142,8 +166,18 @@ export default function Login() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  InputLabelProps={{ style: { color: "#2D1B6B" } }}
-                  inputProps={{ style: { color: "#5F518E" } }}
+                  InputLabelProps={{
+                    style: {
+                      color: "#2D1B6B",
+                      fontFamily: "var(--font-poppins)",
+                    },
+                  }}
+                  inputProps={{
+                    style: {
+                      color: "#5F518E",
+                      fontFamily: "var(--font-poppins)",
+                    },
+                  }}
                   sx={{
                     "& .MuiInput-underline:before": {
                       borderBottom: "2px solid #2D1B6B",
@@ -164,6 +198,8 @@ export default function Login() {
                     borderRadius: "12px",
                     height: "3.3rem",
                     marginTop: "32px",
+                    fontFamily: "var(--font-poppins)",
+
                     "&:hover": {
                       bgcolor: "#3d22a3",
                     },
@@ -172,16 +208,23 @@ export default function Login() {
                   Login
                 </Button>
 
-                <Typography align="center" variant="body2">
+                <Typography
+                  align="center"
+                  variant="body2"
+                  fontWeight={400}
+                  sx={{ fontFamily: "var(--font-quicksand)" }}
+                >
                   Don&apos;t have an account?{" "}
                   <Link
                     component="button"
                     variant="body2"
+                    fontWeight={400}
                     onClick={() => router.push("/register")}
                     sx={{
                       color: "#0F54F8",
                       textDecoration: "underline",
                       "&:hover": { color: "#1e1474" },
+                      fontFamily: "var(--font-quicksand)",
                     }}
                   >
                     Register here.

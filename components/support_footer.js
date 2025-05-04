@@ -25,7 +25,7 @@ export default function SupportFooter() {
       }}
     >
       {/* Left Section */}
-      <Box sx={{ maxWidth: "20%", marginRight: { md: "6rem" } }}>
+      <Box sx={{ maxWidth: "25%", marginRight: { md: "6rem" } }}>
         <Typography
           variant="h5"
           sx={{
@@ -33,13 +33,20 @@ export default function SupportFooter() {
             fontWeight: 600,
             lineHeight: 1.4,
             mb: "8px",
+            fontFamily: poppins.style.fontFamily,
           }}
         >
           Need Immediate Support?
           <br />
           You’re Not Alone.
         </Typography>
-        <Typography sx={{ fontSize: "16px", fontWeight: 600 }}>
+        <Typography
+          sx={{
+            fontSize: "16px",
+            fontWeight: 600,
+            fontFamily: poppins.style.fontFamily,
+          }}
+        >
           24/7 Hotline
         </Typography>
       </Box>
@@ -73,12 +80,25 @@ export default function SupportFooter() {
               width={50}
               height={50}
             />
-            <Typography sx={{ fontWeight: 600, mt: 1, mb: 0.5 }}>
+            <Typography
+              sx={{
+                fontWeight: 600,
+                mt: 1,
+                mb: 0.5,
+                fontFamily: poppins.style.fontFamily,
+              }}
+            >
               Hopeline PH
             </Typography>
-            <Typography>(02) 8804-4673</Typography>
-            <Typography>0917-558-4673</Typography>
-            <Typography>0918-873-4673</Typography>
+            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+              (02) 8804-4673
+            </Typography>
+            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+              0917-558-4673
+            </Typography>
+            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+              0918-873-4673
+            </Typography>
           </Box>
         </Grid>
 
@@ -96,13 +116,24 @@ export default function SupportFooter() {
               width={50}
               height={50}
             />
-            <Typography sx={{ fontWeight: 600, mt: 1, mb: 0.5 }}>
+            <Typography
+              sx={{
+                fontWeight: 600,
+                mt: 1,
+                mb: 0.5,
+                fontFamily: poppins.style.fontFamily,
+              }}
+            >
               National Center for Mental
               <br />
               Health (DOH-NCMH)
             </Typography>
-            <Typography>0919-057-1553</Typography>
-            <Typography>0966-351-4518</Typography>
+            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+              0919-057-1553
+            </Typography>
+            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+              0966-351-4518
+            </Typography>
           </Box>
         </Grid>
 
@@ -115,12 +146,25 @@ export default function SupportFooter() {
               width={50}
               height={50}
             />
-            <Typography sx={{ fontWeight: 600, mt: 1, mb: 0.5 }}>
+            <Typography
+              sx={{
+                fontWeight: 600,
+                mt: 1,
+                mb: 0.5,
+                fontFamily: poppins.style.fontFamily,
+              }}
+            >
               In-Touch
             </Typography>
-            <Typography>(02) 8893 7603</Typography>
-            <Typography>0917-800-1123</Typography>
-            <Typography>0919-056-0709</Typography>
+            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+              (02) 8893 7603
+            </Typography>
+            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+              0917-800-1123
+            </Typography>
+            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+              0919-056-0709
+            </Typography>
           </Box>
         </Grid>
       </Grid>

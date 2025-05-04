@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Box, Typography, Stack } from "@mui/material";
-import { Raleway, Poppins } from "next/font/google";
+import { Raleway, Poppins, Quicksand } from "next/font/google";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -12,6 +12,12 @@ const poppins = Poppins({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-poppins",
+});
+
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-quicksand",
 });
 
 export default function Footer() {
@@ -41,30 +47,48 @@ export default function Footer() {
         <Typography
           variant="h4"
           sx={{
-            fontWeight: 400,
+            fontWeight: 500,
             marginBottom: "12px",
-            fontFamily: raleway.style.fontFamily,
+            fontSize: "2.5rem",
+            fontFamily: quicksand.style.fontFamily,
           }}
         >
           MindMap
         </Typography>
-        <Box
-          display="flex"
-          flexWrap="wrap"
-          gap={5}
-          sx={{ fontFamily: poppins.style.fontFamily }}
-        >
+        <Box display="flex" flexWrap="wrap" gap={5}>
           <Box>
-            <Typography sx={{ fontSize: "14px", opacity: 0.8, mb: "4px" }}>
+            <Typography
+              sx={{
+                fontSize: "14px",
+                opacity: 0.8,
+                mb: "4px",
+                fontFamily: quicksand.style.fontFamily,
+              }}
+            >
               Email
             </Typography>
-            <Typography sx={{ fontSize: "16px" }}>MindMap@gmail.com</Typography>
+            <Typography
+              sx={{ fontSize: "16px", fontFamily: quicksand.style.fontFamily }}
+            >
+              MindMap@gmail.com
+            </Typography>
           </Box>
           <Box>
-            <Typography sx={{ fontSize: "14px", opacity: 0.8, mb: "4px" }}>
+            <Typography
+              sx={{
+                fontSize: "14px",
+                opacity: 0.8,
+                mb: "4px",
+                fontFamily: quicksand.style.fontFamily,
+              }}
+            >
               Phone Number
             </Typography>
-            <Typography sx={{ fontSize: "16px" }}>(049) 1122-234</Typography>
+            <Typography
+              sx={{ fontSize: "16px", fontFamily: quicksand.style.fontFamily }}
+            >
+              (049) 1122-234
+            </Typography>
           </Box>
         </Box>
       </Stack>
@@ -82,7 +106,7 @@ export default function Footer() {
           sx={{
             maxWidth: 320,
             fontSize: { xs: "24px", md: "32px" },
-            fontWeight: 200,
+            fontWeight: 100,
             fontFamily: raleway.style.fontFamily,
           }}
         >

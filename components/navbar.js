@@ -13,7 +13,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { Poppins, Raleway } from "next/font/google";
+import { Poppins, Raleway, Quicksand } from "next/font/google";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -25,6 +25,12 @@ const raleway = Raleway({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-raleway",
+});
+
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-quicksand",
 });
 
 export default function Navbar() {
@@ -74,11 +80,27 @@ export default function Navbar() {
         </IconButton>
       </Box>
 
-      <Box sx={{ display: "flex", alignItems: "center", p: 4, pt: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          p: 4,
+          pt: 3,
+          mb: 4,
+          mt: 2,
+        }}
+      >
         <Image src="/assets/logo.png" alt="Logo" width={50} height={50} />
         <Typography
           variant="h5"
-          sx={{ flexGrow: 1, color: "#ffffff", ml: 2, fontWeight: 600 }}
+          sx={{
+            flexGrow: 1,
+            color: "#ffffff",
+            ml: 2,
+            fontWeight: 500,
+            fontFamily: quicksand.style.fontFamily,
+          }}
+          className={quicksand.className}
         >
           MindMap
         </Typography>
@@ -98,6 +120,8 @@ export default function Navbar() {
               mb: 2,
               textTransform: "none",
               fontSize: "20px",
+              fontWeight: 400,
+              fontFamily: poppins.style.fontFamily,
             }}
             onClick={() => navigateTo(text)}
             startIcon={
@@ -159,6 +183,8 @@ export default function Navbar() {
             fontSize: "20px",
             pt: 0,
             textTransform: "none",
+            fontWeight: 400,
+            fontFamily: poppins.style.fontFamily,
           }}
           startIcon={
             <svg
@@ -217,6 +243,7 @@ export default function Navbar() {
             color: "#2D1B6B",
             lineHeight: 1.2,
             ml: 1,
+            fontFamily: quicksand.style.fontFamily,
           }}
         >
           MindMap
@@ -229,6 +256,10 @@ export default function Navbar() {
         open={open}
         onClose={toggleDrawer(false)}
         sx={{ color: "#2D1B6B" }}
+        ModalProps={{
+          keepMounted: true,
+          disableScrollLock: true,
+        }}
       >
         {drawerContent}
       </Drawer>

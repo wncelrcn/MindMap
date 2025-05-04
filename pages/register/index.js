@@ -13,7 +13,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import Image from "next/image";
-import { Raleway, Poppins } from "next/font/google";
+import { Raleway, Poppins, Quicksand } from "next/font/google";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -25,6 +25,12 @@ const poppins = Poppins({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-poppins",
+});
+
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-quicksand",
 });
 
 export default function Register() {
@@ -63,10 +69,13 @@ export default function Register() {
   return (
     <>
       <Head>
-        <title>Register</title>
-        <meta name="description" content="Create a new account" />
+        <title>MindMap - Register</title>
+        <meta
+          name="description"
+          content="Elevate your mental wellness, mindset, and cognitive strength with the next level of journaling."
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/assets/logo.png" />
       </Head>
 
       <Box
@@ -80,7 +89,7 @@ export default function Register() {
           backgroundPosition: "center",
           fontFamily: "var(--font-poppins), sans-serif",
         }}
-        className={`${raleway.variable} ${poppins.variable}`}
+        className={`${raleway.variable} ${poppins.variable} ${quicksand.variable}`}
       >
         <Container maxWidth="sm">
           <Paper
@@ -103,8 +112,11 @@ export default function Register() {
                   />
                   <Typography
                     variant="h4"
-                    fontWeight={600}
-                    sx={{ color: "#2D1B6B", fontFamily: "var(--font-raleway)" }}
+                    fontWeight={500}
+                    sx={{
+                      color: "#2D1B6B",
+                      fontFamily: "var(--font-quicksand)",
+                    }}
                   >
                     MindMap
                   </Typography>
@@ -113,7 +125,7 @@ export default function Register() {
                 <Typography
                   variant="body1"
                   align="center"
-                  sx={{ color: "#2D1B6B", fontFamily: "var(--font-raleway)" }}
+                  sx={{ color: "#2D1B6B", fontFamily: "var(--font-quicksand)" }}
                 >
                   The Journal Where Every Thought Maps Its Purpose
                 </Typography>
@@ -131,14 +143,26 @@ export default function Register() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  InputLabelProps={{ style: { color: "#2D1B6B" } }}
-                  inputProps={{ style: { color: "#5F518E" } }}
+                  InputLabelProps={{
+                    style: {
+                      color: "#2D1B6B",
+                      fontFamily: "var(--font-poppins)",
+                    },
+                  }}
+                  inputProps={{
+                    style: {
+                      color: "#5F518E",
+                      fontFamily: "var(--font-poppins)",
+                    },
+                  }}
                   sx={{
                     "& .MuiInput-underline:before": {
                       borderBottom: "2px solid #2D1B6B",
+                      fontFamily: "var(--font-poppins)",
                     },
                     "& .MuiInput-underline:after": {
                       borderBottom: "2px solid #1e1474",
+                      fontFamily: "var(--font-poppins)",
                     },
                   }}
                 />
@@ -151,14 +175,26 @@ export default function Register() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  InputLabelProps={{ style: { color: "#2D1B6B" } }}
-                  inputProps={{ style: { color: "#5F518E" } }}
+                  InputLabelProps={{
+                    style: {
+                      color: "#2D1B6B",
+                      fontFamily: "var(--font-poppins)",
+                    },
+                  }}
+                  inputProps={{
+                    style: {
+                      color: "#5F518E",
+                      fontFamily: "var(--font-poppins)",
+                    },
+                  }}
                   sx={{
                     "& .MuiInput-underline:before": {
                       borderBottom: "2px solid #2D1B6B",
+                      fontFamily: "var(--font-poppins)",
                     },
                     "& .MuiInput-underline:after": {
                       borderBottom: "2px solid #1e1474",
+                      fontFamily: "var(--font-poppins)",
                     },
                   }}
                 />
@@ -173,18 +209,30 @@ export default function Register() {
                   onChange={(e) => setBirthday(e.target.value)}
                   InputLabelProps={{
                     shrink: true,
+                    style: {
+                      color: "#2D1B6B",
+                      fontFamily: "var(--font-poppins)",
+                    },
                   }}
-                  inputProps={{ style: { color: "#5F518E" } }}
+                  inputProps={{
+                    style: {
+                      color: "#5F518E",
+                      fontFamily: "var(--font-poppins)",
+                    },
+                  }}
                   sx={{
                     "& .MuiInputLabel-root": {
                       color: "#2D1B6B",
                       fontSize: "18px",
+                      fontFamily: "var(--font-poppins)",
                     },
                     "& .MuiInput-underline:before": {
                       borderBottom: "2px solid #2D1B6B",
+                      fontFamily: "var(--font-poppins)",
                     },
                     "& .MuiInput-underline:after": {
                       borderBottom: "2px solid #1e1474",
+                      fontFamily: "var(--font-poppins)",
                     },
                   }}
                 />
@@ -197,14 +245,26 @@ export default function Register() {
                   required
                   value={gender}
                   onChange={(e) => setGender(e.target.value)}
-                  InputLabelProps={{ style: { color: "#2D1B6B" } }}
-                  inputProps={{ style: { color: "#5F518E" } }}
+                  InputLabelProps={{
+                    style: {
+                      color: "#2D1B6B",
+                      fontFamily: "var(--font-poppins)",
+                    },
+                  }}
+                  inputProps={{
+                    style: {
+                      color: "#5F518E",
+                      fontFamily: "var(--font-poppins)",
+                    },
+                  }}
                   sx={{
                     "& .MuiInput-underline:before": {
                       borderBottom: "2px solid #2D1B6B",
+                      fontFamily: "var(--font-poppins)",
                     },
                     "& .MuiInput-underline:after": {
                       borderBottom: "2px solid #1e1474",
+                      fontFamily: "var(--font-poppins)",
                     },
                   }}
                 >
@@ -222,14 +282,26 @@ export default function Register() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  InputLabelProps={{ style: { color: "#2D1B6B" } }}
-                  inputProps={{ style: { color: "#5F518E" } }}
+                  InputLabelProps={{
+                    style: {
+                      color: "#2D1B6B",
+                      fontFamily: "var(--font-poppins)",
+                    },
+                  }}
+                  inputProps={{
+                    style: {
+                      color: "#5F518E",
+                      fontFamily: "var(--font-poppins)",
+                    },
+                  }}
                   sx={{
                     "& .MuiInput-underline:before": {
                       borderBottom: "2px solid #2D1B6B",
+                      fontFamily: "var(--font-poppins)",
                     },
                     "& .MuiInput-underline:after": {
                       borderBottom: "2px solid #1e1474",
+                      fontFamily: "var(--font-poppins)",
                     },
                   }}
                 />
@@ -242,14 +314,26 @@ export default function Register() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  InputLabelProps={{ style: { color: "#2D1B6B" } }}
-                  inputProps={{ style: { color: "#5F518E" } }}
+                  InputLabelProps={{
+                    style: {
+                      color: "#2D1B6B",
+                      fontFamily: "var(--font-poppins)",
+                    },
+                  }}
+                  inputProps={{
+                    style: {
+                      color: "#5F518E",
+                      fontFamily: "var(--font-poppins)",
+                    },
+                  }}
                   sx={{
                     "& .MuiInput-underline:before": {
                       borderBottom: "2px solid #2D1B6B",
+                      fontFamily: "var(--font-poppins)",
                     },
                     "& .MuiInput-underline:after": {
                       borderBottom: "2px solid #1e1474",
+                      fontFamily: "var(--font-poppins)",
                     },
                     paddingBottom: "24px",
                   }}
@@ -265,12 +349,17 @@ export default function Register() {
                     height: "3.3rem",
                     marginTop: "32px",
                     "&:hover": { bgcolor: "#3d22a3" },
+                    fontFamily: "var(--font-poppins)",
                   }}
                 >
                   Register
                 </Button>
 
-                <Typography align="center" variant="body2">
+                <Typography
+                  align="center"
+                  variant="body2"
+                  sx={{ fontFamily: "var(--font-quicksand)" }}
+                >
                   Already have an account?{" "}
                   <Link
                     component="button"
@@ -280,6 +369,7 @@ export default function Register() {
                       color: "#0F54F8",
                       textDecoration: "underline",
                       "&:hover": { color: "#1e1474" },
+                      fontFamily: "var(--font-quicksand)",
                     }}
                   >
                     Login here.
