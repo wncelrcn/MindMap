@@ -31,6 +31,18 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
+  const handleLogout = async () => {
+    const res = await fetch("../api/auth/logout", {
+      method: "POST",
+    });
+
+    if (res.ok) {
+      router.push("/");
+    } else {
+      alert("Logout failed");
+    }
+  };
+
   const toggleDrawer = (state) => () => {
     setOpen(state);
   };
@@ -133,6 +145,7 @@ export default function Navbar() {
         <Button
           fullWidth
           variant="text"
+          onClick={handleLogout}
           sx={{
             color: "#ffffff",
             textAlign: "left",
@@ -147,7 +160,6 @@ export default function Navbar() {
             pt: 0,
             textTransform: "none",
           }}
-          onClick={() => navigateTo("logout")}
           startIcon={
             <svg
               xmlns="http://www.w3.org/2000/svg"

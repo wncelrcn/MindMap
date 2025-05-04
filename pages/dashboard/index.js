@@ -3,8 +3,15 @@ import Footer from "@/components/footer";
 import SupportFooter from "@/components/support_footer";
 import { Box, Container, Typography } from "@mui/material";
 import Navbar from "@/components/navbar";
+import { requireAuth } from "@/lib/requireAuth";
 
-export default function Dashboard() {
+export async function getServerSideProps(context) {
+  return await requireAuth(context.req);
+}
+
+export default function Dashboard({ user }) {
+  console.log("User:", user);
+
   return (
     <>
       <Head>
