@@ -17,14 +17,29 @@ import Navbar from "@/components/navbar";
 export default function Profile() {
   return (
     <>
-      <Box>
+      <Head>
+        <title>MindMap - Profile</title>
+        <meta
+          name="description"
+          content="Elevate your mental wellness, mindset, and cognitive strength with the next level of journaling."
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/assets/logo.png" />
+      </Head>
+      <Box display="flex" flexDirection="column" minHeight="100vh">
         <Navbar />
-      </Box>
+        {/* Main Content */}
+        <Container sx={{ flex: 1, py: 4 }}>
+          <Typography variant="h4" component="h1" gutterBottom>
+            Profile Page
+          </Typography>
+        </Container>
 
-      {/* Footer Section */}
-      <Box component="footer">
-        <SupportFooter />
-        <Footer />
+        {/* Footer Section */}
+        <Box component="footer">
+          <SupportFooter />
+          <Footer />
+        </Box>
       </Box>
     </>
   );

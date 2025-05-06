@@ -86,7 +86,7 @@ export default function DashboardPage({ user }) {
       <Box display="flex" flexDirection="column" minHeight="100vh">
         <Navbar />
         {/* Main Content */}
-        <Box sx={{ flex: 1, mt: 5 }}>
+        <Box sx={{ flex: 1, mt: 4 }}>
           <Container maxWidth="lg" sx={{ py: 4 }}>
             {/* Header with Gradient Text */}
             <Box
