@@ -140,6 +140,7 @@ export default function DashboardPage({ user }) {
               flexDirection={{ xs: "column", md: "row" }}
               alignItems="stretch"
               gap={2}
+              sx={{ mt: 5 }}
             >
               {/* Create Entry Card */}
 
@@ -219,21 +220,24 @@ export default function DashboardPage({ user }) {
                     <Box>
                       <Typography
                         variant="subtitle2"
-                        className={`${quicksand.className}`}
+                        className={`${poppins.className}`}
                         sx={{
                           color: "#5A33B7",
-                          fontFamily: quicksand.style.fontFamily,
+                          fontWeight: 300,
+                          fontStyle: "italic",
+                          fontFamily: poppins.style.fontFamily,
                         }}
                       >
                         MindMap
                       </Typography>
                       <Typography
                         fontWeight={500}
-                        className={`${raleway.className}`}
+                        className={`${poppins.className}`}
                         sx={{
                           color: "#2D1B6B",
-                          fontSize: { xs: "1.5rem", md: "1.7rem" },
-                          fontFamily: raleway.style.fontFamily,
+                          fontSize: { xs: "1.5rem", md: "1.6rem" },
+                          fontFamily: poppins.style.fontFamily,
+                          fontWeight: 400,
                         }}
                       >
                         Your daily check-in, <br /> reimagined.
@@ -267,7 +271,7 @@ export default function DashboardPage({ user }) {
             </Box>
 
             {/* Recent Journals Section */}
-            <Box mb={4} mt={{ xs: 8, md: 6 }}>
+            <Box mb={4} mt={{ xs: 8, md: 4 }}>
               <Box
                 display="flex"
                 justifyContent="space-between"
