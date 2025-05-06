@@ -44,6 +44,7 @@ export async function getServerSideProps(context) {
 
 export default function Journals({ user }) {
   const [username, setUsername] = useState("");
+  const theme = useTheme();
 
   useEffect(() => {
     const fetchUsername = async () => {
