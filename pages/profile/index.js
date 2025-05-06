@@ -1,4 +1,6 @@
 import Head from "next/head";
+import Footer from "@/components/footer";
+import SupportFooter from "@/components/support_footer";
 import {
   Box,
   Typography,
@@ -17,6 +19,12 @@ export default function Profile() {
     <>
       <Box>
         <Navbar />
+      </Box>
+
+      {/* Footer Section */}
+      <Box component="footer">
+        <SupportFooter />
+        <Footer />
       </Box>
     </>
   );

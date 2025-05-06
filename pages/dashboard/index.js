@@ -12,6 +12,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import Link from "next/link";
 import Navbar from "@/components/navbar";
 import { requireAuth } from "@/lib/requireAuth";
 import { supabase } from "@/lib/supabase";
@@ -85,7 +86,7 @@ export default function DashboardPage({ user }) {
       <Box display="flex" flexDirection="column" minHeight="100vh">
         <Navbar />
         {/* Main Content */}
-        <Box sx={{ flex: 1, mt: 4 }}>
+        <Box sx={{ flex: 1, mt: 5 }}>
           <Container maxWidth="lg" sx={{ py: 4 }}>
             {/* Header with Gradient Text */}
             <Box
@@ -133,46 +134,48 @@ export default function DashboardPage({ user }) {
               </Button>
             </Box>
 
-            {/* Hero Section */}
-            <Card
-              elevation={0}
+            <Grid
+              container
+              spacing={2}
               sx={{
-                bgcolor: "#f8f7fc",
-                borderRadius: 4,
-                mb: 6,
-                overflow: "visible",
+                alignItems: "stretch",
+                justifyContent: "space-between",
+                mb: 5,
               }}
             >
-              <Grid container spacing={0}>
-                {/* Create Entry Button */}
-                <Grid item xs={12} sm={4} md={3}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      textAlign: "center",
-                      m: 2,
-                      p: 2,
-                      height: isMobile ? "auto" : "90%",
-                    }}
+              {/* Create Entry Button */}
+              <Grid item xs={12} sm={4} md={3}>
+                <Box
+                  sx={{
+                    height: "225px",
+                    bgcolor: "#f8f7fc",
+                    borderRadius: 4,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    p: 2,
+                    width: "250px",
+                  }}
+                >
+                  <Link
+                    href="/create-entry"
+                    passHref
+                    style={{ textDecoration: "none" }}
                   >
                     <Button
                       sx={{
-                        backgroundColor: "white",
                         borderRadius: 4,
-                        boxShadow: 1,
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
                         justifyContent: "center",
                         padding: 3,
                         width: "100%",
+                        bgcolor: "#f8f7fc",
                         transition: "transform 0.3s ease, box-shadow 0.3s ease",
                         "&:hover": {
-                          backgroundColor: "white",
-                          boxShadow: 3,
                           transform: "translateY(-5px)",
                         },
                       }}
@@ -193,18 +196,30 @@ export default function DashboardPage({ user }) {
                         Create an Entry
                       </Typography>
                     </Button>
-                  </Box>
-                </Grid>
+                  </Link>
+                </Box>
+              </Grid>
 
-                {/* Main Banner */}
-                <Grid item xs={12} sm={8} md={9}>
+              {/* Hero Section Card */}
+              <Grid item xs={12} sm={8} md={9}>
+                <Card
+                  elevation={0}
+                  sx={{
+                    bgcolor: "#f8f7fc",
+                    borderRadius: 4,
+                    height: "225px",
+                    display: "flex",
+                    alignItems: "center",
+                    position: "relative",
+                  }}
+                >
                   <Box
                     sx={{
                       display: "flex",
-                      flexDirection: isMobile ? "column" : "row",
+                      flexDirection: { xs: "column", md: "row" },
                       alignItems: "center",
                       p: { xs: 2, md: 4 },
-                      height: "100%",
+                      width: "875px",
                     }}
                   >
                     {/* Person Image */}
@@ -256,27 +271,39 @@ export default function DashboardPage({ user }) {
                         <br />
                         reimagined.
                       </Typography>
-                      <Button
-                        variant="contained"
+                      <Box
                         sx={{
-                          fontFamily: poppins.style.fontFamily,
+                          display: "flex",
+                          justifyContent: "flex-end",
                           mt: 2,
-                          bgcolor: "#5A33B7",
-                          borderRadius: "9999px",
-                          fontWeight: 600,
-                          px: 3,
-                          "&:hover": {
-                            bgcolor: "#4a2ba0",
-                          },
+                          position: "absolute",
+                          bottom: 24,
+                          right: 22,
                         }}
                       >
-                        Take a Quiz
-                      </Button>
+                        <Button
+                          variant="contained"
+                          alignItems="right"
+                          sx={{
+                            fontFamily: poppins.style.fontFamily,
+                            mt: 2,
+                            bgcolor: "#5A33B7",
+                            borderRadius: "9999px",
+                            fontWeight: 600,
+                            px: 3,
+                            "&:hover": {
+                              bgcolor: "#4a2ba0",
+                            },
+                          }}
+                        >
+                          Take a Quiz
+                        </Button>
+                      </Box>
                     </Box>
                   </Box>
-                </Grid>
+                </Card>
               </Grid>
-            </Card>
+            </Grid>
 
             {/* Recent Journals Section */}
             <Box mb={4}>
@@ -298,7 +325,7 @@ export default function DashboardPage({ user }) {
                 </Typography>
                 <Typography
                   component="a"
-                  href="#"
+                  href="/journals"
                   sx={{
                     fontFamily: poppins.style.fontFamily,
                     color: "#5A33B7",

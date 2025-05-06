@@ -10,11 +10,21 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import Head from "next/head";
 import Image from "next/image";
 
 export default function Journal() {
   return (
     <>
+      <Head>
+        <title>Create a Journal Entry</title>
+        <meta
+          name="description"
+          content="Elevate your mental wellness, mindset, and cognitive strength with the next level of journaling."
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/assets/logo.png" />
+      </Head>
       <Box>
         <Navbar />
         <Box position="relative" width="100%" height="234px">
