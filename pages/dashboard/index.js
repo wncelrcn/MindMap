@@ -142,41 +142,51 @@ export default function DashboardPage({ user }) {
               gap={2}
             >
               {/* Create Entry Card */}
-              <Box width={{ xs: "100%", md: "30%" }}>
-                <Card
-                  sx={{
-                    backgroundColor: "#f6f3ff",
-                    borderRadius: 4,
-                    textAlign: "center",
-                    minHeight: 220,
-                    height: "80%",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
+
+              <Link href="/create-entry" passHref legacyBehavior>
+                <a
+                  style={{
+                    textDecoration: "none",
+                    width: "100%",
+                    maxWidth: "30%",
                   }}
                 >
-                  <Box>
-                    <img
-                      src="/assets/folder-icon.png"
-                      alt="Create Entry Icon"
-                      style={{ width: "100%", maxWidth: "100%" }}
-                    />
-                  </Box>
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight={600}
-                    className={`${poppins.className}`}
+                  <Card
                     sx={{
-                      color: "#2D1B6B",
-                      fontFamily: poppins.style.fontFamily,
-                      mt: 1,
+                      backgroundColor: "#f6f3ff",
+                      borderRadius: 4,
+                      textAlign: "center",
+                      minHeight: 220,
+                      height: "80%",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      cursor: "pointer",
                     }}
                   >
-                    Create an Entry
-                  </Typography>
-                </Card>
-              </Box>
+                    <Box>
+                      <img
+                        src="/assets/folder-icon.png"
+                        alt="Create Entry Icon"
+                        style={{ width: "100%", maxWidth: "100%" }}
+                      />
+                    </Box>
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight={600}
+                      className={`${poppins.className}`}
+                      sx={{
+                        color: "#2D1B6B",
+                        fontFamily: poppins.style.fontFamily,
+                        mt: 1,
+                      }}
+                    >
+                      Create an Entry
+                    </Typography>
+                  </Card>
+                </a>
+              </Link>
 
               {/* MindMap Quiz Card */}
               <Box width={{ xs: "100%", md: "70%" }}>
