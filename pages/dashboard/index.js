@@ -140,54 +140,54 @@ export default function DashboardPage({ user }) {
               flexDirection={{ xs: "column", md: "row" }}
               alignItems="stretch"
               gap={2}
-              sx={{ mt: 5 }}
             >
               {/* Create Entry Card */}
-
-              <Link href="/create-entry" passHref legacyBehavior>
-                <a
-                  style={{
-                    textDecoration: "none",
-                    width: "100%",
-                    maxWidth: "30%",
-                  }}
-                >
-                  <Card
-                    sx={{
-                      backgroundColor: "#f6f3ff",
-                      borderRadius: 4,
-                      textAlign: "center",
-                      minHeight: 220,
-                      height: "80%",
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      cursor: "pointer",
+              <Box width={{ xs: "100%", md: "30%" }}>
+                <Link href="/create-entry" passHref legacyBehavior>
+                  <a
+                    style={{
+                      textDecoration: "none",
+                      width: "100%",
+                      maxWidth: "30%",
                     }}
                   >
-                    <Box>
-                      <img
-                        src="/assets/folder-icon.png"
-                        alt="Create Entry Icon"
-                        style={{ width: "100%", maxWidth: "100%" }}
-                      />
-                    </Box>
-                    <Typography
-                      variant="subtitle1"
-                      fontWeight={600}
-                      className={`${poppins.className}`}
+                    <Card
                       sx={{
-                        color: "#2D1B6B",
-                        fontFamily: poppins.style.fontFamily,
-                        mt: 1,
+                        backgroundColor: "#f6f3ff",
+                        borderRadius: 4,
+                        textAlign: "center",
+                        minHeight: 220,
+                        height: "80%",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        cursor: "pointer",
                       }}
                     >
-                      Create an Entry
-                    </Typography>
-                  </Card>
-                </a>
-              </Link>
+                      <Box>
+                        <img
+                          src="/assets/folder-icon.png"
+                          alt="Create Entry Icon"
+                          style={{ width: "100%", maxWidth: "100%" }}
+                        />
+                      </Box>
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight={600}
+                        className={`${poppins.className}`}
+                        sx={{
+                          color: "#2D1B6B",
+                          fontFamily: poppins.style.fontFamily,
+                          mt: 1,
+                        }}
+                      >
+                        Create an Entry
+                      </Typography>
+                    </Card>
+                  </a>
+                </Link>
+              </Box>
 
               {/* MindMap Quiz Card */}
               <Box width={{ xs: "100%", md: "70%" }}>
@@ -220,24 +220,21 @@ export default function DashboardPage({ user }) {
                     <Box>
                       <Typography
                         variant="subtitle2"
-                        className={`${poppins.className}`}
+                        className={`${quicksand.className}`}
                         sx={{
                           color: "#5A33B7",
-                          fontWeight: 300,
-                          fontStyle: "italic",
-                          fontFamily: poppins.style.fontFamily,
+                          fontFamily: quicksand.style.fontFamily,
                         }}
                       >
                         MindMap
                       </Typography>
                       <Typography
                         fontWeight={500}
-                        className={`${poppins.className}`}
+                        className={`${raleway.className}`}
                         sx={{
                           color: "#2D1B6B",
-                          fontSize: { xs: "1.5rem", md: "1.6rem" },
-                          fontFamily: poppins.style.fontFamily,
-                          fontWeight: 400,
+                          fontSize: { xs: "1.5rem", md: "1.7rem" },
+                          fontFamily: raleway.style.fontFamily,
                         }}
                       >
                         Your daily check-in, <br /> reimagined.
@@ -271,7 +268,7 @@ export default function DashboardPage({ user }) {
             </Box>
 
             {/* Recent Journals Section */}
-            <Box mb={4} mt={{ xs: 8, md: 4 }}>
+            <Box mb={4} mt={{ xs: 8, md: 6 }}>
               <Box
                 display="flex"
                 justifyContent="space-between"
