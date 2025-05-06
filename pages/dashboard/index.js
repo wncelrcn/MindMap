@@ -134,179 +134,130 @@ export default function DashboardPage({ user }) {
               </Button>
             </Box>
 
-            <Grid
-              container
-              spacing={2}
-              sx={{
-                alignItems: "stretch",
-                justifyContent: "space-between",
-                mb: 5,
-              }}
+            {/* Header */}
+            <Box
+              display="flex"
+              flexDirection={{ xs: "column", md: "row" }}
+              alignItems="stretch"
+              gap={2}
             >
-              {/* Create Entry Button */}
-              <Grid item xs={12} sm={4} md={3}>
-                <Box
+              {/* Create Entry Card */}
+              <Box width={{ xs: "100%", md: "30%" }}>
+                <Card
                   sx={{
-                    height: "225px",
-                    bgcolor: "#f8f7fc",
+                    backgroundColor: "#f6f3ff",
                     borderRadius: 4,
+                    textAlign: "center",
+                    minHeight: 220,
+                    height: "80%",
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "center",
                     justifyContent: "center",
-                    textAlign: "center",
-                    p: 2,
-                    width: "250px",
+                    alignItems: "center",
                   }}
                 >
-                  <Link
-                    href="/create-entry"
-                    passHref
-                    style={{ textDecoration: "none" }}
+                  <Box>
+                    <img
+                      src="/assets/folder-icon.png"
+                      alt="Create Entry Icon"
+                      style={{ width: "100%", maxWidth: "100%" }}
+                    />
+                  </Box>
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight={600}
+                    className={`${poppins.className}`}
+                    sx={{
+                      color: "#2D1B6B",
+                      fontFamily: poppins.style.fontFamily,
+                      mt: 1,
+                    }}
                   >
-                    <Button
-                      sx={{
-                        borderRadius: 4,
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: 3,
-                        width: "100%",
-                        bgcolor: "#f8f7fc",
-                        transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                        "&:hover": {
-                          transform: "translateY(-5px)",
-                        },
-                      }}
-                    >
-                      <Box
-                        component="img"
-                        src="/assets/folder-icon.png"
-                        alt="Folder icon"
-                        sx={{ width: "120px", height: "100px", mb: 2 }}
-                      />
-                      <Typography
-                        variant="body1"
-                        fontWeight={600}
-                        color="#2D1B6B"
-                        className={`${poppins.className}`}
-                        sx={{ fontFamily: poppins.style.fontFamily }}
-                      >
-                        Create an Entry
-                      </Typography>
-                    </Button>
-                  </Link>
-                </Box>
-              </Grid>
+                    Create an Entry
+                  </Typography>
+                </Card>
+              </Box>
 
-              {/* Hero Section Card */}
-              <Grid item xs={12} sm={8} md={9}>
+              {/* MindMap Quiz Card */}
+              <Box width={{ xs: "100%", md: "70%" }}>
                 <Card
-                  elevation={0}
                   sx={{
-                    bgcolor: "#f8f7fc",
+                    backgroundColor: "#f9f7ff",
                     borderRadius: 4,
-                    height: "225px",
+                    minHeight: 220,
+                    height: "80%",
                     display: "flex",
+                    flexDirection: { xs: "column", md: "row" },
+                    justifyContent: "space-between",
                     alignItems: "center",
-                    position: "relative",
+                    p: { xs: 2, md: 3 },
+                    textAlign: { xs: "center", md: "left" },
                   }}
                 >
                   <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: { xs: "column", md: "row" },
-                      alignItems: "center",
-                      p: { xs: 2, md: 4 },
-                      width: "875px",
-                    }}
+                    display="flex"
+                    alignItems="center"
+                    flexDirection={{ xs: "column", md: "row" }}
                   >
-                    {/* Person Image */}
-                    <Box
-                      sx={{
-                        flex: "0 0 auto",
-                        mr: { xs: 0, md: 4 },
-                        mb: { xs: 2, md: 0 },
-                        width: { xs: "70%", sm: "40%", md: "30%" },
-                        maxWidth: "250px",
-                      }}
-                    >
-                      <Box
-                        component="img"
+                    <Box mr={{ md: 3 }} mb={{ xs: 1, md: 0 }}>
+                      <img
                         src="/assets/person-laptop.png"
-                        alt="Person using laptop"
-                        sx={{ width: "100%", height: "auto" }}
+                        alt="Illustration"
+                        style={{ width: "100%", maxWidth: "100%" }}
                       />
                     </Box>
-
-                    {/* Text Content */}
                     <Box>
                       <Typography
-                        variant="subtitle1"
-                        color="#5A33B7"
-                        fontWeight={300}
-                        className={`${poppins.className}`}
-                        gutterBottom
+                        variant="subtitle2"
+                        className={`${quicksand.className}`}
                         sx={{
-                          fontStyle: "italic",
-                          fontFamily: poppins.style.fontFamily,
+                          color: "#5A33B7",
+                          fontFamily: quicksand.style.fontFamily,
                         }}
                       >
                         MindMap
                       </Typography>
                       <Typography
-                        variant="h4"
-                        component="h2"
-                        fontWeight={300}
-                        color="#2D1B6B"
-                        className={`${poppins.className}`}
-                        gutterBottom
+                        fontWeight={500}
+                        className={`${raleway.className}`}
                         sx={{
-                          lineHeight: 1.2,
-                          fontFamily: poppins.style.fontFamily,
+                          color: "#2D1B6B",
+                          fontSize: { xs: "1.5rem", md: "1.7rem" },
+                          fontFamily: raleway.style.fontFamily,
                         }}
                       >
-                        Your daily check-in,
-                        <br />
-                        reimagined.
+                        Your daily check-in, <br /> reimagined.
                       </Typography>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          mt: 2,
-                          position: "absolute",
-                          bottom: 24,
-                          right: 22,
-                        }}
-                      >
-                        <Button
-                          variant="contained"
-                          alignItems="right"
-                          sx={{
-                            fontFamily: poppins.style.fontFamily,
-                            mt: 2,
-                            bgcolor: "#5A33B7",
-                            borderRadius: "9999px",
-                            fontWeight: 600,
-                            px: 3,
-                            "&:hover": {
-                              bgcolor: "#4a2ba0",
-                            },
-                          }}
-                        >
-                          Take a Quiz
-                        </Button>
-                      </Box>
                     </Box>
                   </Box>
+                  <Box mt={{ xs: 2, md: 18 }}>
+                    <Link href="/quiz" passHref>
+                      <Button
+                        variant="contained"
+                        sx={{
+                          backgroundColor: "#5A33B7",
+                          borderRadius: "9999px",
+                          textTransform: "none",
+                          fontFamily: poppins.style.fontFamily,
+                          width: "200px",
+                          px: 3,
+                          py: 1,
+                          fontSize: "0.875rem",
+                          "&:hover": {
+                            backgroundColor: "#45249C",
+                          },
+                        }}
+                      >
+                        Take a Quiz
+                      </Button>
+                    </Link>
+                  </Box>
                 </Card>
-              </Grid>
-            </Grid>
+              </Box>
+            </Box>
 
             {/* Recent Journals Section */}
-            <Box mb={4}>
+            <Box mb={4} mt={{ xs: 8, md: 6 }}>
               <Box
                 display="flex"
                 justifyContent="space-between"
