@@ -304,8 +304,35 @@ export default function DashboardPage({ user }) {
               </Box>
 
               {/* Journal Cards */}
-              <Grid container spacing={3} sx={{ mb: 20 }}>
-                <RecentJournal />
+              <Grid
+                container
+                spacing={3}
+                sx={{
+                  mb: 20,
+                  display: "flex",
+                  justifyContent: {
+                    xs: "center",
+                    sm: "center",
+                    md: "flex-start",
+                  },
+                  alignItems: "center",
+                  maxWidth: "100%",
+                  mx: "auto",
+                  px: { xs: 2, sm: 3, md: 1 },
+                }}
+              >
+                <Grid item xs={12} sm={6} lg={3}>
+                  <RecentJournal />
+                </Grid>
+                <Grid item xs={12} sm={6} lg={3}>
+                  <RecentJournal />
+                </Grid>
+                <Grid item xs={12} sm={6} lg={3}>
+                  <RecentJournal />
+                </Grid>
+                <Grid item xs={12} sm={6} lg={3}>
+                  <RecentJournal />
+                </Grid>
               </Grid>
             </Box>
           </Container>
