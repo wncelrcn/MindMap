@@ -4,6 +4,25 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { Poppins, Raleway, Quicksand } from "next/font/google";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
+});
+
+const raleway = Raleway({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-raleway",
+});
+
+const quicksand = Quicksand({
+  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-quicksand",
+});
 
 export default function Journal() {
   const [title, setTitle] = useState("Journal Title");
@@ -96,11 +115,13 @@ export default function Journal() {
                   fontWeight: 600,
                   color: "#2D1B6B",
                   lineHeight: "normal",
+                  fontFamily: poppins.style.fontFamily,
                 },
               }}
               sx={{
                 padding: 0,
                 height: "3rem",
+                fontFamily: poppins.style.fontFamily,
               }}
             />
           ) : (
@@ -117,11 +138,13 @@ export default function Journal() {
                   fontWeight: 600,
                   color: title ? "#2D1B6B" : "#A5A5A5",
                   lineHeight: "normal",
+                  fontFamily: poppins.style.fontFamily,
                 },
               }}
               sx={{
                 padding: 0,
                 height: "3rem",
+                fontFamily: poppins.style.fontFamily,
               }}
             />
           )}
@@ -132,6 +155,10 @@ export default function Journal() {
             fontWeight={500}
             fontSize="1.4rem"
             color="#2D1B6B"
+            sx={{
+              fontFamily: poppins.style.fontFamily,
+              fontWeight: 300,
+            }}
           >
             {getFormattedDate()}
           </Typography>
@@ -150,7 +177,11 @@ export default function Journal() {
                 fontStyle: content ? "normal" : "italic",
                 fontSize: "1rem",
                 color: "#4A3E8E",
+                fontFamily: poppins.style.fontFamily,
               },
+            }}
+            sx={{
+              fontFamily: poppins.style.fontFamily,
             }}
           />
         </Box>
@@ -184,7 +215,14 @@ export default function Journal() {
                 },
               }}
             >
-              Having a hard time? Don’t worry, try our suggestions.
+              <Typography
+                sx={{
+                  fontFamily: poppins.style.fontFamily,
+                  fontWeight: 500,
+                }}
+              >
+                Having a hard time? Don’t worry, try our suggestions.
+              </Typography>
             </Button>
           </Box>
         )}
