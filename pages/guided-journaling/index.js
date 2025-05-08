@@ -18,7 +18,7 @@ import { requireAuth } from "@/lib/requireAuth";
 import { supabase } from "@/lib/supabase";
 import Navbar from "@/components/navbar";
 import Link from "next/link";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -82,13 +82,15 @@ export default function GuidedJournaling({ user }) {
       title: "Productivity",
       description: "Stay focused and organized to maximize your time.",
       image: "/assets/person-2.png",
-      gradient: "linear-gradient(135deg, #faebf0 0%, #f9cfe4 50%, #eae1f5 100%)",
+      gradient:
+        "linear-gradient(135deg, #faebf0 0%, #f9cfe4 50%, #eae1f5 100%)",
     },
     {
       title: "Growth",
       description: "Track progress and push yourself to improve.",
       image: "/assets/person-3.png",
-      gradient: "linear-gradient(135deg, #faebf0 0%, #f9cfe4 50%, #eae1f5 100%)",
+      gradient:
+        "linear-gradient(135deg, #faebf0 0%, #f9cfe4 50%, #eae1f5 100%)",
     },
     {
       title: "Self-Reflection",
@@ -106,7 +108,8 @@ export default function GuidedJournaling({ user }) {
       title: "Creative Expression",
       description: "Spark ideas and bring creativity to life.",
       image: "/assets/person-6.png",
-      gradient: "linear-gradient(135deg, #faebf0 0%, #f9cfe4 50%, #eae1f5 100%)",
+      gradient:
+        "linear-gradient(135deg, #faebf0 0%, #f9cfe4 50%, #eae1f5 100%)",
     },
   ];
 
@@ -124,59 +127,72 @@ export default function GuidedJournaling({ user }) {
       <Box display="flex" flexDirection="column" minHeight="100vh">
         <Navbar />
         {/* Main Content */}
-        <Container sx={{ flex: 1, py: 4, maxWidth: "lg" }}>
-          <Box mb={2}>
-            <Link href="/create-entry" passHref>
-              <Button 
-                startIcon={<ArrowBackIcon />} 
-                sx={{ 
-                  color: '#2D1B6B',
-                  "&:hover": {
-                    backgroundColor: 'transparent',
-                  },
-                  minWidth: 'auto',
-                  p: 1,
-                }}
-              />
-            </Link>
+        <Box>
+          <Link href="/create-entry" passHref>
+            <Button
+              startIcon={<ArrowBackIcon />}
+              sx={{
+                color: "#2D1B6B",
+                "&:hover": {
+                  backgroundColor: "transparent",
+                },
+                minWidth: "auto",
+                padding: { xs: "1rem", md: "1rem 8rem" },
+              }}
+            />
+          </Link>
+        </Box>
+        <Container
+          sx={{
+            flex: 1,
+            maxWidth: "lg",
+            padding: { xs: "2rem", md: "1.5rem 8rem" },
+          }}
+        >
+          <Box sx={{ maxWidth: { xs: "350px", md: "750px" }, mx: "auto" }}>
+            <Typography
+              variant="h3"
+              component="h1"
+              fontWeight="500"
+              className={`${poppins.className}`}
+              sx={{
+                fontFamily: poppins.style.fontFamily,
+                color: "#2D1B6B",
+                mb: 2,
+              }}
+            >
+              {username}'s Guided Journaling
+            </Typography>
+
+            <Typography
+              variant="body1"
+              className={`${quicksand.className}`}
+              sx={{
+                fontFamily: quicksand.style.fontFamily,
+                color: "#2D1B6B",
+                mb: 6,
+                fontSize: { xs: "1rem", md: "1.2rem" },
+                fontWeight: 400,
+                maxWidth: "800px",
+                mx: "auto",
+              }}
+            >
+              With thought-provoking prompts and insightful guidance, this
+              journal helps you navigate your thoughts, set meaningful goals,
+              and track your progress.
+            </Typography>
           </Box>
-          
-          <Typography
-            variant="h3"
-            component="h1"
-            fontWeight="520"
-            className={`${poppins.className}`}
-            sx={{
-              fontFamily: poppins.style.fontFamily,
-              color: "#2D1B6B",
-              mb: 2,
-              textAlign: "center",
-            }}
-          >
-            {username}'s Guided Journaling
-          </Typography>
-          
-          <Typography
-            variant="body1"
-            className={`${quicksand.className}`}
-            sx={{
-              fontFamily: quicksand.style.fontFamily,
-              color: "#2D1B6B",
-              mb: 4,
-              fontWeight: 500,
-              textAlign: "center",
-              maxWidth: "800px",
-              mx: "auto",
-            }}
-          >
-            With thought-provoking prompts and insightful guidance, this journal helps you
-            navigate your thoughts, set meaningful goals, and track your progress.
-          </Typography>
-          
+
           <Box sx={{ maxWidth: "900px", mx: "auto" }}>
             <Grid container spacing={3} sx={{ justifyContent: "center" }}>
               {journalingCategories.map((category, index) => (
-                <Grid item xs={12} sm={6} key={index} sx={{ maxWidth: "360px" }}>
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  key={index}
+                  sx={{ maxWidth: { xs: "360px", md: "360px" } }}
+                >
                   <Card
                     sx={{
                       borderRadius: 3,
@@ -185,7 +201,8 @@ export default function GuidedJournaling({ user }) {
                       height: "100%",
                       width: "100%",
                       background: category.gradient,
-                      transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+                      transition:
+                        "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
                       "&:hover": {
                         transform: "translateY(-5px)",
                         boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
@@ -195,13 +212,20 @@ export default function GuidedJournaling({ user }) {
                       flexDirection: "column",
                     }}
                   >
-                    <CardContent sx={{ p: 4, display: "flex", flexDirection: "column", height: "100%" }}>
+                    <CardContent
+                      sx={{
+                        p: 4,
+                        display: "flex",
+                        flexDirection: "column",
+                        height: "100%",
+                      }}
+                    >
                       <Box
                         component="img"
                         src={category.image}
                         alt={category.title}
                         sx={{
-                          height: 200,
+                          height: { xs: "250px", md: "300px" },
                           width: "auto",
                           maxWidth: "100%",
                           display: "block",
@@ -213,7 +237,7 @@ export default function GuidedJournaling({ user }) {
                         <Typography
                           variant="h5"
                           component="h2"
-                          fontWeight="600"
+                          fontWeight="400"
                           className={`${poppins.className}`}
                           sx={{
                             fontFamily: poppins.style.fontFamily,
@@ -221,6 +245,7 @@ export default function GuidedJournaling({ user }) {
                             mb: 1,
                             wordWrap: "break-word",
                             overflowWrap: "break-word",
+                            px: 2,
                           }}
                         >
                           {category.title}
@@ -234,6 +259,7 @@ export default function GuidedJournaling({ user }) {
                             fontWeight: 500,
                             wordWrap: "break-word",
                             overflowWrap: "break-word",
+                            px: 2,
                           }}
                         >
                           {category.description}
@@ -248,7 +274,7 @@ export default function GuidedJournaling({ user }) {
         </Container>
 
         {/* Footer Section */}
-        <Box component="footer">
+        <Box component="footer" sx={{ mt: 10 }}>
           <SupportFooter />
           <Footer />
         </Box>
