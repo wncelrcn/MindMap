@@ -4,6 +4,7 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/router";
 import { Poppins, Raleway, Quicksand } from "next/font/google";
 
 const poppins = Poppins({
@@ -28,6 +29,7 @@ export default function Journal() {
   const [title, setTitle] = useState("Journal Title");
   const [editingTitle, setEditingTitle] = useState(false);
   const [content, setContent] = useState("");
+  const router = useRouter();
 
   const handleTitleClick = () => setEditingTitle(true);
   const handleTitleBlur = () => {
@@ -44,6 +46,10 @@ export default function Journal() {
       day: "numeric",
       year: "numeric",
     });
+  };
+
+  const handleSuggestionsClick = () => {
+    router.push("/guided-journaling");
   };
 
   return (
@@ -202,6 +208,7 @@ export default function Journal() {
           >
             <Button
               variant="contained"
+              onClick={handleSuggestionsClick}
               sx={{
                 backgroundColor: "#E2DDF9",
                 color: "#4E2BBD",
