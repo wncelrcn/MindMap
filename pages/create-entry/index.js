@@ -34,11 +34,11 @@ export default function Journal({ user }) {
   const [title, setTitle] = useState("Journal Title");
   const [editingTitle, setEditingTitle] = useState(false);
   const [content, setContent] = useState("");
+  const [sections, setSections] = useState([]);
   const [journalEntry, setJournalEntry] = useState({});
   const [userId, setUserId] = useState(null);
   const [lastActivity, setLastActivity] = useState(Date.now());
   const [showButton, setShowButton] = useState(false);
-
   const [error, setError] = useState(null);
 
   const router = useRouter();
@@ -70,6 +70,18 @@ export default function Journal({ user }) {
     setLastActivity(Date.now());
   };
 
+  const handleGoDeeper = () => {
+    setSections([...sections, { subtitle: "", content: "" }]);
+    setShowButton(false);
+  };
+
+  const handleSectionChange = (index, field, value) => {
+    const newSections = [...sections];
+    newSections[index] = { ...newSections[index], [field]: value };
+    setSections(newSections);
+    setLastActivity(Date.now());
+  };
+
   const getFormattedDate = () => {
     const today = new Date();
     return today.toLocaleDateString("en-US", {
@@ -86,15 +98,25 @@ export default function Journal({ user }) {
         return;
       }
 
+      const journalData = {
+        default: content,
+        ...sections.reduce(
+          (acc, section, index) => ({
+            ...acc,
+            // TO BE CHANGED: TEMPORARY
+            [`question${index + 1}`]: section.content,
+          }),
+          {}
+        ),
+      };
+
       const res = await fetch("/api/journal/freeform", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: userId,
-          journal_entry: {
-            default: content,
-          },
-          title: title.trim() || "Journal Entry",
+          journal_entry: journalData,
+          title: title.trim() || "Untitled Entry",
         }),
       });
 
@@ -162,7 +184,7 @@ export default function Journal({ user }) {
           />
         </Box>
 
-        {/* Journal Title */}
+        {/* Journal Content */}
         <Box
           sx={{
             padding: { xs: "2rem 1.5rem", md: "3rem 8rem" },
@@ -259,17 +281,47 @@ export default function Journal({ user }) {
             }}
           />
 
-          {error && (
-            <Typography
-              color="error"
-              sx={{
-                fontFamily: poppins.style.fontFamily,
-                marginBottom: "1rem",
-              }}
-            >
-              {error}
-            </Typography>
-          )}
+          {sections.map((section, index) => (
+            <Box key={index} sx={{ marginBottom: "2rem" }}>
+              <Typography
+                sx={{
+                  fontSize: "1.5rem",
+                  fontWeight: 500,
+                  color: "#2D1B6B",
+                  lineHeight: "normal",
+                  fontFamily: poppins.style.fontFamily,
+                  marginBottom: "1.5rem",
+                }}
+              >
+                Question
+              </Typography>
+
+              <TextField
+                multiline
+                fullWidth
+                minRows={5}
+                placeholder="Type your thoughts..."
+                variant="standard"
+                value={section.content}
+                onChange={(e) =>
+                  handleSectionChange(index, "content", e.target.value)
+                }
+                InputProps={{
+                  disableUnderline: true,
+                  style: {
+                    fontStyle: section.content ? "normal" : "italic",
+                    fontSize: "1rem",
+                    color: "#4A3E8E",
+                    fontFamily: poppins.style.fontFamily,
+                  },
+                }}
+                sx={{
+                  fontFamily: poppins.style.fontFamily,
+                  marginBottom: "1.5rem",
+                }}
+              />
+            </Box>
+          ))}
 
           {showButton && (
             <Box
@@ -282,9 +334,7 @@ export default function Journal({ user }) {
             >
               <Button
                 variant="contained"
-                onClick={() => {
-                  // Add button action here
-                }}
+                onClick={handleGoDeeper}
                 sx={{
                   backgroundColor: "#4E2BBD",
                   color: "#fff",
