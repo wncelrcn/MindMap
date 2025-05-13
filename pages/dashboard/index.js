@@ -47,28 +47,7 @@ export default function DashboardPage({ user }) {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
-    const fetchUsername = async () => {
-      if (user && user.email) {
-        try {
-          const { data, error } = await supabase
-            .from("user_table")
-            .select("username")
-            .eq("email", user.email)
-            .single();
-
-          if (error) {
-            console.error("Error fetching username:", error);
-          } else if (data) {
-            setUsername(data.username);
-            console.log("Fetched username:", data.username);
-          }
-        } catch (error) {
-          console.error("Failed to fetch username:", error);
-        }
-      }
-    };
-
-    fetchUsername();
+    setUsername(user.username);
   }, [user]);
 
   return (

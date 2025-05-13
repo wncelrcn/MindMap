@@ -19,22 +19,30 @@ export default async function handler(req, res) {
 
     const { data: user, error } = await supabase
       .from("user_table")
-      .select("email, password_hash")
+      .select("email, password_hash, user_id, username")
       .eq("email", email)
       .single();
 
     if (error || !user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
-
+    console.log(user.user_id);
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ email: user.email }, JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign(
+      {
+        email: user.email,
+        user_id: user.user_id,
+        username: user.username,
+      },
+      JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
 
     res.setHeader(
       "Set-Cookie",

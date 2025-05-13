@@ -3,7 +3,8 @@ import { Box, TextField, Typography, Button, useTheme } from "@mui/material";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { requireAuth } from "@/lib/requireAuth";
 import { useRouter } from "next/router";
 import { Poppins, Raleway, Quicksand } from "next/font/google";
 
@@ -25,11 +26,36 @@ const quicksand = Quicksand({
   variable: "--font-quicksand",
 });
 
-export default function Journal() {
+export async function getServerSideProps(context) {
+  return await requireAuth(context.req);
+}
+
+export default function Journal({ user }) {
   const [title, setTitle] = useState("Journal Title");
   const [editingTitle, setEditingTitle] = useState(false);
   const [content, setContent] = useState("");
+  const [journalEntry, setJournalEntry] = useState({});
+  const [userId, setUserId] = useState(null);
+  const [lastActivity, setLastActivity] = useState(Date.now());
+  const [showButton, setShowButton] = useState(false);
+
+  const [error, setError] = useState(null);
+
   const router = useRouter();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (Date.now() - lastActivity >= 2000 && content) {
+        setShowButton(true);
+      }
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [lastActivity, content]);
+
+  useEffect(() => {
+    setUserId(user.user_id);
+  }, [user]);
 
   const handleTitleClick = () => setEditingTitle(true);
   const handleTitleBlur = () => {
@@ -39,6 +65,11 @@ export default function Journal() {
     setEditingTitle(false);
   };
 
+  const handleContentChange = (e) => {
+    setContent(e.target.value);
+    setLastActivity(Date.now());
+  };
+
   const getFormattedDate = () => {
     const today = new Date();
     return today.toLocaleDateString("en-US", {
@@ -46,6 +77,38 @@ export default function Journal() {
       day: "numeric",
       year: "numeric",
     });
+  };
+
+  const handleFinishEntry = async () => {
+    try {
+      if (!content.trim()) {
+        setError("Please enter some content before saving");
+        return;
+      }
+
+      const res = await fetch("/api/journal/freeform", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: userId,
+          journal_entry: {
+            default: content,
+          },
+          title: title.trim() || "Journal Entry",
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to create entry");
+      }
+
+      router.push("/dashboard");
+    } catch (error) {
+      setError(error.message);
+      console.error("Error creating journal entry:", error);
+    }
   };
 
   const handleSuggestionsClick = () => {
@@ -99,7 +162,7 @@ export default function Journal() {
           />
         </Box>
 
-        {/* Journal content */}
+        {/* Journal Title */}
         <Box
           sx={{
             padding: { xs: "2rem 1.5rem", md: "3rem 8rem" },
@@ -131,28 +194,31 @@ export default function Journal() {
               }}
             />
           ) : (
-            <TextField
-              fullWidth
-              value={title || ""}
-              placeholder="Journal Title"
-              onClick={handleTitleClick}
-              variant="standard"
-              InputProps={{
-                disableUnderline: true,
-                style: {
-                  fontSize: "2rem",
-                  fontWeight: 600,
-                  color: title ? "#2D1B6B" : "#A5A5A5",
-                  lineHeight: "normal",
+            <>
+              {/* Title */}
+              <TextField
+                fullWidth
+                value={title || ""}
+                placeholder="Journal Title"
+                onClick={handleTitleClick}
+                variant="standard"
+                InputProps={{
+                  disableUnderline: true,
+                  style: {
+                    fontSize: "2rem",
+                    fontWeight: 600,
+                    color: title ? "#2D1B6B" : "#A5A5A5",
+                    lineHeight: "normal",
+                    fontFamily: poppins.style.fontFamily,
+                  },
+                }}
+                sx={{
+                  padding: 0,
+                  height: "3rem",
                   fontFamily: poppins.style.fontFamily,
-                },
-              }}
-              sx={{
-                padding: 0,
-                height: "3rem",
-                fontFamily: poppins.style.fontFamily,
-              }}
-            />
+                }}
+              />
+            </>
           )}
 
           <Typography
@@ -169,6 +235,7 @@ export default function Journal() {
             {getFormattedDate()}
           </Typography>
 
+          {/* Journal Entry */}
           <TextField
             multiline
             fullWidth
@@ -176,7 +243,7 @@ export default function Journal() {
             placeholder="Type your thoughts..."
             variant="standard"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={handleContentChange}
             InputProps={{
               disableUnderline: true,
               style: {
@@ -188,8 +255,84 @@ export default function Journal() {
             }}
             sx={{
               fontFamily: poppins.style.fontFamily,
+              marginBottom: "1.5rem",
             }}
           />
+
+          {error && (
+            <Typography
+              color="error"
+              sx={{
+                fontFamily: poppins.style.fontFamily,
+                marginBottom: "1rem",
+              }}
+            >
+              {error}
+            </Typography>
+          )}
+
+          {showButton && (
+            <Box
+              width="100%"
+              display="flex"
+              bgcolor="#fff"
+              py={3}
+              zIndex={10}
+              mb={2}
+            >
+              <Button
+                variant="contained"
+                onClick={() => {
+                  // Add button action here
+                }}
+                sx={{
+                  backgroundColor: "#4E2BBD",
+                  color: "#fff",
+                  textTransform: "none",
+                  fontWeight: 500,
+                  borderRadius: "16px",
+                  padding: "0.95rem 2rem",
+                  boxShadow: "none",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontFamily: poppins.style.fontFamily,
+                    fontWeight: 400,
+                    fontSize: "1.1rem",
+                  }}
+                >
+                  Go Deeper
+                </Typography>
+              </Button>
+
+              <Button
+                variant="contained"
+                onClick={handleFinishEntry}
+                sx={{
+                  backgroundColor: "#E2DDF9",
+                  color: "#fff",
+                  textTransform: "none",
+                  fontWeight: 500,
+                  borderRadius: "16px",
+                  padding: "0.95rem 3.5rem",
+                  boxShadow: "none",
+                  marginLeft: "1.2rem",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontFamily: poppins.style.fontFamily,
+                    fontWeight: 400,
+                    fontSize: "1.1rem",
+                    color: "#4E2BBD",
+                  }}
+                >
+                  Finish Entry
+                </Typography>
+              </Button>
+            </Box>
+          )}
         </Box>
 
         {/* Suggestion Button (fixed at bottom of screen) */}
@@ -215,7 +358,7 @@ export default function Journal() {
                 textTransform: "none",
                 fontWeight: 500,
                 borderRadius: "12px",
-                padding: "0.75rem 1.5rem",
+                padding: "0.95rem 2rem",
                 boxShadow: "none",
                 "&:hover": {
                   backgroundColor: "#D4C7F3",
@@ -225,10 +368,11 @@ export default function Journal() {
               <Typography
                 sx={{
                   fontFamily: poppins.style.fontFamily,
-                  fontWeight: 500,
+                  fontWeight: 400,
+                  fontSize: "1.1rem",
                 }}
               >
-                Having a hard time? Don’t worry, try our suggestions.
+                Having a hard time? Don't worry, try our suggestions.
               </Typography>
             </Button>
           </Box>
