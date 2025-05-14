@@ -193,80 +193,81 @@ export default function GuidedJournaling({ user }) {
                   key={index}
                   sx={{ maxWidth: { xs: "360px", md: "360px" } }}
                 >
-                  <Card
-                    sx={{
-                      borderRadius: 3,
-                      overflow: "hidden",
-                      border: `3px solid #2D1B6B`,
-                      height: "100%",
-                      width: "100%",
-                      background: category.gradient,
-                      transition:
-                        "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
-                      "&:hover": {
-                        transform: "translateY(-5px)",
-                        boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
-                        cursor: "pointer",
-                      },
-                      display: "flex",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <CardContent
+                  <Link href={`/guided-journaling/${category.title}`} passHref style={{ textDecoration: "none" }}>
+                    <Card
                       sx={{
-                        p: 4,
+                        borderRadius: 3,
+                        overflow: "hidden",
+                        border: `3px solid #2D1B6B`,
+                        height: "100%",
+                        width: "100%",
+                        background: category.gradient,
+                        transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+                        "&:hover": {
+                          transform: "translateY(-5px)",
+                          boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
+                          cursor: "pointer",
+                        },
                         display: "flex",
                         flexDirection: "column",
-                        height: "100%",
                       }}
                     >
-                      <Box
-                        component="img"
-                        src={category.image}
-                        alt={category.title}
+                      <CardContent
                         sx={{
-                          height: { xs: "250px", md: "300px" },
-                          width: "auto",
-                          maxWidth: "100%",
-                          display: "block",
-                          mx: "auto",
-                          mb: 2,
+                          p: 4,
+                          display: "flex",
+                          flexDirection: "column",
+                          height: "100%",
                         }}
-                      />
-                      <Box sx={{ width: "100%" }}>
-                        <Typography
-                          variant="h5"
-                          component="h2"
-                          fontWeight="400"
-                          className={`${poppins.className}`}
+                      >
+                        <Box
+                          component="img"
+                          src={category.image}
+                          alt={category.title}
                           sx={{
-                            fontFamily: poppins.style.fontFamily,
-                            color: "#2D1B6B",
-                            mb: 1,
-                            wordWrap: "break-word",
-                            overflowWrap: "break-word",
-                            px: 2,
+                            height: { xs: "250px", md: "300px" },
+                            width: "auto",
+                            maxWidth: "100%",
+                            display: "block",
+                            mx: "auto",
+                            mb: 2,
                           }}
-                        >
-                          {category.title}
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          className={`${quicksand.className}`}
-                          sx={{
-                            fontFamily: quicksand.style.fontFamily,
-                            color: "#2D1B6B",
-                            fontWeight: 500,
-                            wordWrap: "break-word",
-                            overflowWrap: "break-word",
-                            px: 2,
-                          }}
-                        >
-                          {category.description}
-                        </Typography>
-                      </Box>
-                    </CardContent>
-                  </Card>
+                        />
+                        <Box sx={{ width: "100%" }}>
+                          <Typography
+                            variant="h5"
+                            component="h2"
+                            fontWeight="400"
+                            className={`${poppins.className}`}
+                            sx={{
+                              fontFamily: poppins.style.fontFamily,
+                              color: "#2D1B6B",
+                              mb: 1,
+                              wordWrap: "break-word",
+                              overflowWrap: "break-word",
+                              px: 2,
+                            }}
+                          >
+                            {category.title}
+                          </Typography>
+                          <Typography
+                            variant="body1"
+                            className={`${quicksand.className}`}
+                            sx={{
+                              fontFamily: quicksand.style.fontFamily,
+                              color: "#2D1B6B",
+                              fontWeight: 500,
+                              wordWrap: "break-word",
+                              overflowWrap: "break-word",
+                              px: 2,
+                            }}
+                          >
+                            {category.description}
+                          </Typography>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 </Grid>
               ))}
             </Grid>
