@@ -10,7 +10,7 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
-import { Raleway, Poppins, Quicksand } from "next/font/google";
+import { Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState } from "react";
 import { requireAuth } from "@/lib/requireAuth";
 import { supabase } from "@/lib/supabase";
@@ -79,8 +79,8 @@ export default function ThemeCategories({ user }) {
   }, [theme]);
 
   // Navigate to category page when a category is clicked
-  const handleCategoryClick = (categoryId) => {
-    router.push(`/guided-journaling/${theme}/${categoryId}`);
+  const handleCategoryClick = (categoryName) => {
+    router.push(`/guided-journaling/${theme}/${encodeURIComponent(categoryName)}`);
   };
 
   if (loading) return <div>Loading...</div>;
@@ -150,7 +150,7 @@ export default function ThemeCategories({ user }) {
                   sx={{ maxWidth: { xs: "360px", md: "850px" } }}
                 >
                   <Card
-                    onClick={() => handleCategoryClick(category.id)}
+                    onClick={() => handleCategoryClick(category.name)}
                     sx={{
                       borderRadius: 3,
                       border: "none",
