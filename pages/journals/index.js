@@ -44,6 +44,8 @@ export async function getServerSideProps(context) {
 
 export default function Journals({ user }) {
   const [username, setUsername] = useState("");
+  const [journalEntries, setJournalEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
   const theme = useTheme();
 
   useEffect(() => {
@@ -52,7 +54,7 @@ export default function Journals({ user }) {
         try {
           const { data, error } = await supabase
             .from("user_table")
-            .select("username")
+            .select("username, user_id")
             .eq("email", user.email)
             .single();
 
@@ -60,7 +62,8 @@ export default function Journals({ user }) {
             console.error("Error fetching username:", error);
           } else if (data) {
             setUsername(data.username);
-            console.log("Fetched username:", data.username);
+            // Fetch journal entries after getting user_id
+            fetchJournalEntries(data.user_id);
           }
         } catch (error) {
           console.error("Failed to fetch username:", error);
@@ -70,6 +73,24 @@ export default function Journals({ user }) {
 
     fetchUsername();
   }, [user]);
+
+  const fetchJournalEntries = async (userId) => {
+    try {
+      const response = await fetch(
+        `/api/fetch-journal/journal?user_id=${userId}`
+      );
+      const data = await response.json();
+
+      if (data.entries) {
+        setJournalEntries(data.entries);
+        console.log(data.entries);
+      }
+    } catch (error) {
+      console.error("Error fetching journal entries:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -114,28 +135,24 @@ export default function Journals({ user }) {
                   variant="outlined"
                   fullWidth
                   sx={{
-                    backgroundColor: "#f8f7fc", // fallback fill
-                    borderRadius: 2, // outer corner radius
+                    backgroundColor: "#f8f7fc",
+                    borderRadius: 2,
                     width: "50rem",
 
-                    // Apply to the actual input wrapper (includes border & padding)
                     "& .MuiOutlinedInput-root": {
-                      borderRadius: "12px", // change this to your desired curve
-                      backgroundColor: "#f8f7fe", // fill inside the box
+                      borderRadius: "12px",
+                      backgroundColor: "#f8f7fe",
 
-                      // Default border
                       "& fieldset": {
-                        borderColor: "#e0d8f8", // default border
+                        borderColor: "#e0d8f8",
                       },
 
-                      // On hover
                       "&:hover fieldset": {
-                        borderColor: "#5A33B7", // border on hover
+                        borderColor: "#5A33B7",
                       },
 
-                      // On focus
                       "&.Mui-focused fieldset": {
-                        borderColor: "#5A33B7", // border on focus
+                        borderColor: "#5A33B7",
                         borderWidth: "2px",
                       },
                     },
@@ -206,8 +223,43 @@ export default function Journals({ user }) {
 
             {/* Journal Cards */}
             <Grid container spacing={3} sx={{ mb: 20 }}>
-              <RecentJournal />
-              <RecentJournal />
+              {loading ? (
+                <Grid item xs={12}>
+                  <Typography
+                    sx={{
+                      fontFamily: poppins.style.fontFamily,
+                      color: "#2D1B6B",
+                      textAlign: "center",
+                    }}
+                  >
+                    Loading journals...
+                  </Typography>
+                </Grid>
+              ) : journalEntries.length === 0 ? (
+                <Grid item xs={12}>
+                  <Typography
+                    sx={{
+                      fontFamily: poppins.style.fontFamily,
+                      color: "#2D1B6B",
+                      textAlign: "center",
+                    }}
+                  >
+                    No journals found. Start writing your first entry!
+                  </Typography>
+                </Grid>
+              ) : (
+                journalEntries.map((entry) => (
+                  <Grid item xs={12} sm={6} md={4} key={entry.id}>
+                    <RecentJournal
+                      journalID={entry.journal_id}
+                      title={entry.title}
+                      content={entry.journal_entry.default}
+                      date={entry.date_created}
+                      time={entry.time_created}
+                    />
+                  </Grid>
+                ))
+              )}
             </Grid>
           </Container>
         </Box>

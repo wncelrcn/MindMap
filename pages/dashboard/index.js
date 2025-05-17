@@ -283,6 +283,7 @@ export default function DashboardPage({ user }) {
               </Box>
 
               {/* Journal Cards */}
+              {/*
               <Grid
                 container
                 spacing={3}
@@ -313,6 +314,7 @@ export default function DashboardPage({ user }) {
                   <RecentJournal />
                 </Grid>
               </Grid>
+              */}
             </Box>
           </Container>
         </Box>

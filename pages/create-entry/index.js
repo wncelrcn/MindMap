@@ -110,7 +110,7 @@ export default function Journal({ user }) {
         ),
       };
 
-      const res = await fetch("/api/journal/freeform", {
+      const res = await fetch("/api/create-journal/freeform", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
