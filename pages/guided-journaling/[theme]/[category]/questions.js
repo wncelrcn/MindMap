@@ -41,6 +41,9 @@ export default function Questions({ user }) {
   const [hasChanges, setHasChanges] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [exitDestination, setExitDestination] = useState(null);
+  const [themeId, setThemeId] = useState(null);
+  const [categoryId, setCategoryId] = useState(null);
+  const [questionSetId, setQuestionSetId] = useState(null);
 
   useEffect(() => {
     const fetchQuestionSet = async () => {
@@ -69,22 +72,48 @@ export default function Questions({ user }) {
 
         if (error) throw error;
 
+        // Store theme ID for later use
+        setThemeId(data.id);
+
         const selectedCategory = data.categories.find(cat => cat.name === category);
         if (!selectedCategory || !selectedCategory.question_sets.length) {
           throw new Error("No question sets found for this category.");
         }
 
+        // Store category ID for later use
+        setCategoryId(selectedCategory.id);
+
         // Randomly select one question set from the available sets
         const randomSetIndex = Math.floor(Math.random() * selectedCategory.question_sets.length);
         const selectedSet = selectedCategory.question_sets[randomSetIndex];
-        setQuestionSet(selectedSet.questions.questions || []);
+        
+        // Store question set ID for later use
+        setQuestionSetId(selectedSet.id);
+        
+        // Debug to understand the structure of the data
+        console.log("Selected set:", selectedSet);
+        
+        // Extract questions correctly based on the actual structure
+        let questions = [];
+        if (selectedSet.questions && Array.isArray(selectedSet.questions.questions)) {
+          questions = selectedSet.questions.questions;
+        } else if (selectedSet.questions && typeof selectedSet.questions === 'object') {
+          // Handle case where questions might be directly in the object
+          questions = selectedSet.questions.questions || [];
+        } else if (Array.isArray(selectedSet.questions)) {
+          questions = selectedSet.questions;
+        }
+        
+        // Set the questions and initialize answers
+        setQuestionSet(questions);
         setAnswers(
-          selectedSet.questions.questions.reduce((acc, _, index) => ({
+          questions.reduce((acc, _, index) => ({
             ...acc,
             [`question${index + 1}`]: "",
           }), {})
         );
       } catch (err) {
+        console.error("Error fetching question set:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -196,22 +225,67 @@ export default function Questions({ user }) {
         return;
       }
 
-      const journalData = answers;
+      // Create a structured journalData object with questions and answers
+      const journalData = {};
+      questionSet.forEach((question, index) => {
+        journalData[`question${index + 1}`] = {
+          question: question,
+          answer: answers[`question${index + 1}`] || ""
+        };
+      });
       
-      /*
-      // WIP TABLE FOR GUIDED JOURNALING NOT YET DONE
-      const res = await fetch("/api/journal/freeform", {
+      console.log("Saving journal entry:", {
+        user_id: userId,
+        theme_id: themeId,
+        category_id: categoryId,
+        question_set_id: questionSetId,
+        journal_entry: journalData,
+        title: title.trim() || "Untitled Entry",
+      });
+      
+      // First try direct Supabase insertion if API route is not yet implemented
+      try {
+        const { data, error } = await supabase
+          .from("guided_journaling_table")
+          .insert({
+            user_id: userId,
+            theme_id: themeId,
+            category_id: categoryId,
+            question_set_id: questionSetId,
+            journal_entry: journalData,
+            title: title.trim() || "Untitled Entry",
+            date_created: new Date().toISOString().split('T')[0],
+            time_created: new Date().toTimeString().split(' ')[0]
+          })
+          .select();
+          
+        if (error) throw error;
+        
+        // Reset hasChanges to prevent the warning dialog
+        setHasChanges(false);
+        router.push("/dashboard?completed=true");
+        return;
+      } catch (directDbError) {
+        console.log("Direct DB insertion failed, trying API route", directDbError);
+        // Continue to API route if direct insertion fails
+      }
+      
+      // Add the API endpoint for guided journaling
+      const res = await fetch("/api/create-journal/guided", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: userId,
+          theme_id: themeId,
+          category_id: categoryId,
+          question_set_id: questionSetId,
           journal_entry: journalData,
           title: title.trim() || "Untitled Entry",
         }),
       });
 
       const data = await res.json();
-      */
+      
       if (!res.ok) {
         throw new Error(data.message || "Failed to create entry");
       }
@@ -253,9 +327,51 @@ export default function Questions({ user }) {
     }
   };
 
+  // Display additional debugging information when there's an error
   if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
-  if (!questionSet.length) return <div>No questions available.</div>;
+  if (error) return (
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h6" color="error">Error: {error}</Typography>
+      <Button 
+        variant="contained" 
+        onClick={() => router.back()}
+        sx={{ mt: 2, backgroundColor: "#4E2BBD" }}
+      >
+        Go Back
+      </Button>
+      {process.env.NODE_ENV !== 'production' && (
+        <Box sx={{ mt: 3, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
+          <Typography variant="subtitle2">Debug Info:</Typography>
+          <Typography variant="body2">Theme: {theme}</Typography>
+          <Typography variant="body2">Category: {category}</Typography>
+          <Typography variant="body2">Theme ID: {themeId}</Typography>
+          <Typography variant="body2">Category ID: {categoryId}</Typography>
+        </Box>
+      )}
+    </Box>
+  );
+  if (!questionSet.length) return (
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h6">No questions available for this category.</Typography>
+      <Button 
+        variant="contained" 
+        onClick={() => router.back()}
+        sx={{ mt: 2, backgroundColor: "#4E2BBD" }}
+      >
+        Go Back
+      </Button>
+      {process.env.NODE_ENV !== 'production' && (
+        <Box sx={{ mt: 3, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
+          <Typography variant="subtitle2">Debug Info:</Typography>
+          <Typography variant="body2">Theme: {theme}</Typography>
+          <Typography variant="body2">Category: {category}</Typography>
+          <Typography variant="body2">Theme ID: {themeId}</Typography>
+          <Typography variant="body2">Category ID: {categoryId}</Typography>
+          <Typography variant="body2">QuestionSet: {JSON.stringify(questionSet)}</Typography>
+        </Box>
+      )}
+    </Box>
+  );
 
   return (
     <>
