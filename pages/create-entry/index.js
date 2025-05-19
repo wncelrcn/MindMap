@@ -93,22 +93,30 @@ export default function Journal({ user }) {
 
   const handleFinishEntry = async () => {
     try {
-      if (!content.trim()) {
+      if (
+        !content.trim() &&
+        !sections.some((section) => section.content.trim())
+      ) {
         setError("Please enter some content before saving");
         return;
       }
 
-      const journalData = {
-        default: content,
-        ...sections.reduce(
-          (acc, section, index) => ({
-            ...acc,
-            // TO BE CHANGED: TEMPORARY
-            [`question${index + 1}`]: section.content,
-          }),
-          {}
-        ),
-      };
+      // Build journalData as an array of {question, answer} objects
+      const journalData = [];
+      if (content.trim()) {
+        journalData.push({
+          question: "Journal Entry",
+          answer: content.trim(),
+        });
+      }
+      sections.forEach((section, index) => {
+        if (section.content.trim()) {
+          journalData.push({
+            question: section.subtitle?.trim() || `Section ${index + 1}`,
+            answer: section.content.trim(),
+          });
+        }
+      });
 
       const res = await fetch("/api/create-journal/freeform", {
         method: "POST",

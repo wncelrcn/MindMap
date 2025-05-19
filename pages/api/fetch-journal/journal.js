@@ -12,23 +12,54 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: "User ID is required" });
     }
 
-    // TO BE CHANGED
-    const { data, error } = await supabase
+    // Fetch freeform journaling entries
+    const { data: freeformData, error: freeformError } = await supabase
       .from("freeform_journaling_table")
       .select("*")
-      .eq("user_id", user_id)
-      .order("date_created", { ascending: false });
+      .eq("user_id", user_id);
 
-    if (error) {
-      console.error("Database error:", error);
+    if (freeformError) {
+      console.error("Freeform DB error:", freeformError);
       return res
         .status(500)
-        .json({ message: "Error fetching journal entries" });
+        .json({ message: "Error fetching freeform journals" });
     }
+
+    // Fetch guided journaling entries
+    const { data: guidedData, error: guidedError } = await supabase
+      .from("guided_journaling_table")
+      .select("*")
+      .eq("user_id", user_id);
+
+    if (guidedError) {
+      console.error("Guided DB error:", guidedError);
+      return res
+        .status(500)
+        .json({ message: "Error fetching guided journals" });
+    }
+
+    // Normalize and combine data
+    const combinedEntries = [
+      ...freeformData.map((entry) => ({
+        ...entry,
+        question_set_id: null,
+        date_created: null,
+        journal_type: "freeform",
+      })),
+      ...guidedData.map((entry) => ({
+        ...entry,
+        journal_type: "guided",
+      })),
+    ];
+
+    // Sort combined by time_created descending
+    combinedEntries.sort(
+      (a, b) => new Date(b.time_created) - new Date(a.time_created)
+    );
 
     res.status(200).json({
       message: "Journal entries fetched successfully",
-      entries: data,
+      entries: combinedEntries,
     });
   } catch (error) {
     console.error("Unexpected error:", error);

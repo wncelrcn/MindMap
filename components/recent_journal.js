@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 import { Raleway, Poppins } from "next/font/google";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -30,8 +31,13 @@ export default function RecentJournal({
   date,
   time,
   journalID,
+  journalType,
 }) {
   const router = useRouter();
+
+  useEffect(() => {
+    console.log(journalID);
+  }, [journalID]);
 
   const handleClick = () => {
     sessionStorage.setItem("currentJournalId", journalID);
@@ -116,14 +122,20 @@ export default function RecentJournal({
             >
               <Box
                 component="img"
-                src="/assets/leaf-icon.png"
+                src={
+                  journalType === "freeform"
+                    ? "/assets/leaf-icon.png"
+                    : "/assets/book-icon.png"
+                }
                 alt="Leaf icon"
                 sx={{
                   width: "18px",
                   height: "18px",
                 }}
               />
-              Free Journaling
+              {journalType === "freeform"
+                ? "Free Journaling"
+                : "Guided Journaling"}
             </Typography>
           </Box>
 

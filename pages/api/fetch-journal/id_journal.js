@@ -16,19 +16,40 @@ export default async function handler(req, res) {
 
     console.log("Using ID:", id);
 
-    const { data, error } = await supabase
+    // fetching from freeform_journaling_table
+    let { data, error } = await supabase
       .from("freeform_journaling_table")
       .select("*")
       .eq("journal_id", id)
       .single();
 
-    if (error) {
-      console.error("Database error:", error);
-      return res.status(500).json({ message: "Error fetching journal entry" });
+    if (error && error.code !== "PGRST116") {
+      console.error("Database error (freeform):", error);
+      return res
+        .status(500)
+        .json({ message: "Error fetching journal entry from freeform" });
+    }
+
+    // fetching from guided_journaling_table
+    if (!data) {
+      ({ data, error } = await supabase
+        .from("guided_journaling_table")
+        .select("*")
+        .eq("journal_id", id)
+        .single());
+
+      if (error) {
+        console.error("Database error (guided):", error);
+        return res
+          .status(500)
+          .json({ message: "Error fetching journal entry from guided" });
+      }
     }
 
     if (!data) {
-      return res.status(404).json({ message: "Journal entry not found" });
+      return res
+        .status(404)
+        .json({ message: "Journal entry not found in both tables" });
     }
 
     res.status(200).json({

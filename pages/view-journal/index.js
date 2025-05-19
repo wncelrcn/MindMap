@@ -274,66 +274,45 @@ export default function ViewJournal({ user }) {
             color: "#2D1B6B",
             lineHeight: "normal",
             fontFamily: poppins.style.fontFamily,
-            mb: 2,
+            mb: 4,
+            mt: 8,
           }}
         >
           Full Journal Entry
         </Typography>
 
-        <Box sx={{ marginBottom: "2rem" }}>
-          <Typography
-            sx={{
-              fontSize: "1rem",
-              color: "#4A3E8E",
-              lineHeight: 1.6,
-              fontFamily: poppins.style.fontFamily,
-              whiteSpace: "pre-wrap",
-              fontStyle: journalData?.journal_entry?.default
-                ? "normal"
-                : "italic",
-              marginBottom: "1.5rem",
-            }}
-          >
-            {journalData?.journal_entry?.default || "No content available"}
-          </Typography>
-        </Box>
-
-        {Object.entries(journalData?.journal_entry || {}).map(
-          ([key, value]) => {
-            if (key === "default") return null;
-
-            return (
-              <Box key={key} sx={{ marginBottom: "2rem" }}>
-                <Typography
-                  sx={{
-                    fontSize: "1.5rem",
-                    fontWeight: 500,
-                    color: "#2D1B6B",
-                    lineHeight: "normal",
-                    fontFamily: poppins.style.fontFamily,
-                    marginBottom: "1.5rem",
-                  }}
-                >
-                  {key}
-                </Typography>
-
-                <Typography
-                  sx={{
-                    fontSize: "1rem",
-                    color: "#4A3E8E",
-                    lineHeight: 1.6,
-                    fontFamily: poppins.style.fontFamily,
-                    whiteSpace: "pre-wrap",
-                    fontStyle: value ? "normal" : "italic",
-                    marginBottom: "1.5rem",
-                  }}
-                >
-                  {value || "No content available"}
-                </Typography>
-              </Box>
-            );
-          }
-        )}
+        {(Array.isArray(journalData?.journal_entry)
+          ? journalData.journal_entry
+          : []
+        ).map((item, idx) => (
+          <Box key={idx} sx={{ marginBottom: "2rem" }}>
+            <Typography
+              sx={{
+                fontSize: "1.5rem",
+                fontWeight: 500,
+                color: "#2D1B6B",
+                lineHeight: "normal",
+                fontFamily: poppins.style.fontFamily,
+                marginBottom: "1.5rem",
+              }}
+            >
+              {item.question}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: "1rem",
+                color: "#4A3E8E",
+                lineHeight: 1.6,
+                fontFamily: poppins.style.fontFamily,
+                whiteSpace: "pre-wrap",
+                fontStyle: item.answer ? "normal" : "italic",
+                marginBottom: "1.5rem",
+              }}
+            >
+              {item.answer || "No answer provided"}
+            </Typography>
+          </Box>
+        ))}
       </Box>
     </>
   );

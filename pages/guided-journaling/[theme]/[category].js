@@ -1,12 +1,7 @@
 import Head from "next/head";
 import Footer from "@/components/footer";
 import SupportFooter from "@/components/support_footer";
-import {
-  Box,
-  Typography,
-  Container,
-  Button,
-} from "@mui/material";
+import { Box, Typography, Container, Button } from "@mui/material";
 import { Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState } from "react";
 import { requireAuth } from "@/lib/requireAuth";
@@ -42,13 +37,14 @@ export default function CategoryDetails({ user }) {
 
   useEffect(() => {
     const fetchCategoryDetails = async () => {
-      if (!theme || !category) return; // Wait for theme and category to be available
+      if (!theme || !category) return;
 
       try {
         // Fetch the theme and the specific category from Supabase
         const { data, error } = await supabase
           .from("themes")
-          .select(`
+          .select(
+            `
             id,
             name,
             categories (
@@ -57,14 +53,17 @@ export default function CategoryDetails({ user }) {
               about,
               useful_when
             )
-          `)
+          `
+          )
           .eq("name", theme)
-          .eq("categories.name", category) // Filter for the specific category
+          .eq("categories.name", category)
           .single();
 
         if (error) throw error;
         setThemeData(data);
-        const selectedCategory = data.categories.find(cat => cat.name === category);
+        const selectedCategory = data.categories.find(
+          (cat) => cat.name === category
+        );
         setCategoryData(selectedCategory || null);
       } catch (err) {
         setError(err.message);
@@ -83,7 +82,9 @@ export default function CategoryDetails({ user }) {
   return (
     <>
       <Head>
-        <title>MindMap - {themeData.name} - {categoryData.name}</title>
+        <title>
+          MindMap - {themeData.name} - {categoryData.name}
+        </title>
         <meta
           name="description"
           content={`Explore the ${categoryData.name} category under the ${themeData.name} theme for guided journaling.`}
@@ -109,12 +110,12 @@ export default function CategoryDetails({ user }) {
             />
           </Link>
         </Box>
-        
+
         {/* Main Content Container */}
-        <Container 
+        <Container
           maxWidth={false}
-          sx={{ 
-            width: "80%", 
+          sx={{
+            width: "80%",
             mx: "auto",
             pl: { xs: 4, md: 8, lg: 12 },
             pr: { xs: 4, md: 8, lg: 12 },
@@ -123,7 +124,8 @@ export default function CategoryDetails({ user }) {
           {/* Gradient Header */}
           <Box
             sx={{
-              background: "linear-gradient(90deg, #e8bdde 0%, #ded3f3 50%, #bfa4e0 100%)",
+              background:
+                "linear-gradient(90deg, #e8bdde 0%, #ded3f3 50%, #bfa4e0 100%)",
               borderRadius: "16px",
               maxWidth: "100%",
               width: "100%",
@@ -144,7 +146,7 @@ export default function CategoryDetails({ user }) {
             >
               {themeData.name}
             </Typography>
-            
+
             <Typography
               variant="h2"
               component="h1"
@@ -159,7 +161,7 @@ export default function CategoryDetails({ user }) {
             >
               {categoryData.name}
             </Typography>
-            
+
             <Typography
               variant="body1"
               className={`${quicksand.className}`}
@@ -170,14 +172,21 @@ export default function CategoryDetails({ user }) {
                 fontWeight: 400,
               }}
             >
-              A simple {themeData.name.toLowerCase()} practice with four guiding prompts.
+              A simple {themeData.name.toLowerCase()} practice with four guiding
+              prompts.
             </Typography>
           </Box>
-          
+
           {/* Start Writing Button Box */}
           <Button
             component={Box}
-            onClick={() => router.push(`/guided-journaling/${theme}/${encodeURIComponent(category)}/questions`)}
+            onClick={() =>
+              router.push(
+                `/guided-journaling/${theme}/${encodeURIComponent(
+                  category
+                )}/questions`
+              )
+            }
             sx={{
               backgroundColor: "#F9F8FE",
               borderRadius: "8px",
@@ -262,7 +271,7 @@ export default function CategoryDetails({ user }) {
                   },
                 }}
               >
-                {categoryData.useful_when.split('\n').map((point, index) => (
+                {categoryData.useful_when.split("\n").map((point, index) => (
                   <Typography
                     key={index}
                     component="li"

@@ -1,5 +1,14 @@
 import Navbar from "@/components/navbar";
-import { Box, TextField, Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Typography,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+} from "@mui/material";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -53,7 +62,8 @@ export default function Questions({ user }) {
         // Fetch the theme, category, and its question sets from Supabase
         const { data, error } = await supabase
           .from("themes")
-          .select(`
+          .select(
+            `
             id,
             name,
             categories (
@@ -65,7 +75,8 @@ export default function Questions({ user }) {
                 questions
               )
             )
-          `)
+          `
+          )
           .eq("name", theme)
           .eq("categories.name", category)
           .single();
@@ -75,7 +86,9 @@ export default function Questions({ user }) {
         // Store theme ID for later use
         setThemeId(data.id);
 
-        const selectedCategory = data.categories.find(cat => cat.name === category);
+        const selectedCategory = data.categories.find(
+          (cat) => cat.name === category
+        );
         if (!selectedCategory || !selectedCategory.question_sets.length) {
           throw new Error("No question sets found for this category.");
         }
@@ -84,33 +97,44 @@ export default function Questions({ user }) {
         setCategoryId(selectedCategory.id);
 
         // Randomly select one question set from the available sets
-        const randomSetIndex = Math.floor(Math.random() * selectedCategory.question_sets.length);
+        const randomSetIndex = Math.floor(
+          Math.random() * selectedCategory.question_sets.length
+        );
         const selectedSet = selectedCategory.question_sets[randomSetIndex];
-        
+
         // Store question set ID for later use
         setQuestionSetId(selectedSet.id);
-        
+
         // Debug to understand the structure of the data
         console.log("Selected set:", selectedSet);
-        
+
         // Extract questions correctly based on the actual structure
         let questions = [];
-        if (selectedSet.questions && Array.isArray(selectedSet.questions.questions)) {
+        if (
+          selectedSet.questions &&
+          Array.isArray(selectedSet.questions.questions)
+        ) {
           questions = selectedSet.questions.questions;
-        } else if (selectedSet.questions && typeof selectedSet.questions === 'object') {
+        } else if (
+          selectedSet.questions &&
+          typeof selectedSet.questions === "object"
+        ) {
           // Handle case where questions might be directly in the object
           questions = selectedSet.questions.questions || [];
         } else if (Array.isArray(selectedSet.questions)) {
           questions = selectedSet.questions;
         }
-        
+
         // Set the questions and initialize answers
         setQuestionSet(questions);
         setAnswers(
-          questions.reduce((acc, _, index) => ({
-            ...acc,
-            [`question${index + 1}`]: "",
-          }), {})
+          questions.reduce(
+            (acc, _, index) => ({
+              ...acc,
+              [`question${index + 1}`]: "",
+            }),
+            {}
+          )
         );
       } catch (err) {
         console.error("Error fetching question set:", err);
@@ -125,7 +149,10 @@ export default function Questions({ user }) {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (Date.now() - lastActivity >= 2000 && answers[`question${currentQuestionIndex + 1}`]) {
+      if (
+        Date.now() - lastActivity >= 2000 &&
+        answers[`question${currentQuestionIndex + 1}`]
+      ) {
         setShowButtons(true);
       }
     }, 2000);
@@ -140,10 +167,12 @@ export default function Questions({ user }) {
   // Check if there are any answers entered
   useEffect(() => {
     const checkForChanges = () => {
-      const hasAnswer = Object.values(answers).some(answer => answer.trim() !== "");
+      const hasAnswer = Object.values(answers).some(
+        (answer) => answer.trim() !== ""
+      );
       setHasChanges(hasAnswer);
     };
-    
+
     checkForChanges();
   }, [answers]);
 
@@ -152,35 +181,36 @@ export default function Questions({ user }) {
     // Handle route change start
     const handleRouteChangeStart = (url) => {
       // If there are changes and it's not an explicit finish action
-      if (hasChanges && !url.includes('/dashboard?completed=true')) {
+      if (hasChanges && !url.includes("/dashboard?completed=true")) {
         // Store the destination URL
         setExitDestination(url);
         // Show the dialog
         setShowExitDialog(true);
         // Prevent default navigation behavior
-        router.events.emit('routeChangeError');
+        router.events.emit("routeChangeError");
         // Keep the URL the same
-        throw 'routeChange aborted to show dialog';
+        throw "routeChange aborted to show dialog";
       }
     };
 
     // Handle browser's back/forward buttons and window close
     const handleBeforeUnload = (e) => {
       if (hasChanges) {
-        const message = "You have unsaved changes. Are you sure you want to leave?";
+        const message =
+          "You have unsaved changes. Are you sure you want to leave?";
         e.returnValue = message;
         return message;
       }
     };
 
     // Add event listeners
-    router.events.on('routeChangeStart', handleRouteChangeStart);
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    router.events.on("routeChangeStart", handleRouteChangeStart);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     // Cleanup event listeners
     return () => {
-      router.events.off('routeChangeStart', handleRouteChangeStart);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      router.events.off("routeChangeStart", handleRouteChangeStart);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [hasChanges, router]);
 
@@ -193,7 +223,7 @@ export default function Questions({ user }) {
   };
 
   const handleAnswerChange = (index, value) => {
-    setAnswers(prev => ({
+    setAnswers((prev) => ({
       ...prev,
       [`question${index + 1}`]: value,
     }));
@@ -202,7 +232,7 @@ export default function Questions({ user }) {
 
   const handleNextQuestion = () => {
     if (currentQuestionIndex < questionSet.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
+      setCurrentQuestionIndex((prev) => prev + 1);
       setShowButtons(false);
     }
   };
@@ -219,21 +249,23 @@ export default function Questions({ user }) {
   const handleFinishEntry = async () => {
     try {
       // Check if at least one answer is provided
-      const hasContent = Object.values(answers).some(answer => answer.trim());
+      const hasContent = Object.values(answers).some((answer) => answer.trim());
       if (!hasContent) {
         setError("Please answer at least one question before saving.");
         return;
       }
 
-      // Create a structured journalData object with questions and answers
-      const journalData = {};
+      // Create a structured journalData array with ordered questions and answers
+      const journalData = [];
       questionSet.forEach((question, index) => {
-        journalData[`question${index + 1}`] = {
-          question: question,
-          answer: answers[`question${index + 1}`] || ""
-        };
+        if (answers[`question${index + 1}`]?.trim()) {
+          journalData.push({
+            question,
+            answer: answers[`question${index + 1}`].trim(),
+          });
+        }
       });
-      
+
       console.log("Saving journal entry:", {
         user_id: userId,
         theme_id: themeId,
@@ -242,7 +274,7 @@ export default function Questions({ user }) {
         journal_entry: journalData,
         title: title.trim() || "Untitled Entry",
       });
-      
+
       // First try direct Supabase insertion if API route is not yet implemented
       try {
         const { data, error } = await supabase
@@ -254,22 +286,25 @@ export default function Questions({ user }) {
             question_set_id: questionSetId,
             journal_entry: journalData,
             title: title.trim() || "Untitled Entry",
-            date_created: new Date().toISOString().split('T')[0],
-            time_created: new Date().toTimeString().split(' ')[0]
+            date_created: new Date().toISOString().split("T")[0],
+            time_created: new Date().toTimeString().split(" ")[0],
           })
           .select();
-          
+
         if (error) throw error;
-        
+
         // Reset hasChanges to prevent the warning dialog
         setHasChanges(false);
         router.push("/dashboard?completed=true");
         return;
       } catch (directDbError) {
-        console.log("Direct DB insertion failed, trying API route", directDbError);
+        console.log(
+          "Direct DB insertion failed, trying API route",
+          directDbError
+        );
         // Continue to API route if direct insertion fails
       }
-      
+
       // Add the API endpoint for guided journaling
       const res = await fetch("/api/create-journal/guided", {
         method: "POST",
@@ -285,11 +320,11 @@ export default function Questions({ user }) {
       });
 
       const data = await res.json();
-      
+
       if (!res.ok) {
         throw new Error(data.message || "Failed to create entry");
       }
-      
+
       // Reset hasChanges to prevent the warning dialog
       setHasChanges(false);
       router.push("/dashboard?completed=true");
@@ -320,58 +355,74 @@ export default function Questions({ user }) {
   // Custom back button handler
   const handleBackButtonClick = () => {
     if (hasChanges) {
-      setExitDestination(`/guided-journaling/${theme}/${encodeURIComponent(category)}`);
+      setExitDestination(
+        `/guided-journaling/${theme}/${encodeURIComponent(category)}`
+      );
       setShowExitDialog(true);
     } else {
-      router.push(`/guided-journaling/${theme}/${encodeURIComponent(category)}`);
+      router.push(
+        `/guided-journaling/${theme}/${encodeURIComponent(category)}`
+      );
     }
   };
 
   // Display additional debugging information when there's an error
   if (loading) return <div>Loading...</div>;
-  if (error) return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h6" color="error">Error: {error}</Typography>
-      <Button 
-        variant="contained" 
-        onClick={() => router.back()}
-        sx={{ mt: 2, backgroundColor: "#4E2BBD" }}
-      >
-        Go Back
-      </Button>
-      {process.env.NODE_ENV !== 'production' && (
-        <Box sx={{ mt: 3, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
-          <Typography variant="subtitle2">Debug Info:</Typography>
-          <Typography variant="body2">Theme: {theme}</Typography>
-          <Typography variant="body2">Category: {category}</Typography>
-          <Typography variant="body2">Theme ID: {themeId}</Typography>
-          <Typography variant="body2">Category ID: {categoryId}</Typography>
-        </Box>
-      )}
-    </Box>
-  );
-  if (!questionSet.length) return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h6">No questions available for this category.</Typography>
-      <Button 
-        variant="contained" 
-        onClick={() => router.back()}
-        sx={{ mt: 2, backgroundColor: "#4E2BBD" }}
-      >
-        Go Back
-      </Button>
-      {process.env.NODE_ENV !== 'production' && (
-        <Box sx={{ mt: 3, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
-          <Typography variant="subtitle2">Debug Info:</Typography>
-          <Typography variant="body2">Theme: {theme}</Typography>
-          <Typography variant="body2">Category: {category}</Typography>
-          <Typography variant="body2">Theme ID: {themeId}</Typography>
-          <Typography variant="body2">Category ID: {categoryId}</Typography>
-          <Typography variant="body2">QuestionSet: {JSON.stringify(questionSet)}</Typography>
-        </Box>
-      )}
-    </Box>
-  );
+  if (error)
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h6" color="error">
+          Error: {error}
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={() => router.back()}
+          sx={{ mt: 2, backgroundColor: "#4E2BBD" }}
+        >
+          Go Back
+        </Button>
+        {process.env.NODE_ENV !== "production" && (
+          <Box
+            sx={{ mt: 3, p: 2, backgroundColor: "#f5f5f5", borderRadius: 1 }}
+          >
+            <Typography variant="subtitle2">Debug Info:</Typography>
+            <Typography variant="body2">Theme: {theme}</Typography>
+            <Typography variant="body2">Category: {category}</Typography>
+            <Typography variant="body2">Theme ID: {themeId}</Typography>
+            <Typography variant="body2">Category ID: {categoryId}</Typography>
+          </Box>
+        )}
+      </Box>
+    );
+  if (!questionSet.length)
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h6">
+          No questions available for this category.
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={() => router.back()}
+          sx={{ mt: 2, backgroundColor: "#4E2BBD" }}
+        >
+          Go Back
+        </Button>
+        {process.env.NODE_ENV !== "production" && (
+          <Box
+            sx={{ mt: 3, p: 2, backgroundColor: "#f5f5f5", borderRadius: 1 }}
+          >
+            <Typography variant="subtitle2">Debug Info:</Typography>
+            <Typography variant="body2">Theme: {theme}</Typography>
+            <Typography variant="body2">Category: {category}</Typography>
+            <Typography variant="body2">Theme ID: {themeId}</Typography>
+            <Typography variant="body2">Category ID: {categoryId}</Typography>
+            <Typography variant="body2">
+              QuestionSet: {JSON.stringify(questionSet)}
+            </Typography>
+          </Box>
+        )}
+      </Box>
+    );
 
   return (
     <>
@@ -489,45 +540,49 @@ export default function Questions({ user }) {
           </Typography>
 
           {/* Display all questions up to the current index */}
-          {questionSet.slice(0, currentQuestionIndex + 1).map((question, index) => (
-            <Box key={index} sx={{ marginBottom: "2rem" }}>
-              <Typography
-                sx={{
-                  fontSize: "1.5rem",
-                  fontWeight: 500,
-                  color: "#2D1B6B",
-                  lineHeight: "normal",
-                  fontFamily: poppins.style.fontFamily,
-                  marginBottom: "1.5rem",
-                }}
-              >
-                {question}
-              </Typography>
-
-              <TextField
-                multiline
-                fullWidth
-                minRows={5}
-                placeholder="Type your thoughts..."
-                variant="standard"
-                value={answers[`question${index + 1}`] || ""}
-                onChange={(e) => handleAnswerChange(index, e.target.value)}
-                InputProps={{
-                  disableUnderline: true,
-                  style: {
-                    fontStyle: answers[`question${index + 1}`] ? "normal" : "italic",
-                    fontSize: "1rem",
-                    color: "#4A3E8E",
+          {questionSet
+            .slice(0, currentQuestionIndex + 1)
+            .map((question, index) => (
+              <Box key={index} sx={{ marginBottom: "2rem" }}>
+                <Typography
+                  sx={{
+                    fontSize: "1.5rem",
+                    fontWeight: 500,
+                    color: "#2D1B6B",
+                    lineHeight: "normal",
                     fontFamily: poppins.style.fontFamily,
-                  },
-                }}
-                sx={{
-                  fontFamily: poppins.style.fontFamily,
-                  marginBottom: "1.5rem",
-                }}
-              />
-            </Box>
-          ))}
+                    marginBottom: "1.5rem",
+                  }}
+                >
+                  {question}
+                </Typography>
+
+                <TextField
+                  multiline
+                  fullWidth
+                  minRows={5}
+                  placeholder="Type your thoughts..."
+                  variant="standard"
+                  value={answers[`question${index + 1}`] || ""}
+                  onChange={(e) => handleAnswerChange(index, e.target.value)}
+                  InputProps={{
+                    disableUnderline: true,
+                    style: {
+                      fontStyle: answers[`question${index + 1}`]
+                        ? "normal"
+                        : "italic",
+                      fontSize: "1rem",
+                      color: "#4A3E8E",
+                      fontFamily: poppins.style.fontFamily,
+                    },
+                  }}
+                  sx={{
+                    fontFamily: poppins.style.fontFamily,
+                    marginBottom: "1.5rem",
+                  }}
+                />
+              </Box>
+            ))}
 
           {currentQuestionIndex < questionSet.length - 1 && showButtons && (
             <Box
@@ -633,23 +688,29 @@ export default function Questions({ user }) {
         aria-labelledby="exit-dialog-title"
         aria-describedby="exit-dialog-description"
       >
-        <DialogTitle id="exit-dialog-title" sx={{ 
-          fontFamily: poppins.style.fontFamily,
-          fontWeight: 600,
-          color: "#2D1B6B"
-        }}>
+        <DialogTitle
+          id="exit-dialog-title"
+          sx={{
+            fontFamily: poppins.style.fontFamily,
+            fontWeight: 600,
+            color: "#2D1B6B",
+          }}
+        >
           Unsaved Changes
         </DialogTitle>
         <DialogContent>
-          <Typography sx={{ 
-            fontFamily: poppins.style.fontFamily,
-            color: "#4A3E8E"
-          }}>
-            You have unsaved content in your journal entry. Leaving this page will cause your work to be lost. Are you sure you want to leave?
+          <Typography
+            sx={{
+              fontFamily: poppins.style.fontFamily,
+              color: "#4A3E8E",
+            }}
+          >
+            You have unsaved content in your journal entry. Leaving this page
+            will cause your work to be lost. Are you sure you want to leave?
           </Typography>
         </DialogContent>
         <DialogActions sx={{ padding: "1rem" }}>
-          <Button 
+          <Button
             onClick={handleCancelExit}
             sx={{
               backgroundColor: "#E2DDF9",
@@ -664,7 +725,7 @@ export default function Questions({ user }) {
           >
             Stay on Page
           </Button>
-          <Button 
+          <Button
             onClick={handleConfirmExit}
             sx={{
               backgroundColor: "#4E2BBD",
@@ -675,7 +736,7 @@ export default function Questions({ user }) {
               padding: "0.75rem 1.5rem",
               boxShadow: "none",
               fontFamily: poppins.style.fontFamily,
-              ml: 2
+              ml: 2,
             }}
           >
             Leave Without Saving
