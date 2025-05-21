@@ -12,6 +12,7 @@ import {
   useMediaQuery,
   useTheme,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState } from "react";
@@ -53,6 +54,7 @@ export default function Profile({ user }) {
   );
   const [aboutMe, setAboutMe] = useState("");
   const [isFlipped, setIsFlipped] = useState(false);
+  const [loading, setLoading] = useState(true);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -63,7 +65,6 @@ export default function Profile({ user }) {
           const { data, error } = await supabase
             .from("user_table")
             .select("username, profile_pic_url, about_me")
-
             .eq("email", user.email)
             .single();
 
@@ -78,7 +79,11 @@ export default function Profile({ user }) {
           }
         } catch (error) {
           console.error("Failed to fetch user data:", error);
+        } finally {
+          setLoading(false);
         }
+      } else {
+        setLoading(false);
       }
     };
 
@@ -99,12 +104,16 @@ export default function Profile({ user }) {
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/assets/logo.png" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        />
       </Head>
       <Box
         display="flex"
         flexDirection="column"
         minHeight="100vh"
-        sx={{ backgroundColor: "#f8f9fa" }}
+        sx={{ backgroundColor: "#FFFFFF" }}
       >
         <Navbar />
 
@@ -114,13 +123,40 @@ export default function Profile({ user }) {
             flexGrow: 1,
             py: 5,
             px: { xs: 1, md: 1 },
+            position: "relative",
           }}
         >
+          {loading && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "rgba(255, 255, 255, 1)",
+                zIndex: 10,
+              }}
+            >
+              <CircularProgress
+                size={60}
+                thickness={4}
+                sx={{
+                  color: "#5C35C2",
+                  marginTop: "-300px",
+                }}
+              />
+            </Box>
+          )}
+
           <Box
             sx={{
               display: "flex",
               flexDirection: { xs: "column", md: "row" },
-              gap: { xs: 6, md: 10 },
+              gap: { xs: 3, sm: 4, md: 10 },
               maxWidth: "1300px",
               mx: "auto",
             }}
@@ -129,11 +165,12 @@ export default function Profile({ user }) {
             <Box
               sx={{
                 flex: "0 0 auto",
-                maxWidth: { xs: "100%", md: "42%" },
+                maxWidth: { xs: "100%", md: "35%" },
                 position: "relative",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                mb: { xs: 4, md: 0 },
               }}
             >
               {/* Edit Profile Button */}
@@ -155,7 +192,7 @@ export default function Profile({ user }) {
                 <Typography
                   sx={{
                     mr: 1,
-                    fontSize: "0.5rem",
+                    fontSize: "0.75rem",
                     fontFamily: poppins.style.fontFamily,
                   }}
                 >
@@ -168,11 +205,11 @@ export default function Profile({ user }) {
               <Box
                 sx={{
                   position: "relative",
-                  width: 220,
-                  height: 220,
+                  width: { xs: 180, sm: 200, md: 220 },
+                  height: { xs: 180, sm: 200, md: 220 },
                   borderRadius: "50%",
                   overflow: "hidden",
-                  backgroundColor: "#f5f5f7",
+                  backgroundColor: "#ffffff",
                   mb: 3,
                   mx: "auto",
                 }}
@@ -191,9 +228,9 @@ export default function Profile({ user }) {
                 component="h1"
                 align="center"
                 sx={{
-                  fontFamily: raleway.style.fontFamily,
+                  fontFamily: poppins.style.fontFamily,
                   fontWeight: 700,
-                  fontSize: { xs: "3rem", md: "4rem" },
+                  fontSize: { xs: "2rem", md: "4rem" },
                   mb: 3,
                   background:
                     "linear-gradient(90deg, #5C35C2 0%, #ED6D6C 100%)",
@@ -206,26 +243,27 @@ export default function Profile({ user }) {
               </Typography>
 
               {/* About Me Section */}
-              <Box sx={{ mb: 4, textAlign: "center", px: 2 }}>
+              <Box sx={{ mb: { xs: 2, md: 4 }, textAlign: "center", px: 2 }}>
                 <Typography
                   variant="h5"
                   sx={{
-                    fontFamily: raleway.style.fontFamily,
-                    color: "#555",
-                    mb: 2,
+                    fontFamily: poppins.style.fontFamily,
+                    color: "#2D1B6B",
+                    mb: { xs: 1, md: 2 },
+                    mt: { xs: 1, md: 2 },
                     textAlign: "center",
-                    fontSize: "1.75rem",
+                    fontSize: { xs: "1.3rem", md: "1.5rem" },
                   }}
                 >
                   About Me
                 </Typography>
                 <Typography
                   sx={{
-                    fontFamily: quicksand.style.fontFamily,
-                    color: "#555",
+                    fontFamily: poppins.style.fontFamily,
+                    color: "#2D1B6B",
                     lineHeight: 1.6,
                     textAlign: "center",
-                    fontSize: "0.9rem",
+                    fontSize: { xs: "0.9rem", md: "1rem" },
                   }}
                 >
                   {aboutMe}
@@ -242,7 +280,7 @@ export default function Profile({ user }) {
                   fontFamily: raleway.style.fontFamily,
                   fontWeight: "bold",
                   color: "#5C35C2",
-                  mb: 2,
+                  mb: { xs: 1.5, md: 2 },
                   fontSize: "1rem",
                 }}
               >
@@ -253,8 +291,8 @@ export default function Profile({ user }) {
                 sx={{
                   display: "flex",
                   flexDirection: { xs: "column", sm: "row" },
-                  gap: 3,
-                  mb: 5,
+                  gap: { xs: 2, sm: 3 },
+                  mb: { xs: 3, sm: 5 },
                 }}
               >
                 {/* Personality Card */}
@@ -483,84 +521,122 @@ export default function Profile({ user }) {
                     </Stack>
                   </Box>
 
-                  {/* Mascot and Discover More */}
                   <Box
                     sx={{
                       display: "flex",
-                      flexDirection: { xs: "column", sm: "row" },
-                      gap: 3,
+                      flexDirection: "row",
+                      gap: { xs: 2, sm: 3 },
                       flex: 1,
                     }}
                   >
-                    {/* Mascot Card */}
-                    <Box
-                      sx={{
-                        flex: 1,
-                        backgroundColor: "#f5f5f7",
-                        borderRadius: 4,
-                        p: 2,
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        aspectRatio: "1/1",
-                      }}
-                    >
-                      <Box
-                        sx={{ width: 120, height: 120, position: "relative" }}
-                      >
-                        <Image
-                          src="/assets/image 50.png"
-                          alt="Mascot"
-                          fill
-                          style={{ objectFit: "contain" }}
-                        />
-                      </Box>
-                    </Box>
-
-                    {/* Discover More Card */}
+                    {/* Total Journal Entries Card */}
                     <Box
                       sx={{
                         flex: 1,
                         backgroundColor: "#5C35C2",
                         borderRadius: 4,
-                        p: 2.5,
+                        p: { xs: 1, sm: 1.5, md: 2 },
                         display: "flex",
-                        flexDirection: "column",
                         justifyContent: "center",
+                        alignItems: "center",
+                        minHeight: { xs: "120px", sm: "auto" },
+                        maxWidth: { xs: "49%", sm: "none" },
                         color: "white",
-                        aspectRatio: "1/1",
+                        flexDirection: "column",
                       }}
                     >
                       <Typography
-                        variant="h4"
+                        variant="h6"
+                        sx={{
+                          fontFamily: poppins.style.fontFamily,
+                          fontWeight: 600,
+                          mb: { xs: 1, sm: 2, md: 3 },
+                          fontSize: { xs: "0.9rem", sm: "1rem" },
+                          textAlign: "center",
+                        }}
+                      >
+                        Journal Entries
+                      </Typography>
+
+                      <Typography
+                        variant="h1"
                         sx={{
                           fontFamily: poppins.style.fontFamily,
                           fontWeight: 700,
-                          textAlign: "right",
-                          mb: 3,
-                          fontSize: "1.5rem",
+                          fontSize: { xs: "3.5rem", sm: "5rem", md: "6.5rem" },
+                          lineHeight: 1,
                         }}
                       >
-                        Discover More
+                        5
+                      </Typography>
+                    </Box>
+
+                    {/* Streak Score Card */}
+                    <Box
+                      sx={{
+                        flex: 1,
+                        backgroundColor: "#5C35C2",
+                        borderRadius: 4,
+                        p: { xs: 1, sm: 1.5, md: 2 },
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        minHeight: { xs: "120px", sm: "auto" },
+                        maxWidth: { xs: "49%", sm: "none" },
+                        color: "white",
+                        flexDirection: "column",
+                      }}
+                    >
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          fontFamily: poppins.style.fontFamily,
+                          fontWeight: 600,
+                          mb: { xs: 1, sm: 2, md: 3 },
+                          fontSize: { xs: "0.9rem", sm: "1rem" },
+                        }}
+                      >
+                        Streak Score
                       </Typography>
 
-                      <Button
-                        variant="contained"
+                      <Typography
+                        variant="h1"
                         sx={{
-                          backgroundColor: "#FBF7C0",
-                          color: "#555",
                           fontFamily: poppins.style.fontFamily,
-                          borderRadius: 5,
-                          px: 2.5,
-                          py: 0.5,
-                          fontSize: "0.5rem",
-                          "&:hover": {
-                            backgroundColor: "#F0EDB0",
-                          },
+                          fontWeight: 700,
+                          fontSize: { xs: "2.8rem", sm: "3.5rem", md: "4rem" },
+                          lineHeight: 1,
                         }}
                       >
-                        Read here
-                      </Button>
+                        10
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          mt: 2,
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          fill="currentColor"
+                          className="bi bi-fire"
+                          viewBox="0 0 16 16"
+                        >
+                          <path d="M8 16c3.314 0 6-2 6-5.5 0-1.5-.5-4-2.5-6 .25 1.5-1.25 2-1.25 2C11 4 9 .5 6 0c.357 2 .5 4-2 6-1.25 1-2 2.729-2 4.5C2 14 4.686 16 8 16m0-1c-1.657 0-3-1-3-2.75 0-.75.25-2 1.25-3C6.125 10 7 10.5 7 10.5c-.375-1.25.5-3.25 2-3.5-.179 1-.25 2 1 3 .625.5 1 1.364 1 2.25C11 14 9.657 15 8 15" />
+                        </svg>
+                        <Typography
+                          sx={{
+                            fontFamily: poppins.style.fontFamily,
+                            ml: 1,
+                            fontSize: { xs: "0.7rem", sm: "0.9rem" },
+                          }}
+                        >
+                          All Time High: 7
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
                 </Box>
@@ -574,6 +650,7 @@ export default function Profile({ user }) {
                   color: "#5C35C2",
                   fontWeight: "bold",
                   mb: 2,
+                  mt: { xs: 4, md: 2 },
                   fontSize: "1rem",
                 }}
               >
@@ -587,15 +664,21 @@ export default function Profile({ user }) {
                     xs: "repeat(1, 1fr)",
                     sm: "repeat(2, 1fr)",
                   },
-                  gap: 3,
+                  gap: { xs: 2, sm: 3 },
                   "& img": { maxWidth: "100%" },
                 }}
               >
-                <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    mb: { xs: 2, sm: 0 },
+                  }}
+                >
                   <Box
                     sx={{
-                      width: 100,
-                      height: 100,
+                      width: { xs: 70, sm: 100 },
+                      height: { xs: 70, sm: 100 },
                       mr: 2,
                       position: "relative",
                       flexShrink: 0,
@@ -615,7 +698,7 @@ export default function Profile({ user }) {
                         fontFamily: poppins.style.fontFamily,
                         color: "#5C35C2",
                         fontWeight: 600,
-                        fontSize: "1rem",
+                        fontSize: { xs: "0.9rem", sm: "1rem" },
                       }}
                     >
                       John's Mindfulness Practice
@@ -625,7 +708,7 @@ export default function Profile({ user }) {
                       sx={{
                         fontFamily: quicksand.style.fontFamily,
                         color: "#777",
-                        fontSize: "0.9rem",
+                        fontSize: { xs: "0.8rem", sm: "0.9rem" },
                       }}
                     >
                       January
@@ -634,11 +717,17 @@ export default function Profile({ user }) {
                 </Box>
 
                 {/* Badge 2 - Journal Master */}
-                <Box sx={{ display: "flex", alignItems: "center" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    mb: { xs: 2, sm: 0 },
+                  }}
+                >
                   <Box
                     sx={{
-                      width: 100,
-                      height: 100,
+                      width: { xs: 70, sm: 100 },
+                      height: { xs: 70, sm: 100 },
                       mr: 2,
                       position: "relative",
                       flexShrink: 0,
@@ -658,7 +747,7 @@ export default function Profile({ user }) {
                         fontFamily: poppins.style.fontFamily,
                         color: "#5C35C2",
                         fontWeight: 600,
-                        fontSize: "1rem",
+                        fontSize: { xs: "0.9rem", sm: "1rem" },
                       }}
                     >
                       Journal Master
@@ -668,7 +757,7 @@ export default function Profile({ user }) {
                       sx={{
                         fontFamily: quicksand.style.fontFamily,
                         color: "#777",
-                        fontSize: "0.9rem",
+                        fontSize: { xs: "0.8rem", sm: "0.9rem" },
                       }}
                     >
                       January
@@ -680,12 +769,16 @@ export default function Profile({ user }) {
                 {[...Array(4)].map((_, index) => (
                   <Box
                     key={index}
-                    sx={{ display: "flex", alignItems: "center" }}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      mb: { xs: 2, sm: index < 2 ? 2 : 0 },
+                    }}
                   >
                     <Box
                       sx={{
-                        width: 100,
-                        height: 100,
+                        width: { xs: 70, sm: 100 },
+                        height: { xs: 70, sm: 100 },
                         mr: 2,
                         position: "relative",
                         flexShrink: 0,
@@ -705,7 +798,7 @@ export default function Profile({ user }) {
                           fontFamily: poppins.style.fontFamily,
                           color: "#5C35C2",
                           fontWeight: 600,
-                          fontSize: "1rem",
+                          fontSize: { xs: "0.9rem", sm: "1rem" },
                         }}
                       >
                         Complete your Goals to Unlock the Badge
