@@ -15,21 +15,27 @@ export default function SupportFooter() {
       className={poppins.className}
       sx={{
         backgroundColor: "#f8f6ff",
-        padding: { xs: "2rem", md: "4rem 8rem" },
+        padding: { xs: "1.5rem", sm: "2rem", md: "4rem 8rem" },
         display: "flex",
-        flexWrap: "wrap",
+        flexDirection: { xs: "column", md: "row" },
         justifyContent: "space-between",
-        alignItems: "flex-start",
-        gap: "60px",
+        alignItems: { xs: "center", md: "flex-start" },
+        gap: { xs: "2rem", sm: "3rem", md: "60px" },
         color: "#2f2361",
       }}
     >
       {/* Left Section */}
-      <Box sx={{ maxWidth: "25%", marginRight: { md: "6rem" } }}>
+      <Box
+        sx={{
+          maxWidth: { xs: "100%", md: "25%" },
+          textAlign: { xs: "center", md: "left" },
+          marginRight: { md: "2rem", lg: "6rem" },
+        }}
+      >
         <Typography
           variant="h5"
           sx={{
-            fontSize: "24px",
+            fontSize: { xs: "20px", sm: "24px" },
             fontWeight: 600,
             lineHeight: 1.4,
             mb: "8px",
@@ -38,11 +44,11 @@ export default function SupportFooter() {
         >
           Need Immediate Support?
           <br />
-          You’re Not Alone.
+          You're Not Alone.
         </Typography>
         <Typography
           sx={{
-            fontSize: "16px",
+            fontSize: { xs: "14px", sm: "16px" },
             fontWeight: 600,
             fontFamily: poppins.style.fontFamily,
           }}
@@ -57,13 +63,11 @@ export default function SupportFooter() {
         sx={{
           display: "flex",
           flexDirection: { xs: "column", sm: "row" },
-          gap: { sm: "1rem", md: "2rem", lg: "6rem" },
+          gap: { xs: "1rem", sm: "1.5rem", md: "2rem", lg: "6rem" },
           flex: 1,
-          justifyContent: {
-            xs: "center",
-            sm: "center",
-            md: "flex-end",
-          },
+          justifyContent: { xs: "center", sm: "center", md: "flex-end" },
+          alignItems: "center",
+          width: { xs: "100%", md: "auto" },
         }}
       >
         {/* Hopeline PH */}
@@ -71,7 +75,8 @@ export default function SupportFooter() {
           <Box
             textAlign="center"
             sx={{
-              mb: { xs: 4, sm: 6, md: 8 },
+              mb: { xs: 2, sm: 3, md: 4 },
+              width: "100%",
             }}
           >
             <Image
@@ -86,17 +91,33 @@ export default function SupportFooter() {
                 mt: 1,
                 mb: 0.5,
                 fontFamily: poppins.style.fontFamily,
+                fontSize: { xs: "14px", sm: "16px" },
               }}
             >
               Hopeline PH
             </Typography>
-            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+            <Typography
+              sx={{
+                fontFamily: poppins.style.fontFamily,
+                fontSize: { xs: "13px", sm: "14px" },
+              }}
+            >
               (02) 8804-4673
             </Typography>
-            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+            <Typography
+              sx={{
+                fontFamily: poppins.style.fontFamily,
+                fontSize: { xs: "13px", sm: "14px" },
+              }}
+            >
               0917-558-4673
             </Typography>
-            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+            <Typography
+              sx={{
+                fontFamily: poppins.style.fontFamily,
+                fontSize: { xs: "13px", sm: "14px" },
+              }}
+            >
               0918-873-4673
             </Typography>
           </Box>
@@ -107,7 +128,8 @@ export default function SupportFooter() {
           <Box
             textAlign="center"
             sx={{
-              mb: { xs: 4, sm: 6, md: 8 },
+              mb: { xs: 2, sm: 3, md: 4 },
+              width: "100%",
             }}
           >
             <Image
@@ -122,16 +144,27 @@ export default function SupportFooter() {
                 mt: 1,
                 mb: 0.5,
                 fontFamily: poppins.style.fontFamily,
+                fontSize: { xs: "14px", sm: "16px" },
               }}
             >
               National Center for Mental
               <br />
               Health (DOH-NCMH)
             </Typography>
-            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+            <Typography
+              sx={{
+                fontFamily: poppins.style.fontFamily,
+                fontSize: { xs: "13px", sm: "14px" },
+              }}
+            >
               0919-057-1553
             </Typography>
-            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+            <Typography
+              sx={{
+                fontFamily: poppins.style.fontFamily,
+                fontSize: { xs: "13px", sm: "14px" },
+              }}
+            >
               0966-351-4518
             </Typography>
           </Box>
@@ -139,7 +172,13 @@ export default function SupportFooter() {
 
         {/* In-Touch */}
         <Grid item xs={12} sm={6} md={4}>
-          <Box textAlign="center" sx={{ mb: { xs: 4, sm: 6, md: 8 } }}>
+          <Box
+            textAlign="center"
+            sx={{
+              mb: { xs: 2, sm: 3, md: 4 },
+              width: "100%",
+            }}
+          >
             <Image
               src="/assets/intouch.png"
               alt="In-Touch"
@@ -152,17 +191,33 @@ export default function SupportFooter() {
                 mt: 1,
                 mb: 0.5,
                 fontFamily: poppins.style.fontFamily,
+                fontSize: { xs: "14px", sm: "16px" },
               }}
             >
               In-Touch
             </Typography>
-            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+            <Typography
+              sx={{
+                fontFamily: poppins.style.fontFamily,
+                fontSize: { xs: "13px", sm: "14px" },
+              }}
+            >
               (02) 8893 7603
             </Typography>
-            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+            <Typography
+              sx={{
+                fontFamily: poppins.style.fontFamily,
+                fontSize: { xs: "13px", sm: "14px" },
+              }}
+            >
               0917-800-1123
             </Typography>
-            <Typography sx={{ fontFamily: poppins.style.fontFamily }}>
+            <Typography
+              sx={{
+                fontFamily: poppins.style.fontFamily,
+                fontSize: { xs: "13px", sm: "14px" },
+              }}
+            >
               0919-056-0709
             </Typography>
           </Box>
