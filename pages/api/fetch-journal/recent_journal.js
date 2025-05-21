@@ -1,14 +1,14 @@
 import { supabase } from "@/lib/supabase";
 
 export default async function handler(req, res) {
-  if (req.method !== "GET") {
+  if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
   try {
-    const { user_id } = req.query;
+    const { user_id } = req.body;
 
-    if (!user_id) {
+    if (!user_id || user_id === "undefined") {
       return res.status(400).json({ message: "User ID is required" });
     }
 
@@ -50,16 +50,19 @@ export default async function handler(req, res) {
       })),
     ];
 
+    // Sort by most recent (date and time)
     combinedEntries.sort((a, b) => {
       const aDateTime = new Date(`${a.date_created}T${a.time_created}`);
       const bDateTime = new Date(`${b.date_created}T${b.time_created}`);
-
       return bDateTime - aDateTime;
     });
 
+    // Get only the 4 most recent
+    const recentEntries = combinedEntries.slice(0, 4);
+
     res.status(200).json({
-      message: "Journal entries fetched successfully",
-      entries: combinedEntries,
+      message: "Recent journal entries fetched successfully",
+      entries: recentEntries,
     });
   } catch (error) {
     console.error("Unexpected error:", error);

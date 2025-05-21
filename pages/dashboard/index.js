@@ -9,13 +9,10 @@ import {
   Button,
   Card,
   CardContent,
-  useMediaQuery,
-  useTheme,
 } from "@mui/material";
 import Link from "next/link";
 import Navbar from "@/components/navbar";
 import { requireAuth } from "@/lib/requireAuth";
-import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import RecentJournal from "@/components/recent_journal";
@@ -43,12 +40,28 @@ export async function getServerSideProps(context) {
 
 export default function DashboardPage({ user }) {
   const [username, setUsername] = useState("");
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [recentJournals, setRecentJournals] = useState([]);
 
   useEffect(() => {
     setUsername(user.username);
-  }, [user]);
+    async function fetchRecentJournals() {
+      try {
+        const res = await fetch("/api/fetch-journal/recent_journal", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: user.user_id }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setRecentJournals(data.entries);
+          console.log(data.entries);
+        }
+      } catch (err) {
+        console.error("Failed to fetch recent journals", err);
+      }
+    }
+    fetchRecentJournals();
+  }, [user.id]);
 
   return (
     <>
@@ -283,7 +296,6 @@ export default function DashboardPage({ user }) {
               </Box>
 
               {/* Journal Cards */}
-              {/*
               <Grid
                 container
                 spacing={3}
@@ -301,20 +313,42 @@ export default function DashboardPage({ user }) {
                   px: { xs: 2, sm: 3, md: 1 },
                 }}
               >
-                <Grid item xs={12} sm={6} lg={3}>
-                  <RecentJournal />
-                </Grid>
-                <Grid item xs={12} sm={6} lg={3}>
-                  <RecentJournal />
-                </Grid>
-                <Grid item xs={12} sm={6} lg={3}>
-                  <RecentJournal />
-                </Grid>
-                <Grid item xs={12} sm={6} lg={3}>
-                  <RecentJournal />
-                </Grid>
+                {recentJournals.map((entry) => {
+                  let contentPreview = "";
+                  if (Array.isArray(entry.journal_entry)) {
+                    contentPreview = entry.journal_entry[0]?.answer || "";
+                  } else if (
+                    entry.journal_entry &&
+                    typeof entry.journal_entry === "object"
+                  ) {
+                    contentPreview =
+                      entry.journal_entry.default ||
+                      Object.values(entry.journal_entry)[0] ||
+                      "";
+                  } else if (typeof entry.journal_entry === "string") {
+                    contentPreview = entry.journal_entry;
+                  }
+
+                  return (
+                    <Grid
+                      item
+                      xs={12}
+                      sm={6}
+                      lg={3}
+                      key={entry.journal_id || entry.id}
+                    >
+                      <RecentJournal
+                        journalID={entry.journal_id}
+                        title={entry.title}
+                        content={contentPreview}
+                        date={entry.date_created}
+                        time={entry.time_created}
+                        journalType={entry.journal_type}
+                      />
+                    </Grid>
+                  );
+                })}
               </Grid>
-              */}
             </Box>
           </Container>
         </Box>

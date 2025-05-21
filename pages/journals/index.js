@@ -60,6 +60,7 @@ export default function Journals({ user }) {
 
       if (data.entries) {
         setJournalEntries(data.entries);
+        console.log(data.entries);
       }
     } catch (error) {
       console.error("Error fetching journal entries:", error);
