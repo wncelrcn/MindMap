@@ -232,7 +232,11 @@ export default function Navbar() {
           display: "flex",
           alignItems: "center",
           gap: 1,
-          ml: 4,
+          ml: { xs: "auto", md: 4 },
+          mr: { xs: "auto", md: 0 },
+          flexGrow: { xs: 1, md: 0 },
+          justifyContent: { xs: "center", md: "flex-start" },
+          transform: { xs: "translateX(-16px)", md: "none" },
         }}
       >
         <Image src="/assets/logo.png" alt="Logo" width={45} height={45} />
