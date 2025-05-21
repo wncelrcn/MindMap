@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import { Raleway, Poppins } from "next/font/google";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -37,6 +36,7 @@ export default function RecentJournal({
 
   const handleClick = () => {
     sessionStorage.setItem("currentJournalId", journalID);
+    sessionStorage.setItem("currentJournalType", journalType);
     router.replace("/view-journal");
   };
 

@@ -6,31 +6,30 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log("Request body:", req.body);
-
-    const { id } = req.body;
+    const { id, type } = req.body;
 
     if (!id) {
       return res.status(400).json({ message: "Journal ID is required" });
     }
 
-    console.log("Using ID:", id);
+    let data = null;
+    let error = null;
 
-    // fetching from freeform_journaling_table
-    let { data, error } = await supabase
-      .from("freeform_journaling_table")
-      .select("*")
-      .eq("journal_id", id)
-      .single();
+    if (type === "freeform") {
+      ({ data, error } = await supabase
+        .from("freeform_journaling_table")
+        .select("*")
+        .eq("journal_id", id)
+        .single());
 
-    if (error && error.code !== "PGRST116") {
-      console.error("Database error (freeform):", error);
-      return res
-        .status(500)
-        .json({ message: "Error fetching journal entry from freeform" });
+      if (error && error.code !== "PGRST116") {
+        console.error("Database error (freeform):", error);
+        return res
+          .status(500)
+          .json({ message: "Error fetching journal entry from freeform" });
+      }
     }
 
-    // fetching from guided_journaling_table
     if (!data) {
       ({ data, error } = await supabase
         .from("guided_journaling_table")

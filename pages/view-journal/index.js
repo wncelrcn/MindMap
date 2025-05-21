@@ -55,6 +55,7 @@ export default function ViewJournal({ user }) {
     const fetchJournal = async () => {
       try {
         const currentJournalID = sessionStorage.getItem("currentJournalId");
+        const currentJournalType = sessionStorage.getItem("currentJournalType");
         if (!currentJournalID) {
           setError("No journal ID found");
           setLoading(false);
@@ -62,6 +63,7 @@ export default function ViewJournal({ user }) {
         }
 
         console.log("Sending ID:", currentJournalID);
+        console.log("Sending Type:", currentJournalType);
 
         const response = await fetch(`/api/fetch-journal/id_journal`, {
           method: "POST",
@@ -70,6 +72,7 @@ export default function ViewJournal({ user }) {
           },
           body: JSON.stringify({
             id: currentJournalID,
+            type: currentJournalType,
           }),
         });
         const data = await response.json();

@@ -39,6 +39,7 @@ export default async function handler(req, res) {
         theme_id,
         category_id,
         title,
+        question_set_id,
         journal_entry,
         date_created: new Date().toISOString().split("T")[0],
         time_created: new Date().toTimeString().split(" ")[0],

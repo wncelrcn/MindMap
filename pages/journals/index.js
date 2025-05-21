@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import Navbar from "@/components/navbar";
 import { requireAuth } from "@/lib/requireAuth";
-import { supabase } from "@/lib/supabase";
 import RecentJournal from "@/components/recent_journal";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState } from "react";
@@ -43,35 +42,13 @@ export async function getServerSideProps(context) {
 }
 
 export default function Journals({ user }) {
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(user.username);
   const [journalEntries, setJournalEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const theme = useTheme();
 
   useEffect(() => {
-    const fetchUsername = async () => {
-      if (user && user.email) {
-        try {
-          const { data, error } = await supabase
-            .from("user_table")
-            .select("username, user_id")
-            .eq("email", user.email)
-            .single();
-
-          if (error) {
-            console.error("Error fetching username:", error);
-          } else if (data) {
-            setUsername(data.username);
-            // Fetch journal entries after getting user_id
-            fetchJournalEntries(data.user_id);
-          }
-        } catch (error) {
-          console.error("Failed to fetch username:", error);
-        }
-      }
-    };
-
-    fetchUsername();
+    fetchJournalEntries(user.user_id);
   }, [user]);
 
   const fetchJournalEntries = async (userId) => {
