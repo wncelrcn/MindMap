@@ -35,10 +35,6 @@ export default function RecentJournal({
 }) {
   const router = useRouter();
 
-  useEffect(() => {
-    console.log(journalID);
-  }, [journalID]);
-
   const handleClick = () => {
     sessionStorage.setItem("currentJournalId", journalID);
     router.replace("/view-journal");

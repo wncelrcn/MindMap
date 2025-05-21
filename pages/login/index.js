@@ -51,7 +51,6 @@ export default function Login() {
     if (!res.ok) {
       alert(data.message || "Login failed");
     } else {
-      alert("Login successful!");
       router.push("/dashboard");
     }
   };

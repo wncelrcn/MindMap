@@ -15,7 +15,6 @@ import {
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState } from "react";
 import { requireAuth } from "@/lib/requireAuth";
-import { supabase } from "@/lib/supabase";
 import Navbar from "@/components/navbar";
 import Link from "next/link";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -47,28 +46,7 @@ export default function GuidedJournaling({ user }) {
   const theme = useTheme();
 
   useEffect(() => {
-    const fetchUsername = async () => {
-      if (user && user.email) {
-        try {
-          const { data, error } = await supabase
-            .from("user_table")
-            .select("username")
-            .eq("email", user.email)
-            .single();
-
-          if (error) {
-            console.error("Error fetching username:", error);
-          } else if (data) {
-            setUsername(data.username);
-            console.log("Fetched username:", data.username);
-          }
-        } catch (error) {
-          console.error("Failed to fetch username:", error);
-        }
-      }
-    };
-
-    fetchUsername();
+    setUsername(user.username);
   }, [user]);
 
   const journalingCategories = [
@@ -193,7 +171,11 @@ export default function GuidedJournaling({ user }) {
                   key={index}
                   sx={{ maxWidth: { xs: "360px", md: "360px" } }}
                 >
-                  <Link href={`/guided-journaling/${category.title}`} passHref style={{ textDecoration: "none" }}>
+                  <Link
+                    href={`/guided-journaling/${category.title}`}
+                    passHref
+                    style={{ textDecoration: "none" }}
+                  >
                     <Card
                       sx={{
                         borderRadius: 3,
@@ -202,7 +184,8 @@ export default function GuidedJournaling({ user }) {
                         height: "100%",
                         width: "100%",
                         background: category.gradient,
-                        transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+                        transition:
+                          "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
                         "&:hover": {
                           transform: "translateY(-5px)",
                           boxShadow: "0 10px 20px rgba(0,0,0,0.1)",

@@ -29,7 +29,7 @@ export async function getServerSideProps(context) {
 
 export default function CategoryDetails({ user }) {
   const router = useRouter();
-  const { theme, category } = router.query; // Get theme and category from URL
+  const { theme, category } = router.query;
   const [themeData, setThemeData] = useState(null);
   const [categoryData, setCategoryData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -40,30 +40,15 @@ export default function CategoryDetails({ user }) {
       if (!theme || !category) return;
 
       try {
-        // Fetch the theme and the specific category from Supabase
-        const { data, error } = await supabase
-          .from("themes")
-          .select(
-            `
-            id,
-            name,
-            categories (
-              id,
-              name,
-              about,
-              useful_when
-            )
-          `
-          )
-          .eq("name", theme)
-          .eq("categories.name", category)
-          .single();
-
-        if (error) throw error;
-        setThemeData(data);
-        const selectedCategory = data.categories.find(
-          (cat) => cat.name === category
+        const response = await fetch(
+          `/api/create-journal/category?theme=${theme}&category=${category}`
         );
+        if (!response.ok) {
+          throw new Error("Failed to fetch category data");
+        }
+        const { theme: themeData, category: selectedCategory } =
+          await response.json();
+        setThemeData(themeData);
         setCategoryData(selectedCategory || null);
       } catch (err) {
         setError(err.message);
@@ -129,7 +114,7 @@ export default function CategoryDetails({ user }) {
               borderRadius: "16px",
               maxWidth: "100%",
               width: "100%",
-              mb: 4,
+              mb: 2,
               p: { xs: 3, md: 4 },
             }}
           >
@@ -156,7 +141,7 @@ export default function CategoryDetails({ user }) {
                 fontFamily: poppins.style.fontFamily,
                 color: "#2D1B6B",
                 fontSize: { xs: "2.5rem", md: "3.5rem" },
-                mb: 2,
+                mb: 5,
               }}
             >
               {categoryData.name}
@@ -193,7 +178,8 @@ export default function CategoryDetails({ user }) {
               maxWidth: "100%",
               width: "100%",
               mb: 6,
-              p: 3,
+              pt: 2,
+              pb: 2,
               display: "flex",
               justifyContent: "center",
               alignItems: "center",

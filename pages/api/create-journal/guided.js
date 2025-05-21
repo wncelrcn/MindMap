@@ -6,7 +6,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { user_id, theme_id, category_id, question_set_id, journal_entry, title } = req.body;
+    const {
+      user_id,
+      theme_id,
+      category_id,
+      question_set_id,
+      journal_entry,
+      title,
+    } = req.body;
 
     // Validation
     if (!user_id || !theme_id || !category_id || !journal_entry || !title) {
@@ -33,19 +40,26 @@ export default async function handler(req, res) {
         category_id,
         title,
         journal_entry,
-        date_created: new Date().toISOString().split('T')[0], // YYYY-MM-DD
-        time_created: new Date().toTimeString().split(' ')[0] // HH:MM:SS
+        date_created: new Date().toISOString().split("T")[0],
+        time_created: new Date().toTimeString().split(" ")[0],
       })
       .select();
 
     if (error) {
       console.error("Database error:", error);
-      return res.status(500).json({ message: "Failed to create journal entry", error: error.message });
+      return res.status(500).json({
+        message: "Failed to create journal entry",
+        error: error.message,
+      });
     }
 
-    return res.status(201).json({ message: "Journal entry created successfully", data });
+    return res
+      .status(201)
+      .json({ message: "Journal entry created successfully", data });
   } catch (error) {
     console.error("Server error:", error);
-    return res.status(500).json({ message: "Internal server error", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 }

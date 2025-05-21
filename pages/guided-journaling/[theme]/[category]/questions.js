@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import Head from "next/head";
 import Image from "next/image";
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import { requireAuth } from "@/lib/requireAuth";
 import { useRouter } from "next/router";

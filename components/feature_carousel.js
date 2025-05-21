@@ -1,40 +1,7 @@
 import { Box, Typography } from "@mui/material";
 
 export default function FeatureCarousel({ features }) {
-  // If no features are provided, use these default features
-  const defaultFeatures = [
-    {
-      id: 1,
-      title: "Smart Automation",
-      description:
-        "Automate repetitive tasks and workflows to save time and reduce manual effort.",
-      image: "/assets/feature_automation.png",
-    },
-    {
-      id: 2,
-      title: "Data Analytics",
-      description:
-        "Gain valuable insights with powerful analytics tools that visualize your data.",
-      image: "/assets/feature_analytics.png",
-    },
-    {
-      id: 3,
-      title: "Cloud Storage",
-      description:
-        "Access your files from anywhere with secure and reliable cloud storage solutions.",
-      image: "/assets/feature_storage.png",
-    },
-    {
-      id: 4,
-      title: "24/7 Support",
-      description:
-        "Get help whenever you need it with our round-the-clock customer support team.",
-      image: "/assets/feature_support.png",
-    },
-  ];
-
-  // Use provided features or default ones
-  const displayFeatures = features || defaultFeatures;
+  const displayFeatures = features;
 
   return (
     <Box>

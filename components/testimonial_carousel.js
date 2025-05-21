@@ -14,36 +14,7 @@ export default function TestimonialCarousel({ testimonials }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const carouselRef = useRef(null);
 
-  // Default testimonials if none are provided
-  const defaultTestimonials = [
-    {
-      id: 1,
-      name: "Michael Jones",
-      role: "Mapúa MCL Student",
-      quote:
-        "Using this app daily has significantly improved my productivity and mental well-being...",
-      image: "/assets/testimonials/1.png",
-    },
-    {
-      id: 2,
-      name: "Jane Doe",
-      role: "Mapúa MCL Student",
-      quote:
-        "MindMap has completely changed how I organize my thoughts. Being able to visually map out my ideas reduces my anxiety and helps me achieve my goals.",
-      image: "/assets/testimonials/2.png",
-    },
-    {
-      id: 3,
-      name: "Alex Smith",
-      role: "Mapúa MCL Student",
-      quote:
-        "I've tried many productivity apps, but this one stands out for its intuitive design and helpful features. It's become an essential part of my daily routine.",
-      image: "/assets/testimonials/1.png",
-    },
-  ];
-
-  // Use provided testimonials or default ones
-  const displayTestimonials = testimonials || defaultTestimonials;
+  const displayTestimonials = testimonials;
   const totalTestimonials = displayTestimonials.length;
 
   // Navigate to the next or previous testimonial
