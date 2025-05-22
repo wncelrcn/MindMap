@@ -1,5 +1,5 @@
 import Head from "next/head";
-import Image from "next/image";
+import NextImage from "next/image";
 import Footer from "@/components/footer";
 import SupportFooter from "@/components/support_footer";
 import Navbar from "@/components/navbar";
@@ -97,7 +97,7 @@ export default function Profile({ user }) {
         try {
           const { data, error } = await supabase
             .from("user_table")
-            .select("username, profile_pic_url, about_me")
+            .select("username, profile_pic_url, about_me", "email")
             .eq("email", user.email)
             .single();
 
@@ -164,10 +164,51 @@ export default function Profile({ user }) {
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file) {
+      // Check file size - reject if over 5MB
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image is too large. Please select an image under 5MB.");
+        return;
+      }
+
       setSelectedFile(file);
+
+      // Create a preview with canvas to optimize
       const reader = new FileReader();
-      reader.onload = () => {
-        setPreviewUrl(reader.result);
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          // Use canvas to resize the image before preview
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 300;
+          const MAX_HEIGHT = 300;
+
+          let width = img.width;
+          let height = img.height;
+
+          // Calculate new dimensions while maintaining aspect ratio
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height = Math.round((height * MAX_WIDTH) / width);
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width = Math.round((width * MAX_HEIGHT) / height);
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Get optimized preview URL and use for display
+          const optimizedPreview = canvas.toDataURL("image/jpeg", 0.7);
+          setPreviewUrl(optimizedPreview);
+        };
+        img.src = e.target.result;
       };
       reader.readAsDataURL(file);
     }
@@ -178,8 +219,6 @@ export default function Profile({ user }) {
 
     setUpdating(true);
     try {
-      const formData = new FormData();
-
       const updateData = {
         user: {
           email: user.email,
@@ -189,44 +228,100 @@ export default function Profile({ user }) {
         aboutMe: newAboutMe,
       };
 
-      // Log for debugging
-      console.log("Update data:", {
-        email: user.email,
-        username: username,
-        id: user.id,
-        hasFile: !!selectedFile,
-      });
-
       if (selectedFile) {
         const reader = new FileReader();
         reader.readAsDataURL(selectedFile);
         reader.onload = async () => {
-          const base64Data = reader.result.split(",")[1];
+          // Get the base64 string
+          let base64String = reader.result.split(",")[1];
 
-          updateData.profileImage = {
-            name: selectedFile.name,
-            type: selectedFile.type,
-            data: base64Data,
-          };
+          // If file is large, apply additional optimization in client
+          if (selectedFile.size > 1 * 1024 * 1024) {
+            // Create an image for canvas-based optimization
+            const img = new Image();
+            img.onload = async () => {
+              const canvas = document.createElement("canvas");
+              // Set to reasonable dimensions for a profile picture
+              const MAX_DIM = 500;
 
-          try {
-            const response = await axios.post(
-              "/api/profile/update_profile",
-              updateData
-            );
+              let width = img.width;
+              let height = img.height;
 
-            if (response.data.success) {
-              // Refresh the page to show updated profile
-              window.location.reload();
+              // Resize while keeping aspect ratio
+              if (width > height) {
+                if (width > MAX_DIM) {
+                  height = Math.round((height * MAX_DIM) / width);
+                  width = MAX_DIM;
+                }
+              } else {
+                if (height > MAX_DIM) {
+                  width = Math.round((width * MAX_DIM) / height);
+                  height = MAX_DIM;
+                }
+              }
+
+              canvas.width = width;
+              canvas.height = height;
+
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, width, height);
+
+              // Get optimized data URL
+              const optimizedDataUrl = canvas.toDataURL("image/jpeg", 0.8);
+
+              // Extract base64 string
+              base64String = optimizedDataUrl.split(",")[1];
+
+              updateData.profileImage = {
+                name: "profile_picture.jpg",
+                type: "image/jpeg",
+                data: base64String,
+              };
+
+              try {
+                const response = await axios.post(
+                  "/api/profile/update_profile",
+                  updateData
+                );
+
+                if (response.data.success) {
+                  window.location.reload();
+                }
+              } catch (err) {
+                console.error("API error:", err.response?.data || err.message);
+                alert("Failed to update profile. Please try again.");
+              } finally {
+                setUpdating(false);
+              }
+            };
+            img.src = reader.result;
+          } else {
+            // Smaller files can proceed without client-side optimization
+            updateData.profileImage = {
+              name: selectedFile.name,
+              type: selectedFile.type,
+              data: base64String,
+            };
+
+            try {
+              const response = await axios.post(
+                "/api/profile/update_profile",
+                updateData
+              );
+
+              if (response.data.success) {
+                window.location.reload();
+              }
+            } catch (err) {
+              console.error("API error:", err.response?.data || err.message);
+              alert("Failed to update profile. Please try again.");
+            } finally {
+              setUpdating(false);
             }
-          } catch (err) {
-            console.error("API error:", err.response?.data || err.message);
-            alert("Failed to update profile. Please try again.");
-          } finally {
-            setUpdating(false);
           }
         };
       } else {
+        // Just update aboutMe without image
         try {
           const response = await axios.post(
             "/api/profile/update_profile",
@@ -234,7 +329,6 @@ export default function Profile({ user }) {
           );
 
           if (response.data.success) {
-            // Refresh the page to show updated profile
             window.location.reload();
           }
         } catch (err) {
@@ -371,7 +465,7 @@ export default function Profile({ user }) {
                   mx: "auto",
                 }}
               >
-                <Image
+                <NextImage
                   src={profilePicture}
                   alt="Profile Picture"
                   fill
@@ -841,7 +935,7 @@ export default function Profile({ user }) {
                       flexShrink: 0,
                     }}
                   >
-                    <Image
+                    <NextImage
                       src="/assets/Group 47668.png"
                       alt="Mindfulness Badge"
                       fill
@@ -890,7 +984,7 @@ export default function Profile({ user }) {
                       flexShrink: 0,
                     }}
                   >
-                    <Image
+                    <NextImage
                       src="/assets/Group 47669.png"
                       alt="Journal Master Badge"
                       fill
@@ -941,7 +1035,7 @@ export default function Profile({ user }) {
                         flexShrink: 0,
                       }}
                     >
-                      <Image
+                      <NextImage
                         src="/assets/Group 47671.png"
                         alt="Unlocked Badge"
                         fill
@@ -1013,14 +1107,14 @@ export default function Profile({ user }) {
                   }}
                 >
                   {previewUrl ? (
-                    <Image
+                    <NextImage
                       src={previewUrl}
                       alt="Profile Preview"
                       fill
                       style={{ objectFit: "cover" }}
                     />
                   ) : (
-                    <Image
+                    <NextImage
                       src={profilePicture}
                       alt="Current Profile Picture"
                       fill
