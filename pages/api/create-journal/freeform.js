@@ -6,9 +6,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { user_id, journal_entry, title } = req.body;
+    const { user_UID, journal_entry, title } = req.body;
 
-    if (!user_id || !journal_entry || !title) {
+    if (!user_UID || !journal_entry || !title) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     const { data, error } = await supabase
       .from("freeform_journaling_table")
       .insert({
-        user_id: user_id,
+        user_UID: user_UID,
         journal_entry: journal_entry,
         title: title,
         date_created: now.toISOString(),

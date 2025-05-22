@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import Image from "next/image";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
+import { createClient } from "@/utils/supabase/component";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -42,27 +43,90 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const supabase = createClient();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
+    try {
+      // Validate password match
+      if (password !== confirmPassword) {
+        setError("Passwords do not match");
+        setLoading(false);
+        return;
+      }
 
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, birthday, gender, password }),
-    });
+      // Validate password length
+      if (password.length < 6) {
+        setError("Password must be at least 6 characters long");
+        setLoading(false);
+        return;
+      }
 
-    const data = await res.json();
+      // Validate email format
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(email)) {
+        setError("Please enter a valid email address");
+        setLoading(false);
+        return;
+      }
 
-    if (res.ok) {
-      router.push("/login");
-    } else {
-      setError(data.message || "Registration failed");
+      // Validate required fields
+      if (!name || !email || !birthday || !gender) {
+        setError("All fields are required");
+        setLoading(false);
+        return;
+      }
+
+      // Sign up with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password,
+        options: {
+          data: {
+            name,
+            birthday,
+            gender,
+          },
+          emailRedirectTo: `${window.location.origin}/login`,
+        },
+      });
+
+      if (authError) throw authError;
+
+      if (authData?.user) {
+        // Register user profile using the API
+        const response = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            email: email.trim().toLowerCase(),
+            birthday,
+            gender,
+            user_UID: authData.user.id, // Pass the Supabase Auth UID
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to create user profile");
+        }
+
+        // Redirect to login page
+        router.push("/login?registered=true");
+      }
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError(err.message || "Registration failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -343,6 +407,7 @@ export default function Register() {
                   type="submit"
                   fullWidth
                   variant="contained"
+                  disabled={loading}
                   sx={{
                     bgcolor: "#4E2BBD",
                     borderRadius: "12px",
@@ -352,7 +417,7 @@ export default function Register() {
                     fontFamily: "var(--font-poppins)",
                   }}
                 >
-                  Register
+                  {loading ? "Registering..." : "Register"}
                 </Button>
 
                 <Typography

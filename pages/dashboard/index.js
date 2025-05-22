@@ -12,10 +12,11 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import Navbar from "@/components/navbar";
-import { requireAuth } from "@/lib/requireAuth";
 import { useEffect, useState } from "react";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import RecentJournal from "@/components/recent_journal";
+import { createClient } from "@/utils/supabase/server-props";
+import { useRouter } from "next/router";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -33,35 +34,62 @@ const quicksand = Quicksand({
   weight: ["400", "500", "600", "700"],
   variable: "--font-quicksand",
 });
-
 export async function getServerSideProps(context) {
-  return await requireAuth(context.req);
-}
+  const supabase = createClient(context);
 
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error || !data) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      user: data.user,
+    },
+  };
+}
 export default function DashboardPage({ user }) {
-  const [username, setUsername] = useState("");
+  const router = useRouter();
+  const [username, setUsername] = useState(user.user_metadata.name);
+  const [user_UID, setUser_UID] = useState(user.id);
   const [recentJournals, setRecentJournals] = useState([]);
 
   useEffect(() => {
-    setUsername(user.username);
-    async function fetchRecentJournals() {
+    const fetchData = async () => {
       try {
+        // Fetch recent journals
         const res = await fetch("/api/fetch-journal/recent_journal", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user_id: user.user_id }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.access_token}`,
+          },
+          body: JSON.stringify({ user_id: user_UID }),
         });
+
         const data = await res.json();
         if (res.ok) {
           setRecentJournals(data.entries);
-          console.log(data.entries);
+        } else {
+          console.error("Failed to fetch recent journals:", data.error);
         }
-      } catch (err) {
-        console.error("Failed to fetch recent journals", err);
+      } catch (error) {
+        console.error("Error fetching recent journals:", error);
       }
-    }
-    fetchRecentJournals();
-  }, [user.id]);
+    };
+
+    fetchData();
+
+    console.log(recentJournals);
+  }, [user_UID]);
+
+  console.log(user);
 
   return (
     <>

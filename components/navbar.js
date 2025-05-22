@@ -14,6 +14,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { Poppins, Raleway, Quicksand } from "next/font/google";
+import { auth } from "@/lib/auth";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -38,13 +39,12 @@ export default function Navbar() {
   const router = useRouter();
 
   const handleLogout = async () => {
-    const res = await fetch("../api/auth/logout", {
-      method: "POST",
-    });
-
-    if (res.ok) {
+    try {
+      const { error } = await auth.signOut();
+      if (error) throw error;
       router.push("/");
-    } else {
+    } catch (error) {
+      console.error("Error logging out:", error);
       alert("Logout failed");
     }
   };

@@ -12,13 +12,14 @@ import {
   Button,
 } from "@mui/material";
 import Navbar from "@/components/navbar";
-import { requireAuth } from "@/lib/requireAuth";
 import RecentJournal from "@/components/recent_journal";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import { createClient } from "@/utils/supabase/server-props";
+import { useRouter } from "next/router";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -36,38 +37,53 @@ const quicksand = Quicksand({
   weight: ["400", "500", "600", "700"],
   variable: "--font-quicksand",
 });
-
 export async function getServerSideProps(context) {
-  return await requireAuth(context.req);
+  const supabase = createClient(context);
+
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error || !data) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      user: data.user,
+    },
+  };
 }
 
 export default function Journals({ user }) {
-  const [username, setUsername] = useState(user.username);
+  const [username, setUsername] = useState(user.user_metadata.name);
+  const [user_UID, setUser_UID] = useState(user.id);
   const [journalEntries, setJournalEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const theme = useTheme();
+
+  const router = useRouter();
 
   useEffect(() => {
-    fetchJournalEntries(user.user_id);
-  }, [user]);
+    const fetchJournalEntries = async (userId) => {
+      try {
+        const response = await fetch(
+          `/api/fetch-journal/journal?user_id=${userId}`
+        );
+        const data = await response.json();
 
-  const fetchJournalEntries = async (userId) => {
-    try {
-      const response = await fetch(
-        `/api/fetch-journal/journal?user_id=${userId}`
-      );
-      const data = await response.json();
-
-      if (data.entries) {
-        setJournalEntries(data.entries);
-        console.log(data.entries);
+        if (data.entries) {
+          setJournalEntries(data.entries);
+          console.log(data.entries);
+        }
+      } catch (error) {
+        console.error("Error fetching journal entries:", error);
       }
-    } catch (error) {
-      console.error("Error fetching journal entries:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    fetchJournalEntries(user_UID);
+  }, [user_UID]);
 
   return (
     <>
@@ -200,7 +216,7 @@ export default function Journals({ user }) {
 
             {/* Journal Cards */}
             <Grid container spacing={3} sx={{ mb: 20 }}>
-              {loading ? (
+              {journalEntries.length === 0 ? (
                 <Grid item xs={12}>
                   <Typography
                     sx={{
@@ -209,7 +225,7 @@ export default function Journals({ user }) {
                       textAlign: "center",
                     }}
                   >
-                    Loading journals...
+                    No journals found. Start writing your first entry!
                   </Typography>
                 </Grid>
               ) : journalEntries.length === 0 ? (

@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import {
   Box,
@@ -10,9 +10,11 @@ import {
   Paper,
   Link,
   Stack,
+  Alert,
 } from "@mui/material";
 import Image from "next/image";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
+import { createClient } from "@/utils/supabase/component";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -34,24 +36,82 @@ const quicksand = Quicksand({
 
 export default function Login() {
   const router = useRouter();
+  const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [verificationError, setVerificationError] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
+  const [invalidCredentials, setInvalidCredentials] = useState("");
+
+  useEffect(() => {
+    if (router.query.registered) {
+      setSuccessMessage(
+        "Registration successful! Please check your email to verify your account."
+      );
+    }
+  }, [router.query]);
+
+  const handleResendVerification = async () => {
+    setResendLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email,
+      });
+
+      if (error) throw error;
+
+      setSuccessMessage(
+        "Verification email has been resent. Please check your inbox."
+      );
+      setVerificationError("");
+      setInvalidCredentials("");
+    } catch (err) {
+      console.error("Resend error:", err);
+      setVerificationError(
+        "Failed to resend verification email. Please try again."
+      );
+    } finally {
+      setResendLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setVerificationError("");
+    setInvalidCredentials("");
+    setLoading(true);
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    const data = await res.json();
+      if (error) {
+        if (error.message.includes("Email not confirmed")) {
+          setVerificationError("Please verify your email before logging in.");
+          return;
+        }
+        if (error.message.includes("Invalid login credentials")) {
+          setInvalidCredentials("Invalid email or password. Please try again.");
+          return;
+        }
+        throw error;
+      }
 
-    if (!res.ok) {
-      alert(data.message || "Login failed");
-    } else {
-      router.push("/dashboard");
+      if (data?.user) {
+        router.push("/dashboard");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -66,6 +126,7 @@ export default function Login() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/assets/logo.png" />
       </Head>
+
       <Box
         sx={{
           minHeight: "100vh",
@@ -82,11 +143,7 @@ export default function Login() {
         <Container maxWidth="sm">
           <Paper
             elevation={6}
-            sx={{
-              p: 5,
-              borderRadius: 4,
-              backdropFilter: "blur(10px)",
-            }}
+            sx={{ p: 5, borderRadius: 4, backdropFilter: "blur(10px)" }}
           >
             <form onSubmit={handleSubmit}>
               <Stack spacing={3}>
@@ -117,17 +174,59 @@ export default function Login() {
                 <Typography
                   variant="body1"
                   align="center"
-                  fontWeight={400}
-                  sx={{
-                    color: "#2D1B6B",
-                    fontFamily: "var(--font-quicksand)",
-                  }}
+                  sx={{ color: "#2D1B6B", fontFamily: "var(--font-quicksand)" }}
                 >
                   The Journal Where Every Thought Maps Its Purpose
                 </Typography>
 
+                {successMessage &&
+                  !verificationError &&
+                  !invalidCredentials && (
+                    <Alert
+                      severity="success"
+                      sx={{ fontFamily: "var(--font-poppins)" }}
+                    >
+                      {successMessage}
+                    </Alert>
+                  )}
+
+                {verificationError && (
+                  <Alert
+                    severity="error"
+                    sx={{ fontFamily: "var(--font-poppins)" }}
+                    action={
+                      <Button
+                        color="inherit"
+                        size="small"
+                        onClick={handleResendVerification}
+                        disabled={resendLoading}
+                      >
+                        {resendLoading ? "Sending..." : "Resend Email"}
+                      </Button>
+                    }
+                  >
+                    {verificationError}
+                  </Alert>
+                )}
+
+                {invalidCredentials && (
+                  <Alert
+                    severity="error"
+                    sx={{ fontFamily: "var(--font-poppins)" }}
+                  >
+                    {invalidCredentials}
+                  </Alert>
+                )}
+
+                {error && !verificationError && !invalidCredentials && (
+                  <Typography color="error" variant="body2" align="center">
+                    {error}
+                  </Typography>
+                )}
+
                 <TextField
                   label="Email"
+                  type="email"
                   variant="standard"
                   fullWidth
                   required
@@ -180,11 +279,12 @@ export default function Login() {
                   sx={{
                     "& .MuiInput-underline:before": {
                       borderBottom: "2px solid #2D1B6B",
+                      fontFamily: "var(--font-poppins)",
                     },
                     "& .MuiInput-underline:after": {
                       borderBottom: "2px solid #1e1474",
+                      fontFamily: "var(--font-poppins)",
                     },
-                    paddingBottom: "24px",
                   }}
                 />
 
@@ -192,32 +292,28 @@ export default function Login() {
                   type="submit"
                   fullWidth
                   variant="contained"
+                  disabled={loading}
                   sx={{
                     bgcolor: "#4E2BBD",
                     borderRadius: "12px",
                     height: "3.3rem",
                     marginTop: "32px",
+                    "&:hover": { bgcolor: "#3d22a3" },
                     fontFamily: "var(--font-poppins)",
-
-                    "&:hover": {
-                      bgcolor: "#3d22a3",
-                    },
                   }}
                 >
-                  Login
+                  {loading ? "Logging in..." : "Login"}
                 </Button>
 
                 <Typography
                   align="center"
                   variant="body2"
-                  fontWeight={400}
                   sx={{ fontFamily: "var(--font-quicksand)" }}
                 >
-                  Don&apos;t have an account?{" "}
+                  Don't have an account?{" "}
                   <Link
                     component="button"
                     variant="body2"
-                    fontWeight={400}
                     onClick={() => router.push("/register")}
                     sx={{
                       color: "#0F54F8",

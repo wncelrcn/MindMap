@@ -4,9 +4,9 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { requireAuth } from "@/lib/requireAuth";
 import { useRouter } from "next/router";
 import { Poppins, Raleway, Quicksand } from "next/font/google";
+import { createClient } from "@/utils/supabase/server-props";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -25,12 +25,30 @@ const quicksand = Quicksand({
   subsets: ["latin"],
   variable: "--font-quicksand",
 });
-
 export async function getServerSideProps(context) {
-  return await requireAuth(context.req);
+  const supabase = createClient(context);
+
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error || !data) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      user: data.user,
+    },
+  };
 }
 
 export default function Journal({ user }) {
+  const [username, setUsername] = useState(user.user_metadata.name);
+  const [user_UID, setUser_UID] = useState(user.id);
   const [title, setTitle] = useState("Journal Title");
   const [editingTitle, setEditingTitle] = useState(false);
   const [content, setContent] = useState("");
@@ -52,10 +70,6 @@ export default function Journal({ user }) {
 
     return () => clearTimeout(timer);
   }, [lastActivity, content]);
-
-  useEffect(() => {
-    setUserId(user.user_id);
-  }, [user]);
 
   const handleTitleClick = () => setEditingTitle(true);
   const handleTitleBlur = () => {
@@ -122,7 +136,7 @@ export default function Journal({ user }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: userId,
+          user_UID: user_UID,
           journal_entry: journalData,
           title: title.trim() || "Untitled Entry",
         }),

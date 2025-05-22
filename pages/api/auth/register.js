@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabase";
-import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
 
@@ -9,10 +8,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { name, email, birthday, gender, password } = req.body;
+    const { name, email, birthday, gender, user_UID } = req.body;
 
     // Input validation
-    if (!name || !email || !birthday || !gender || !password) {
+    if (!name || !email || !birthday || !gender || !user_UID) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -25,13 +24,6 @@ export default async function handler(req, res) {
     // Validate gender
     if (!["male", "female", "other"].includes(gender)) {
       return res.status(400).json({ message: "Invalid gender" });
-    }
-
-    // Validate password strength
-    if (password.length < 8) {
-      return res.status(400).json({
-        message: "Password must be at least 8 characters long",
-      });
     }
 
     // Check if email already exists
@@ -49,10 +41,6 @@ export default async function handler(req, res) {
     if (existingUser) {
       return res.status(400).json({ message: "Email is already registered" });
     }
-
-    // Hash the password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
 
     // Default about me text
     const defaultAboutMe =
@@ -99,14 +87,12 @@ export default async function handler(req, res) {
       .from("user_table")
       .insert([
         {
+          user_UID,
           username: name,
           email,
-          password_hash: hashedPassword,
           birthday,
           gender,
           about_me: defaultAboutMe,
-          created_at: new Date().toISOString(),
-          is_active: true,
           profile_pic_url: publicUrl,
         },
       ])
@@ -120,7 +106,7 @@ export default async function handler(req, res) {
     return res.status(201).json({
       message: "User registered successfully",
       user: {
-        id: userData[0].id,
+        id: userData[0].user_UID,
         name: userData[0].username,
         email: userData[0].email,
       },
