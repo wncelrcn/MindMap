@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
   try {
     const {
-      user_id,
+      user_UID,
       theme_id,
       category_id,
       question_set_id,
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     } = req.body;
 
     // Validation
-    if (!user_id || !theme_id || !category_id || !journal_entry || !title) {
+    if (!user_UID || !theme_id || !category_id || !journal_entry || !title) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     const { data: userData, error: userError } = await supabase
       .from("user_table")
       .select("*")
-      .eq("user_id", user_id)
+      .eq("user_UID", user_UID)
       .single();
 
     if (userError || !userData) {
@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     const { data, error } = await supabase
       .from("guided_journaling_table")
       .insert({
-        user_id,
+        user_UID,
         theme_id,
         category_id,
         title,

@@ -12,13 +12,12 @@ import {
 } from "@mui/material";
 import { Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState } from "react";
-import { requireAuth } from "@/lib/requireAuth";
-import { supabase } from "@/lib/supabase";
 import Navbar from "@/components/navbar";
 import Link from "next/link";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useRouter } from "next/router";
+import { createClient } from "@/utils/supabase/server-props";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -33,7 +32,24 @@ const quicksand = Quicksand({
 });
 
 export async function getServerSideProps(context) {
-  return await requireAuth(context.req);
+  const supabase = createClient(context);
+
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error || !data) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      user: data.user,
+    },
+  };
 }
 
 export default function ThemeCategories({ user }) {

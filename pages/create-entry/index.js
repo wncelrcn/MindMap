@@ -47,14 +47,11 @@ export async function getServerSideProps(context) {
 }
 
 export default function Journal({ user }) {
-  const [username, setUsername] = useState(user.user_metadata.name);
   const [user_UID, setUser_UID] = useState(user.id);
   const [title, setTitle] = useState("Journal Title");
   const [editingTitle, setEditingTitle] = useState(false);
   const [content, setContent] = useState("");
   const [sections, setSections] = useState([]);
-  const [journalEntry, setJournalEntry] = useState({});
-  const [userId, setUserId] = useState(null);
   const [lastActivity, setLastActivity] = useState(Date.now());
   const [showButton, setShowButton] = useState(false);
   const [error, setError] = useState(null);

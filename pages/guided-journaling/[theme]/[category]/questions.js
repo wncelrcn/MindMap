@@ -15,7 +15,7 @@ import { useState, useEffect } from "react";
 import { requireAuth } from "@/lib/requireAuth";
 import { useRouter } from "next/router";
 import { Poppins, Quicksand } from "next/font/google";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/server-props";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -30,7 +30,24 @@ const quicksand = Quicksand({
 });
 
 export async function getServerSideProps(context) {
-  return await requireAuth(context.req);
+  const supabase = createClient(context);
+
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error || !data) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      user: data.user,
+    },
+  };
 }
 
 export default function Questions({ user }) {
@@ -41,7 +58,9 @@ export default function Questions({ user }) {
   const [questionSet, setQuestionSet] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [userId, setUserId] = useState(null);
+
+  const [user_UID, setUser_UID] = useState(user.id);
+
   const [lastActivity, setLastActivity] = useState(Date.now());
   const [showButtons, setShowButtons] = useState(false);
   const [error, setError] = useState(null);
@@ -130,10 +149,6 @@ export default function Questions({ user }) {
 
     return () => clearTimeout(timer);
   }, [lastActivity, answers, currentQuestionIndex]);
-
-  useEffect(() => {
-    setUserId(user.user_id);
-  }, [user]);
 
   useEffect(() => {
     const checkForChanges = () => {
@@ -241,7 +256,7 @@ export default function Questions({ user }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: userId,
+          user_UID: user_UID,
           theme_id: themeId,
           category_id: categoryId,
           question_set_id: questionSetId,
@@ -251,6 +266,7 @@ export default function Questions({ user }) {
       });
 
       const data = await res.json();
+      console.log(data);
 
       if (!res.ok) {
         throw new Error(data.message || "Failed to create entry");

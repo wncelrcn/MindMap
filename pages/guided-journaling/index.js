@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState } from "react";
-import { requireAuth } from "@/lib/requireAuth";
+import { createClient } from "@/utils/supabase/server-props";
 import Navbar from "@/components/navbar";
 import Link from "next/link";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -38,16 +38,30 @@ const quicksand = Quicksand({
 });
 
 export async function getServerSideProps(context) {
-  return await requireAuth(context.req);
+  const supabase = createClient(context);
+
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error || !data) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      user: data.user,
+    },
+  };
 }
 
 export default function GuidedJournaling({ user }) {
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(user.user_metadata.name);
+  const [user_UID, setUser_UID] = useState(user.id);
   const theme = useTheme();
-
-  useEffect(() => {
-    setUsername(user.username);
-  }, [user]);
 
   const journalingCategories = [
     {

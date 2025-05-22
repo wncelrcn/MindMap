@@ -13,7 +13,7 @@ import Image from "next/image";
 import Navbar from "@/components/navbar";
 import { useState, useEffect } from "react";
 import { Poppins, Raleway, Quicksand } from "next/font/google";
-import { requireAuth } from "@/lib/requireAuth";
+import { createClient } from "@/utils/supabase/server-props";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -34,10 +34,29 @@ const quicksand = Quicksand({
 });
 
 export async function getServerSideProps(context) {
-  return await requireAuth(context.req);
+  const supabase = createClient(context);
+
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error || !data) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      user: data.user,
+    },
+  };
 }
 
 export default function ViewJournal({ user }) {
+  const [username, setUsername] = useState(user.user_metadata.name);
+  const [user_UID, setUser_UID] = useState(user.id);
   const [journalData, setJournalData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -90,7 +109,7 @@ export default function ViewJournal({ user }) {
     };
 
     fetchJournal();
-  }, []);
+  }, [user_UID]);
 
   if (loading) {
     return (

@@ -70,7 +70,7 @@ export default function DashboardPage({ user }) {
             "Content-Type": "application/json",
             Authorization: `Bearer ${user.access_token}`,
           },
-          body: JSON.stringify({ user_id: user_UID }),
+          body: JSON.stringify({ user_UID: user_UID }),
         });
 
         const data = await res.json();

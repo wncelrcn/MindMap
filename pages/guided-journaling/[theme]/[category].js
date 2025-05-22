@@ -4,8 +4,7 @@ import SupportFooter from "@/components/support_footer";
 import { Box, Typography, Container, Button } from "@mui/material";
 import { Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState } from "react";
-import { requireAuth } from "@/lib/requireAuth";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/server-props";
 import Navbar from "@/components/navbar";
 import Link from "next/link";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -24,10 +23,29 @@ const quicksand = Quicksand({
 });
 
 export async function getServerSideProps(context) {
-  return await requireAuth(context.req);
+  const supabase = createClient(context);
+
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error || !data) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      user: data.user,
+    },
+  };
 }
 
 export default function CategoryDetails({ user }) {
+  const [username, setUsername] = useState(user.user_metadata.name);
+  const [user_UID, setUser_UID] = useState(user.id);
   const router = useRouter();
   const { theme, category } = router.query;
   const [themeData, setThemeData] = useState(null);
