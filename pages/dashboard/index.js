@@ -111,8 +111,10 @@ export default function DashboardPage({ user }) {
             {/* Header with Gradient Text */}
             <Box
               display="flex"
+              flexDirection={{ xs: "column", sm: "row" }}
               justifyContent="space-between"
-              alignItems="center"
+              alignItems={{ xs: "flex-start", sm: "center" }}
+              gap={2}
               mb={4}
             >
               <Typography
@@ -123,6 +125,7 @@ export default function DashboardPage({ user }) {
                 sx={{
                   fontFamily: poppins.style.fontFamily,
                   color: "#2D1B6B",
+                  fontSize: { xs: "2.8rem", sm: "3.5rem" },
                   "& span": {
                     background:
                       "linear-gradient(90deg, #2D1B6B 0%, #ED6D6C 100%)",
@@ -143,6 +146,7 @@ export default function DashboardPage({ user }) {
                   color: "#2D1B6B",
                   fontWeight: 400,
                   px: 3,
+                  width: { xs: "100%", sm: "auto" },
                   fontFamily: poppins.style.fontFamily,
                   "&:hover": {
                     borderColor: "#5A33B7",

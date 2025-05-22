@@ -6,9 +6,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { user_id } = req.query;
+    const { user_UID } = req.query;
 
-    if (!user_id) {
+    if (!user_UID) {
       return res.status(400).json({ message: "User ID is required" });
     }
 
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     const { data: freeformData, error: freeformError } = await supabase
       .from("freeform_journaling_table")
       .select("*")
-      .eq("user_id", user_id);
+      .eq("user_UID", user_UID);
 
     if (freeformError) {
       console.error("Freeform DB error:", freeformError);
@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     const { data: guidedData, error: guidedError } = await supabase
       .from("guided_journaling_table")
       .select("*")
-      .eq("user_id", user_id);
+      .eq("user_UID", user_UID);
 
     if (guidedError) {
       console.error("Guided DB error:", guidedError);

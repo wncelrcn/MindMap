@@ -69,7 +69,7 @@ export default function Journals({ user }) {
     const fetchJournalEntries = async (userId) => {
       try {
         const response = await fetch(
-          `/api/fetch-journal/journal?user_id=${userId}`
+          `/api/fetch-journal/journal?user_UID=${user_UID}`
         );
         const data = await response.json();
 
@@ -110,6 +110,8 @@ export default function Journals({ user }) {
               sx={{
                 fontFamily: poppins.style.fontFamily,
                 color: "#2D1B6B",
+                fontSize: { xs: "1.8rem", sm: "2.5rem", md: "3rem" },
+                mb: { xs: 2, sm: 0 },
               }}
             >
               <span>{username}'s Journals</span>
@@ -120,9 +122,16 @@ export default function Journals({ user }) {
               spacing={2}
               alignItems="center"
               sx={{ mt: 4, mb: 4 }}
+              flexDirection={{ xs: "column", sm: "row" }}
             >
               {/* Search Entry */}
-              <Grid item xs={12} md={6} lg={5}>
+              <Grid
+                item
+                xs={12}
+                md={6}
+                lg={5}
+                sx={{ width: { xs: "100%", md: "auto" } }}
+              >
                 <TextField
                   placeholder="Search Entry"
                   variant="outlined"
@@ -130,7 +139,7 @@ export default function Journals({ user }) {
                   sx={{
                     backgroundColor: "#f8f7fc",
                     borderRadius: 2,
-                    width: "50rem",
+                    width: { xs: "100%", md: "50rem" },
 
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "12px",
@@ -165,52 +174,64 @@ export default function Journals({ user }) {
                 />
               </Grid>
 
-              {/* Apply Filter */}
-              <Grid item>
-                <Button
-                  variant="outlined"
-                  startIcon={<FilterListIcon />}
-                  sx={{
-                    textTransform: "none",
-                    fontFamily: poppins.style.fontFamily,
-                    color: "#5A33B7",
-                    borderColor: "#e0d8f8",
-                    backgroundColor: "#f8f7fc",
-                    borderRadius: 5,
-                    px: 3,
-                    py: 1.5,
-                    "&:hover": {
-                      backgroundColor: "#ece7fa",
-                      borderColor: "#d0c6f0",
-                    },
-                  }}
-                >
-                  Apply Filter
-                </Button>
-              </Grid>
+              {/* Button Container */}
+              <Grid
+                item
+                container
+                xs={12}
+                md="auto"
+                spacing={2}
+                justifyContent={{ xs: "space-between", sm: "flex-start" }}
+              >
+                {/* Apply Filter */}
+                <Grid item xs={5.5} sm="auto">
+                  <Button
+                    variant="outlined"
+                    startIcon={<FilterListIcon />}
+                    fullWidth
+                    sx={{
+                      textTransform: "none",
+                      fontFamily: poppins.style.fontFamily,
+                      color: "#5A33B7",
+                      borderColor: "#e0d8f8",
+                      backgroundColor: "#f8f7fc",
+                      borderRadius: 5,
+                      px: { xs: 1, sm: 3 },
+                      py: 1.5,
+                      "&:hover": {
+                        backgroundColor: "#ece7fa",
+                        borderColor: "#d0c6f0",
+                      },
+                    }}
+                  >
+                    Apply Filter
+                  </Button>
+                </Grid>
 
-              {/* Select Date */}
-              <Grid item>
-                <Button
-                  variant="outlined"
-                  startIcon={<CalendarTodayIcon />}
-                  sx={{
-                    textTransform: "none",
-                    fontFamily: poppins.style.fontFamily,
-                    color: "#5A33B7",
-                    borderColor: "#e0d8f8",
-                    backgroundColor: "#f8f7fc",
-                    borderRadius: 5,
-                    px: 3,
-                    py: 1.5,
-                    "&:hover": {
-                      backgroundColor: "#ece7fa",
-                      borderColor: "#d0c6f0",
-                    },
-                  }}
-                >
-                  Select Date
-                </Button>
+                {/* Select Date */}
+                <Grid item xs={5.5} sm="auto">
+                  <Button
+                    variant="outlined"
+                    startIcon={<CalendarTodayIcon />}
+                    fullWidth
+                    sx={{
+                      textTransform: "none",
+                      fontFamily: poppins.style.fontFamily,
+                      color: "#5A33B7",
+                      borderColor: "#e0d8f8",
+                      backgroundColor: "#f8f7fc",
+                      borderRadius: 5,
+                      px: { xs: 1, sm: 3 },
+                      py: 1.5,
+                      "&:hover": {
+                        backgroundColor: "#ece7fa",
+                        borderColor: "#d0c6f0",
+                      },
+                    }}
+                  >
+                    Select Date
+                  </Button>
+                </Grid>
               </Grid>
             </Grid>
 
