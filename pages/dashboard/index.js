@@ -34,6 +34,7 @@ const quicksand = Quicksand({
   weight: ["400", "500", "600", "700"],
   variable: "--font-quicksand",
 });
+
 export async function getServerSideProps(context) {
   const supabase = createClient(context);
 

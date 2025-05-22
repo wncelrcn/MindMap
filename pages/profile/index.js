@@ -13,16 +13,25 @@ import {
   useTheme,
   IconButton,
   CircularProgress,
+  Modal,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Avatar,
 } from "@mui/material";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
-import { useEffect, useState } from "react";
-import { requireAuth } from "@/lib/requireAuth";
+import { useEffect, useState, useRef } from "react";
+import { createClient } from "@/utils/supabase/server-props";
 import { supabase } from "@/lib/supabase";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import SpaIcon from "@mui/icons-material/Spa";
 import WorkIcon from "@mui/icons-material/Work";
 import FlipCameraAndroidIcon from "@mui/icons-material/FlipCameraAndroid";
 import EditIcon from "@mui/icons-material/Edit";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import axios from "axios";
 
 // Font configurations
 const poppins = Poppins({
@@ -44,17 +53,41 @@ const quicksand = Quicksand({
 });
 
 export async function getServerSideProps(context) {
-  return await requireAuth(context.req);
+  const supabase = createClient(context);
+
+  const { data, error } = await supabase.auth.getUser();
+
+  if (error || !data) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {
+      user: data.user,
+    },
+  };
 }
 
 export default function Profile({ user }) {
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(user.user_metadata.name);
+  const [user_UID, setUser_UID] = useState(user.id);
   const [profilePicture, setProfilePicture] = useState(
     "/assets/default_profile.png"
   );
   const [aboutMe, setAboutMe] = useState("");
   const [isFlipped, setIsFlipped] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [newAboutMe, setNewAboutMe] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [updating, setUpdating] = useState(false);
+  const fileInputRef = useRef(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -70,12 +103,35 @@ export default function Profile({ user }) {
 
           if (error) {
             console.error("Error fetching user data:", error);
-          } else if (data) {
-            setUsername(data.username);
-            if (data.profile_picture_url) {
-              setProfilePicture(data.profile_picture_url);
+          } else {
+            // Check profile picture URL
+            if (data.profile_pic_url) {
+              // Extract filename from URL
+              const urlParts = data.profile_pic_url.split("/");
+              const filename = urlParts[urlParts.length - 1];
+
+              if (filename.includes(`${data.username}_profile.png`)) {
+                // If filename contains username_profile.png or new_profile.png, use it
+                // Add timestamp to prevent browser caching
+                setProfilePicture(`${data.profile_pic_url}?t=${Date.now()}`);
+              } else {
+                // Otherwise check if it's a valid URL or use default
+                const validUrl =
+                  data.profile_pic_url &&
+                  data.profile_pic_url.startsWith("http");
+                setProfilePicture(
+                  validUrl
+                    ? `${data.profile_pic_url}?t=${Date.now()}`
+                    : "/assets/default_profile.png"
+                );
+              }
+            } else {
+              // If no profile pic URL, use default
+              setProfilePicture("/assets/default_profile.png");
             }
+
             setAboutMe(data.about_me || "");
+            setNewAboutMe(data.about_me || "");
           }
         } catch (error) {
           console.error("Failed to fetch user data:", error);
@@ -92,6 +148,106 @@ export default function Profile({ user }) {
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
+  };
+
+  const handleOpenEditDialog = () => {
+    setEditDialogOpen(true);
+    setNewAboutMe(aboutMe);
+    setPreviewUrl(null);
+    setSelectedFile(null);
+  };
+
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false);
+  };
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreviewUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUpdateProfile = async () => {
+    if (!user || !user.email) return;
+
+    setUpdating(true);
+    try {
+      const formData = new FormData();
+
+      const updateData = {
+        user: {
+          email: user.email,
+          username: username,
+          id: user.id,
+        },
+        aboutMe: newAboutMe,
+      };
+
+      // Log for debugging
+      console.log("Update data:", {
+        email: user.email,
+        username: username,
+        id: user.id,
+        hasFile: !!selectedFile,
+      });
+
+      if (selectedFile) {
+        const reader = new FileReader();
+        reader.readAsDataURL(selectedFile);
+        reader.onload = async () => {
+          const base64Data = reader.result.split(",")[1];
+
+          updateData.profileImage = {
+            name: selectedFile.name,
+            type: selectedFile.type,
+            data: base64Data,
+          };
+
+          try {
+            const response = await axios.post(
+              "/api/profile/update_profile",
+              updateData
+            );
+
+            if (response.data.success) {
+              // Refresh the page to show updated profile
+              window.location.reload();
+            }
+          } catch (err) {
+            console.error("API error:", err.response?.data || err.message);
+            alert("Failed to update profile. Please try again.");
+          } finally {
+            setUpdating(false);
+          }
+        };
+      } else {
+        try {
+          const response = await axios.post(
+            "/api/profile/update_profile",
+            updateData
+          );
+
+          if (response.data.success) {
+            // Refresh the page to show updated profile
+            window.location.reload();
+          }
+        } catch (err) {
+          console.error("API error:", err.response?.data || err.message);
+          alert("Failed to update profile. Please try again.");
+        } finally {
+          setUpdating(false);
+        }
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setUpdating(false);
+    }
   };
 
   return (
@@ -175,6 +331,7 @@ export default function Profile({ user }) {
             >
               {/* Edit Profile Button */}
               <Box
+                onClick={handleOpenEditDialog}
                 sx={{
                   position: "absolute",
                   top: 0,
@@ -816,6 +973,161 @@ export default function Profile({ user }) {
           <SupportFooter />
           <Footer />
         </Box>
+
+        {/* Edit Profile Dialog */}
+        <Dialog
+          open={editDialogOpen}
+          onClose={handleCloseEditDialog}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle
+            sx={{
+              fontFamily: poppins.style.fontFamily,
+              color: "#5C35C2",
+              fontWeight: 600,
+            }}
+          >
+            Edit Profile
+          </DialogTitle>
+          <DialogContent sx={{ p: 3 }}>
+            <Stack spacing={3}>
+              {/* Profile Picture Upload */}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  mb: 2,
+                }}
+              >
+                <Box
+                  sx={{
+                    position: "relative",
+                    width: 150,
+                    height: 150,
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    mb: 2,
+                    border: "3px solid #5C35C2",
+                  }}
+                >
+                  {previewUrl ? (
+                    <Image
+                      src={previewUrl}
+                      alt="Profile Preview"
+                      fill
+                      style={{ objectFit: "cover" }}
+                    />
+                  ) : (
+                    <Image
+                      src={profilePicture}
+                      alt="Current Profile Picture"
+                      fill
+                      style={{ objectFit: "cover" }}
+                    />
+                  )}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: "40px",
+                      backgroundColor: "rgba(92, 53, 194, 0.7)",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => fileInputRef.current.click()}
+                  >
+                    <PhotoCameraIcon sx={{ color: "white" }} />
+                  </Box>
+                </Box>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={handleFileSelect}
+                />
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontFamily: poppins.style.fontFamily,
+                    fontSize: "0.9rem",
+                    color: "#555",
+                    textAlign: "center",
+                  }}
+                >
+                  Click to upload a new profile picture
+                </Typography>
+              </Box>
+
+              {/* About Me Section */}
+              <TextField
+                label="About Me"
+                multiline
+                rows={4}
+                value={newAboutMe}
+                onChange={(e) => setNewAboutMe(e.target.value)}
+                fullWidth
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#5C35C2",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#5C35C2",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#5C35C2",
+                    },
+                  },
+                  "& .MuiFormLabel-root": {
+                    fontFamily: poppins.style.fontFamily,
+                    color: "#5C35C2",
+                  },
+                  "& .MuiInputBase-input": {
+                    fontFamily: poppins.style.fontFamily,
+                  },
+                }}
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ p: 3, pt: 0 }}>
+            <Button
+              onClick={handleCloseEditDialog}
+              sx={{
+                fontFamily: poppins.style.fontFamily,
+                color: "#888",
+                fontWeight: 500,
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUpdateProfile}
+              disabled={updating}
+              variant="contained"
+              sx={{
+                fontFamily: poppins.style.fontFamily,
+                backgroundColor: "#5C35C2",
+                "&:hover": {
+                  backgroundColor: "#4527A0",
+                },
+                px: 4,
+              }}
+            >
+              {updating ? (
+                <CircularProgress size={24} sx={{ color: "white" }} />
+              ) : (
+                "Save"
+              )}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </>
   );
