@@ -1,3 +1,6 @@
+// Goal: Finish UI
+// Objective: This page will display the dashboard of the recap of the user.
+
 import Head from "next/head";
 import Footer from "@/components/footer";
 import SupportFooter from "@/components/support_footer";
@@ -139,24 +142,27 @@ export default function DashboardPage({ user }) {
                 <span>Hello, {username}!</span>
               </Typography>
 
-              <Button
-                variant="outlined"
-                sx={{
-                  borderRadius: "9999px",
-                  borderColor: "#2D1B6B",
-                  color: "#2D1B6B",
-                  fontWeight: 400,
-                  px: 3,
-                  width: { xs: "100%", sm: "auto" },
-                  fontFamily: poppins.style.fontFamily,
-                  "&:hover": {
-                    borderColor: "#5A33B7",
-                    backgroundColor: "rgba(90, 51, 183, 0.04)",
-                  },
-                }}
-              >
-                See your Weekly Recap
-              </Button>
+              <Link href="/recaps" passHref legacyBehavior>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    borderRadius: "9999px",
+                    borderColor: "#2D1B6B",
+                    color: "#2D1B6B",
+                    fontWeight: 400,
+                    px: 3,
+                    width: { xs: "100%", sm: "auto" },
+                    fontFamily: poppins.style.fontFamily,
+                    cursor: "pointer",
+                    "&:hover": {
+                      borderColor: "#5A33B7",
+                      backgroundColor: "rgba(90, 51, 183, 0.04)",
+                    },
+                  }}
+                >
+                  See your Weekly Recap
+                </Button>
+              </Link>
             </Box>
 
             {/* Header */}

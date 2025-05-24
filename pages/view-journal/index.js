@@ -240,53 +240,59 @@ export default function ViewJournal({ user }) {
           zIndex={10}
           mb={10}
         >
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: "#4E2BBD",
-              color: "#fff",
-              textTransform: "none",
-              fontWeight: 500,
-              borderRadius: "16px",
-              padding: "0.95rem 3.5rem",
-              boxShadow: "none",
-            }}
-          >
-            <Typography
+          <Link href="/view-insights" passHref legacyBehavior>
+            <Button
+              variant="contained"
               sx={{
-                fontFamily: poppins.style.fontFamily,
-                fontWeight: 400,
-                fontSize: "1.1rem",
+                backgroundColor: "#4E2BBD",
+                color: "#fff",
+                textTransform: "none",
+                fontWeight: 500,
+                borderRadius: "16px",
+                padding: "0.95rem 3.5rem",
+                boxShadow: "none",
+                cursor: "pointer",
               }}
             >
-              View Insights
-            </Typography>
-          </Button>
+              <Typography
+                sx={{
+                  fontFamily: poppins.style.fontFamily,
+                  fontWeight: 400,
+                  fontSize: "1.1rem",
+                }}
+              >
+                View Insights
+              </Typography>
+            </Button>
+          </Link>
 
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: "#E2DDF9",
-              color: "#fff",
-              textTransform: "none",
-              fontWeight: 500,
-              borderRadius: "16px",
-              padding: "0.95rem 3.5rem",
-              boxShadow: "none",
-              marginLeft: "1.2rem",
-            }}
-          >
-            <Typography
+          <Link href="/view-emotions" passHref legacyBehavior>
+            <Button
+              variant="contained"
               sx={{
-                fontFamily: poppins.style.fontFamily,
-                fontWeight: 400,
-                fontSize: "1.1rem",
-                color: "#4E2BBD",
+                backgroundColor: "#E2DDF9",
+                color: "#fff",
+                textTransform: "none",
+                fontWeight: 500,
+                borderRadius: "16px",
+                padding: "0.95rem 3.5rem",
+                boxShadow: "none",
+                marginLeft: "1.2rem",
+                cursor: "pointer",
               }}
             >
-              View Emotions
-            </Typography>
-          </Button>
+              <Typography
+                sx={{
+                  fontFamily: poppins.style.fontFamily,
+                  fontWeight: 400,
+                  fontSize: "1.1rem",
+                  color: "#4E2BBD",
+                }}
+              >
+                View Emotions
+              </Typography>
+            </Button>
+          </Link>
         </Box>
 
         <Typography
