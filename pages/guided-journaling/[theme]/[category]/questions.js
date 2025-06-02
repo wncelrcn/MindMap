@@ -250,7 +250,6 @@ export default function Questions({ user }) {
         }
       });
 
-      // 1. Get the summary from the API
       const summaryRes = await fetch("/api/analyze-journal/journal_summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -259,7 +258,6 @@ export default function Questions({ user }) {
 
       const summaryData = await summaryRes.json();
 
-      // 2. Insert the journal entry into the database, including the summary
       const res = await fetch("/api/create-journal/guided", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
