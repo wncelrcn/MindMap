@@ -98,7 +98,6 @@ export default function Questions({ user }) {
         const selectedSet = question_sets[randomSetIndex];
 
         setQuestionSetId(selectedSet.id);
-        console.log("Selected set:", selectedSet);
 
         // Extract questions correctly based on the actual structure
         let questions = [];
@@ -251,7 +250,16 @@ export default function Questions({ user }) {
         }
       });
 
-      // Insert the journal entry into the database
+      // 1. Get the summary from the API
+      const summaryRes = await fetch("/api/analyze-journal/journal_summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ journal_text: journalData }),
+      });
+
+      const summaryData = await summaryRes.json();
+
+      // 2. Insert the journal entry into the database, including the summary
       const res = await fetch("/api/create-journal/guided", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -262,11 +270,11 @@ export default function Questions({ user }) {
           question_set_id: questionSetId,
           journal_entry: journalData,
           title: title.trim() || "Untitled Entry",
+          journal_summary: summaryData["summary"],
         }),
       });
 
       const data = await res.json();
-      console.log(data);
 
       if (!res.ok) {
         throw new Error(data.message || "Failed to create entry");

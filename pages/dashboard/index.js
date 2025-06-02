@@ -89,11 +89,7 @@ export default function DashboardPage({ user }) {
     };
 
     fetchData();
-
-    console.log(recentJournals);
   }, [user_UID]);
-
-  console.log(user);
 
   return (
     <>

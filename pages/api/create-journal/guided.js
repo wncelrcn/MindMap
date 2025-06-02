@@ -13,6 +13,7 @@ export default async function handler(req, res) {
       question_set_id,
       journal_entry,
       title,
+      journal_summary,
     } = req.body;
 
     // Validation
@@ -41,6 +42,7 @@ export default async function handler(req, res) {
         title,
         question_set_id,
         journal_entry,
+        journal_summary,
         date_created: new Date().toISOString().split("T")[0],
         time_created: new Date().toTimeString().split(" ")[0],
       })

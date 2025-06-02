@@ -158,10 +158,19 @@ export default function Journal({ user }) {
         }
       });
 
+      const summaryRes = await fetch("/api/analyze-journal/journal_summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ journal_text: journalData }),
+      });
+
+      const summaryData = await summaryRes.json();
+
       const res = await fetch("/api/create-journal/freeform", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          journal_summary: summaryData["summary"],
           user_UID: user_UID,
           journal_entry: journalData,
           title: title.trim() || "Untitled Entry",

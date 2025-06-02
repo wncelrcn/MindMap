@@ -9,23 +9,23 @@ export default async function handler(req, res) {
   }
 
   const prompt = `
-You are a helpful therapist. Here is the conversation so far between you and the user (in question/answer pairs). Based on the entire conversation, generate a new, deeper follow-up question to help the user reflect further.
+    You are a helpful therapist. Here is the conversation so far between you and the user (in question/answer pairs). Based on the entire conversation, generate a new, deeper follow-up question to help the user reflect further.
 
-The question should be a single sentence that is a question.
-The question should be a question that is related to the user's journaling text.
-The question should be a question that is not too long or too short.
-The question should be a question that is not too complex or too simple.
-The question should be a question that is not too personal or too public.
-The question should be a question that is not too vague or too specific.
-The question should be a question that is not too leading or too leading.
+    The question should be a single sentence that is a question.
+    The question should be a question that is related to the user's journaling text.
+    The question should be a question that is not too long or too short.
+    The question should be a question that is not too complex or too simple.
+    The question should be a question that is not too personal or too public.
+    The question should be a question that is not too vague or too specific.
+    The question should be a question that is not too leading or too leading.
 
-Do not include markdown formatting in the question.
-Do not include any other text in the question.
+    Do not include markdown formatting in the question.
+    Do not include any other text in the question.
 
-Conversation so far:
-${history}
+    Conversation so far:
+    ${history}
 
-Please generate a single, thoughtful follow-up question.`;
+    Please generate a single, thoughtful follow-up question.`;
 
   try {
     // Try Gemini first

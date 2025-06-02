@@ -81,9 +81,6 @@ export default function ViewJournal({ user }) {
           return;
         }
 
-        console.log("Sending ID:", currentJournalID);
-        console.log("Sending Type:", currentJournalType);
-
         const response = await fetch(`/api/fetch-journal/id_journal`, {
           method: "POST",
           headers: {
@@ -228,7 +225,7 @@ export default function ViewJournal({ user }) {
             mb: 4,
           }}
         >
-          "SUMMARY"
+          {journalData?.journal_summary || "No summary provided"}
         </Typography>
 
         {/* Buttons */}

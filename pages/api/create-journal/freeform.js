@@ -6,9 +6,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { user_UID, journal_entry, title } = req.body;
+    const { user_UID, journal_entry, title, journal_summary } = req.body;
 
-    if (!user_UID || !journal_entry || !title) {
+    if (!user_UID || !journal_entry || !title || !journal_summary) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -21,6 +21,7 @@ export default async function handler(req, res) {
         title: title,
         date_created: now.toISOString(),
         time_created: now.toTimeString().split(" ")[0],
+        journal_summary: journal_summary,
       })
       .select();
 
