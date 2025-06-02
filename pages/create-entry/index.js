@@ -81,9 +81,38 @@ export default function Journal({ user }) {
     setLastActivity(Date.now());
   };
 
-  const handleGoDeeper = () => {
-    setSections([...sections, { subtitle: "", content: "" }]);
+  const handleGoDeeper = async () => {
     setShowButton(false);
+
+    // Build the conversation history as a string
+    let history = "";
+    if (content.trim()) {
+      history += `Q: Journal Entry\nA: ${content.trim()}\n`;
+    }
+    sections.forEach((section) => {
+      if (section.subtitle && section.content.trim()) {
+        history += `Q: ${section.subtitle}\nA: ${section.content.trim()}\n`;
+      }
+    });
+
+    // The last answer is either the main content (if no sections) or the last section's content
+    let lastText = "";
+    if (sections.length === 0) {
+      lastText = content;
+    } else {
+      lastText = sections[sections.length - 1].content;
+    }
+
+    // Send the full history and the last answer (for clarity)
+    const res = await fetch("/api/create-journal/freeform-question", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ history, lastText }),
+    });
+
+    const data = await res.json();
+
+    setSections([...sections, { subtitle: data.question, content: "" }]);
   };
 
   const handleSectionChange = (index, field, value) => {
@@ -312,7 +341,7 @@ export default function Journal({ user }) {
                   marginBottom: "1.5rem",
                 }}
               >
-                Question
+                {section.subtitle || "Question"}
               </Typography>
 
               <TextField
