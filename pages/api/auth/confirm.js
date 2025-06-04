@@ -14,20 +14,37 @@ export default async function handler(req, res) {
   const token_hash = stringOrFirstString(queryParams.token_hash);
   const type = stringOrFirstString(queryParams.type);
 
-  let next = "/error";
+  console.log("Email confirmation attempt:", {
+    token_hash: token_hash ? "present" : "missing",
+    type,
+    query: queryParams,
+  });
 
-  if (token_hash && type) {
-    const supabase = createClient(req, res);
+  if (!token_hash || !type) {
+    console.error("Missing token_hash or type in query params");
+    return res.redirect("/error?message=Invalid confirmation link");
+  }
+
+  const supabase = createClient(req, res);
+
+  try {
     const { error } = await supabase.auth.verifyOtp({
       type,
       token_hash,
     });
-    if (error) {
-      console.error(error);
-    } else {
-      next = stringOrFirstString(queryParams.next) || "/";
-    }
-  }
 
-  res.redirect(next);
+    if (error) {
+      console.error("Email verification error:", error);
+      return res.redirect(
+        `/error?message=${encodeURIComponent(error.message)}`
+      );
+    }
+
+    console.log("Email verification successful");
+    const next = stringOrFirstString(queryParams.next) || "/auth/success";
+    return res.redirect(next);
+  } catch (err) {
+    console.error("Unexpected error during email verification:", err);
+    return res.redirect("/error?message=An unexpected error occurred");
+  }
 }

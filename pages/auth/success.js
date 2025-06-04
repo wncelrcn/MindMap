@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import Image from "next/image";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
-import ErrorIcon from "@mui/icons-material/Error";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -31,16 +31,8 @@ const quicksand = Quicksand({
   variable: "--font-quicksand",
 });
 
-export default function ErrorPage() {
+export default function AuthSuccess() {
   const router = useRouter();
-  const { message } = router.query;
-
-  const errorMessage = message || "Sorry, something went wrong";
-  const isExpiredToken = message && message.includes("expired");
-
-  const handleRegisterRedirect = () => {
-    router.push("/register");
-  };
 
   const handleLoginRedirect = () => {
     router.push("/login");
@@ -49,10 +41,10 @@ export default function ErrorPage() {
   return (
     <>
       <Head>
-        <title>MindMap - Verification Error</title>
+        <title>MindMap - Email Verified</title>
         <meta
           name="description"
-          content="There was an issue with email verification. Please try again."
+          content="Your email has been successfully verified. Welcome to MindMap!"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/assets/logo.png" />
@@ -109,10 +101,10 @@ export default function ErrorPage() {
                 The Journal Where Every Thought Maps Its Purpose
               </Typography>
 
-              <ErrorIcon
+              <CheckCircleIcon
                 sx={{
                   fontSize: 80,
-                  color: "#f44336",
+                  color: "#4CAF50",
                   my: 2,
                 }}
               />
@@ -127,11 +119,11 @@ export default function ErrorPage() {
                   mb: 1,
                 }}
               >
-                Verification Failed
+                Email Verified Successfully!
               </Typography>
 
               <Alert
-                severity="error"
+                severity="success"
                 sx={{
                   width: "100%",
                   fontFamily: "var(--font-poppins)",
@@ -141,63 +133,27 @@ export default function ErrorPage() {
                   },
                 }}
               >
-                {errorMessage}
+                Your email address has been confirmed. You can now log in to
+                your account and start using MindMap to elevate your mental
+                wellness journey.
               </Alert>
 
-              {isExpiredToken && (
-                <Alert
-                  severity="info"
-                  sx={{
-                    width: "100%",
-                    fontFamily: "var(--font-poppins)",
-                    "& .MuiAlert-message": {
-                      textAlign: "center",
-                      width: "100%",
-                    },
-                  }}
-                >
-                  Confirmation link expired. Please request a new one.
-                </Alert>
-              )}
-
-              <Stack spacing={2} sx={{ width: "100%", mt: 2 }}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  onClick={handleRegisterRedirect}
-                  sx={{
-                    bgcolor: "#4E2BBD",
-                    borderRadius: "12px",
-                    height: "3.3rem",
-                    "&:hover": { bgcolor: "#3d22a3" },
-                    fontFamily: "var(--font-poppins)",
-                    fontWeight: 600,
-                  }}
-                >
-                  Register Again
-                </Button>
-
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  onClick={handleLoginRedirect}
-                  sx={{
-                    borderColor: "#2D1B6B",
-                    color: "#2D1B6B",
-                    borderRadius: "12px",
-                    height: "3.3rem",
-                    "&:hover": {
-                      borderColor: "#1e1474",
-                      color: "#1e1474",
-                      bgcolor: "rgba(45, 27, 107, 0.04)",
-                    },
-                    fontFamily: "var(--font-poppins)",
-                    fontWeight: 600,
-                  }}
-                >
-                  Go to Login
-                </Button>
-              </Stack>
+              <Button
+                fullWidth
+                variant="contained"
+                onClick={handleLoginRedirect}
+                sx={{
+                  bgcolor: "#4E2BBD",
+                  borderRadius: "12px",
+                  height: "3.3rem",
+                  marginTop: "32px",
+                  "&:hover": { bgcolor: "#3d22a3" },
+                  fontFamily: "var(--font-poppins)",
+                  fontWeight: 600,
+                }}
+              >
+                Go to Login
+              </Button>
 
               <Typography
                 variant="body2"
@@ -208,8 +164,8 @@ export default function ErrorPage() {
                   mt: 2,
                 }}
               >
-                Need help? Contact our support team or try registering with a
-                different email address.
+                Ready to start your journaling journey? Log in now to access
+                your dashboard.
               </Typography>
             </Stack>
           </Paper>
