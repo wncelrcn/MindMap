@@ -258,38 +258,31 @@ export default function Journals({ user }) {
                 xs={12}
                 md={6}
                 lg={5}
-                sx={{ width: { xs: "100%", md: "auto" } }}
+                sx={{ width: { xs: "100%", md: "auto" }, maxWidth: { md: "800px" } }}
               >
                 <TextField
                   placeholder="Search Entry"
                   variant="outlined"
-                  fullWidth
                   value={searchQuery}
                   onChange={handleSearchChange}
                   sx={{
                     backgroundColor: "#f8f7fc",
                     borderRadius: 2,
-                    width: { xs: "100%", md: "50rem" },
-
+                    width: { xs: "100%", md: "650px" },
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "12px",
                       backgroundColor: "#f8f7fe",
-
                       "& fieldset": {
                         borderColor: "#e0d8f8",
                       },
-
                       "&:hover fieldset": {
                         borderColor: "#5A33B7",
                       },
-
                       "&.Mui-focused fieldset": {
                         borderColor: "#5A33B7",
                         borderWidth: "2px",
                       },
                     },
-
-                    // Input text
                     "& .MuiInputBase-input": {
                       fontFamily: poppins.style.fontFamily,
                     },
@@ -311,6 +304,10 @@ export default function Journals({ user }) {
                 xs={12}
                 md="auto"
                 spacing={2}
+                sx={{ 
+                  flexWrap: "nowrap",
+                  alignItems: "center",
+                }}
                 justifyContent={{ xs: "space-between", sm: "flex-start" }}
               >
                 {/* Apply Filter */}
@@ -440,7 +437,12 @@ export default function Journals({ user }) {
             )}
 
             {/* Journal Cards */}
-            <Grid container spacing={3} sx={{ mb: 20 }}>
+            <Grid 
+              container 
+              spacing={3} 
+              sx={{ mb: 20 }}
+              justifyContent={{ xs: "center", md: "flex-start" }}
+            >
               {filteredEntries.length === 0 ? (
                 <Grid item xs={12}>
                   <Typography

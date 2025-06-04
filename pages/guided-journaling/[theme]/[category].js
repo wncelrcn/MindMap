@@ -108,7 +108,7 @@ export default function CategoryDetails({ user }) {
                   backgroundColor: "transparent",
                 },
                 minWidth: "auto",
-                padding: { xs: "1rem", md: "1rem 8rem" },
+                padding: { xs: "1rem 1.5rem", md: "1rem 8rem" },
               }}
             />
           </Link>
@@ -118,10 +118,9 @@ export default function CategoryDetails({ user }) {
         <Container
           maxWidth={false}
           sx={{
-            width: "80%",
+            width: { xs: "95%", sm: "90%", md: "80%" },
             mx: "auto",
-            pl: { xs: 4, md: 8, lg: 12 },
-            pr: { xs: 4, md: 8, lg: 12 },
+            px: { xs: 2, sm: 3, md: 8, lg: 12 },
           }}
         >
           {/* Gradient Header */}
@@ -133,7 +132,7 @@ export default function CategoryDetails({ user }) {
               maxWidth: "100%",
               width: "100%",
               mb: 2,
-              p: { xs: 3, md: 4 },
+              p: { xs: 2, sm: 3, md: 4 },
             }}
           >
             <Typography
@@ -143,7 +142,7 @@ export default function CategoryDetails({ user }) {
               sx={{
                 fontFamily: poppins.style.fontFamily,
                 color: "#2D1B6B",
-                fontSize: { xs: "1rem", md: "1.1rem" },
+                fontSize: { xs: "0.95rem", sm: "1rem", md: "1.1rem" },
                 mb: 2,
               }}
             >
@@ -158,8 +157,9 @@ export default function CategoryDetails({ user }) {
               sx={{
                 fontFamily: poppins.style.fontFamily,
                 color: "#2D1B6B",
-                fontSize: { xs: "2.5rem", md: "3.5rem" },
-                mb: 5,
+                fontSize: { xs: "2rem", sm: "2.5rem", md: "3.5rem" },
+                mb: { xs: 3, md: 5 },
+                lineHeight: { xs: 1.2, md: 1.1 },
               }}
             >
               {categoryData.name}
@@ -171,8 +171,9 @@ export default function CategoryDetails({ user }) {
               sx={{
                 fontFamily: quicksand.style.fontFamily,
                 color: "#2D1B6B",
-                fontSize: { xs: "1rem", md: "1.1rem" },
+                fontSize: { xs: "0.95rem", sm: "1rem", md: "1.1rem" },
                 fontWeight: 400,
+                lineHeight: 1.4,
               }}
             >
               A simple {themeData.name.toLowerCase()} practice with four guiding
@@ -195,16 +196,16 @@ export default function CategoryDetails({ user }) {
               borderRadius: "8px",
               maxWidth: "100%",
               width: "100%",
-              mb: 6,
-              pt: 2,
-              pb: 2,
+              mb: { xs: 4, md: 6 },
+              py: { xs: 1.5, md: 2 },
+              px: { xs: 2, md: 3 },
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               textTransform: "none",
               fontFamily: poppins.style.fontFamily,
               fontWeight: 500,
-              fontSize: "1.1rem",
+              fontSize: { xs: "1rem", md: "1.1rem" },
               color: "#4E2BBD",
               cursor: "pointer",
               transition: "all 0.2s ease",
@@ -219,7 +220,7 @@ export default function CategoryDetails({ user }) {
 
           {/* Content Section */}
           <Box sx={{ maxWidth: "100%", width: "100%" }}>
-            <Box sx={{ mb: 6 }}>
+            <Box sx={{ mb: { xs: 4, md: 6 } }}>
               <Typography
                 variant="h5"
                 component="h3"
@@ -228,8 +229,8 @@ export default function CategoryDetails({ user }) {
                 sx={{
                   fontFamily: poppins.style.fontFamily,
                   color: "#2D1B6B",
-                  fontSize: { xs: "1.5rem", md: "1.8rem" },
-                  mb: 2,
+                  fontSize: { xs: "1.3rem", sm: "1.5rem", md: "1.8rem" },
+                  mb: { xs: 1.5, md: 2 },
                 }}
               >
                 About
@@ -240,10 +241,10 @@ export default function CategoryDetails({ user }) {
                 sx={{
                   fontFamily: quicksand.style.fontFamily,
                   color: "#2D1B6B",
-                  fontSize: { xs: "1rem", md: "1.1rem" },
+                  fontSize: { xs: "0.95rem", sm: "1rem", md: "1.1rem" },
                   fontWeight: 400,
                   mb: 1,
-                  lineHeight: 1.6,
+                  lineHeight: { xs: 1.5, md: 1.6 },
                 }}
               >
                 {categoryData.about}
@@ -259,8 +260,8 @@ export default function CategoryDetails({ user }) {
                 sx={{
                   fontFamily: poppins.style.fontFamily,
                   color: "#2D1B6B",
-                  fontSize: { xs: "1.5rem", md: "1.8rem" },
-                  mb: 2,
+                  fontSize: { xs: "1.3rem", sm: "1.5rem", md: "1.8rem" },
+                  mb: { xs: 1.5, md: 2 },
                 }}
               >
                 Useful When
@@ -269,9 +270,9 @@ export default function CategoryDetails({ user }) {
                 component="ul"
                 sx={{
                   listStyleType: "disc",
-                  pl: 4,
+                  pl: { xs: 3, md: 4 },
                   "& li": {
-                    pb: 1,
+                    pb: { xs: 0.5, md: 1 },
                   },
                 }}
               >
@@ -284,9 +285,9 @@ export default function CategoryDetails({ user }) {
                     sx={{
                       fontFamily: quicksand.style.fontFamily,
                       color: "#2D1B6B",
-                      fontSize: { xs: "1rem", md: "1.1rem" },
+                      fontSize: { xs: "0.95rem", sm: "1rem", md: "1.1rem" },
                       fontWeight: 400,
-                      lineHeight: 1.6,
+                      lineHeight: { xs: 1.5, md: 1.6 },
                     }}
                   >
                     {point.trim()}
@@ -298,7 +299,7 @@ export default function CategoryDetails({ user }) {
         </Container>
 
         {/* Footer Section */}
-        <Box component="footer" sx={{ mt: 10 }}>
+        <Box component="footer" sx={{ mt: { xs: 6, md: 10 } }}>
           <SupportFooter />
           <Footer />
         </Box>

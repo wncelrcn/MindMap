@@ -225,57 +225,73 @@ export default function Home() {
               border: "2px dashed #ccc",
             }}
           />
-          <Container
-            maxWidth="lg"
+        </Container>
+
+        {/* Features and Testimonials Section - Fixed Container */}
+        <Container
+          maxWidth="lg"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            px: { xs: 2, sm: 3, md: 4 }, // Better padding for mobile
+            pb: 8, // Add bottom padding
+          }}
+        >
+          {/* Features Section */}
+          <Typography
+            variant="h4"
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "left",
-              textAlign: "left",
+              mt: 8,
+              mb: 4,
+              fontWeight: 700,
+              background: "linear-gradient(90deg, #563CA5 0%, #E25C59 30%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              textAlign: { xs: "center", md: "left" }, // Center on mobile
+              fontSize: { xs: "1.8rem", md: "2.125rem" }, // Responsive font size
             }}
           >
-            {/* Features Section */}
-            <Typography
-              variant="h4"
-              sx={{
-                mt: 8,
-                mb: 4,
-                fontWeight: 700,
-                background: "linear-gradient(90deg, #563CA5 0%, #E25C59 30%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                textAlign: "left",
-              }}
-            >
-              What can it do?
-            </Typography>
+            What can it do?
+          </Typography>
 
+          <Box sx={{ mb: 6 }}>
             <FeatureCarousel features={myFeatures} />
+          </Box>
 
-            <Typography
-              variant="h4"
-              sx={{
-                mt: 10,
-                mb: 4,
-                fontWeight: 700,
-                background: "linear-gradient(90deg, #563CA5 0%, #E25C59 50%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                textAlign: "left",
-              }}
-            >
-              What do our users say?
-            </Typography>
+          <Typography
+            variant="h4"
+            sx={{
+              mt: 10,
+              mb: 4,
+              fontWeight: 700,
+              background: "linear-gradient(90deg, #563CA5 0%, #E25C59 50%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              textAlign: { xs: "center", md: "left" }, // Center on mobile
+              fontSize: { xs: "1.8rem", md: "2.125rem" }, // Responsive font size
+            }}
+          >
+            What do our users say?
+          </Typography>
 
+          {/* Testimonials Section with better responsive handling */}
+          <Box 
+            sx={{ 
+              width: "100%",
+              overflow: "hidden", // Prevent horizontal scroll
+              mb: 6, // Add margin bottom
+            }}
+          >
             <TestimonialCarousel testimonials={myTestimonials} />
-          </Container>
+          </Box>
         </Container>
+
+        {/* Footer Section */}
+        <Box component="footer" sx={{ mt: 10 }}>
+          <SupportFooter />
+          <Footer />
+        </Box>
       </div>
-      {/* Footer Section */}
-      <Box component="footer" sx={{ mt: 10 }}>
-        <SupportFooter />
-        <Footer />
-      </Box>
     </ThemeProvider>
   );
 }

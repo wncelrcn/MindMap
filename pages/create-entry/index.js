@@ -25,6 +25,7 @@ const quicksand = Quicksand({
   subsets: ["latin"],
   variable: "--font-quicksand",
 });
+
 export async function getServerSideProps(context) {
   const supabase = createClient(context);
 
@@ -442,7 +443,7 @@ export default function Journal({ user }) {
           )}
         </Box>
 
-        {/* Suggestion Button (fixed at bottom of screen) */}
+        {/* Suggestion Button (fixed at bottom of screen) - FIXED VERSION */}
         {!content && (
           <Box
             position="fixed"
@@ -451,10 +452,14 @@ export default function Journal({ user }) {
             width="100%"
             display="flex"
             justifyContent="center"
+            alignItems="center"
             bgcolor="#fff"
-            py={3}
+            py={{ xs: 2, sm: 3 }}
+            px={{ xs: 2, sm: 4 }}
             zIndex={10}
-            mb={2}
+            sx={{
+              boxShadow: "0 -2px 8px rgba(0,0,0,0.1)",
+            }}
           >
             <Button
               variant="contained"
@@ -465,8 +470,11 @@ export default function Journal({ user }) {
                 textTransform: "none",
                 fontWeight: 500,
                 borderRadius: "12px",
-                padding: "0.95rem 2rem",
+                padding: { xs: "0.8rem 1.5rem", sm: "0.95rem 2rem" },
                 boxShadow: "none",
+                maxWidth: { xs: "90%", sm: "600px", md: "500px" },
+                width: "fit-content",
+                minWidth: { xs: "280px", sm: "auto" },
                 "&:hover": {
                   backgroundColor: "#D4C7F3",
                 },
@@ -476,7 +484,9 @@ export default function Journal({ user }) {
                 sx={{
                   fontFamily: poppins.style.fontFamily,
                   fontWeight: 400,
-                  fontSize: "1.1rem",
+                  fontSize: { xs: "0.9rem", sm: "1rem", md: "1.1rem" },
+                  textAlign: "center",
+                  lineHeight: 1.4,
                 }}
               >
                 Having a hard time? Don't worry, try our suggestions.
