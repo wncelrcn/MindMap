@@ -1,5 +1,5 @@
-// Goal: This page will display the emotions of the journal entry.
-// Goal: Finish UI
+// UI Almost complete just need little tweaks for the Mood Distribution Chart
+// Goal: Integrate backend data fetching
 
 import {
   Box,
@@ -9,6 +9,7 @@ import {
   CardContent,
   LinearProgress,
   Avatar,
+  Paper,
 } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
@@ -110,7 +111,6 @@ export default function ViewEmotions({ user }) {
     fetchJournal();
   }, [user_UID]);
 
-  // TODO: Replace this with actual AI-generated emotion analysis
   const getEmotions = () => {
     if (!journalData) return [];
 
@@ -121,14 +121,16 @@ export default function ViewEmotions({ user }) {
         description:
           "Strong positive emotions detected throughout the journal entry, particularly when discussing achievements and relationships.",
         color: "#FFD700",
+        gradientColor: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
         icon: "😊",
       },
       {
-        emotion: "Gratitude",
+        emotion: "Gratitude", 
         intensity: 85,
         description:
           "High levels of appreciation and thankfulness expressed towards various aspects of life.",
         color: "#32CD32",
+        gradientColor: "linear-gradient(135deg, #32CD32 0%, #228B22 100%)",
         icon: "🙏",
       },
       {
@@ -137,6 +139,7 @@ export default function ViewEmotions({ user }) {
         description:
           "Mild concerns about future uncertainties, but well-managed and acknowledged.",
         color: "#FF6B6B",
+        gradientColor: "linear-gradient(135deg, #FF6B6B 0%, #FF4757 100%)",
         icon: "😰",
       },
       {
@@ -145,6 +148,7 @@ export default function ViewEmotions({ user }) {
         description:
           "Overwhelming sense of optimism and positive expectations for the future.",
         color: "#87CEEB",
+        gradientColor: "linear-gradient(135deg, #87CEEB 0%, #4682B4 100%)",
         icon: "🌟",
       },
       {
@@ -153,9 +157,102 @@ export default function ViewEmotions({ user }) {
         description:
           "Deep contemplative thoughts about personal growth and life experiences.",
         color: "#DDA0DD",
+        gradientColor: "linear-gradient(135deg, #DDA0DD 0%, #9370DB 100%)",
         icon: "🤔",
       },
     ];
+  };
+
+  // Mood distribution visualization component
+  const MoodDistributionChart = () => {
+    const emotions = getEmotions();
+    const totalIntensity = emotions.reduce((sum, emotion) => sum + emotion.intensity, 0);
+    
+    return (
+      <Paper
+        elevation={0}
+        sx={{
+          background: "linear-gradient(135deg, #FF6B9D 0%, #C44AFF 25%, #4ECDC4 75%, #45B7D1 100%)",
+          borderRadius: "24px",
+          p: 4,
+          mb: 4,
+          position: "relative",
+          overflow: "hidden",
+          minHeight: "280px",
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: { xs: "1.1rem", md: "1.3rem" },
+            fontWeight: 400,
+            color: "white",
+            opacity: 0.9,
+            fontFamily: poppins.style.fontFamily,
+            mb: 1,
+          }}
+        >
+          Mood Distribution Insights
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: { xs: "0.9rem", md: "1rem" },
+            fontWeight: 300,
+            color: "white",
+            opacity: 0.8,
+            fontFamily: poppins.style.fontFamily,
+            mb: 3,
+          }}
+        >
+          How you felt
+        </Typography>
+        
+        {/* Emotion bubbles positioned across the gradient */}
+        {emotions.map((emotion, index) => {
+          const positions = [
+            { left: "15%", top: "40%" }, // Joy
+            { left: "75%", top: "25%" }, // Gratitude  
+            { left: "25%", top: "70%" }, // Anxiety
+            { left: "60%", top: "60%" }, // Hope
+            { left: "45%", top: "35%" }, // Reflection
+          ];
+          
+          return (
+            <Box
+              key={emotion.emotion}
+              sx={{
+                position: "absolute",
+                ...positions[index],
+                transform: "translate(-50%, -50%)",
+                textAlign: "center",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: { xs: "0.75rem", md: "0.85rem" },
+                  fontWeight: 400,
+                  color: "white",
+                  opacity: 0.9,
+                  fontFamily: poppins.style.fontFamily,
+                  mb: 0.5,
+                }}
+              >
+                {emotion.intensity}%
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: { xs: "0.85rem", md: "1rem" },
+                  fontWeight: 500,
+                  color: "white",
+                  fontFamily: poppins.style.fontFamily,
+                }}
+              >
+                {emotion.emotion}
+              </Typography>
+            </Box>
+          );
+        })}
+      </Paper>
+    );
   };
 
   if (loading) {
@@ -163,7 +260,15 @@ export default function ViewEmotions({ user }) {
       <>
         <Navbar />
         <Box sx={{ p: 4, textAlign: "center" }}>
-          <Typography>Loading emotions...</Typography>
+          <Typography
+            sx={{
+              fontFamily: poppins.style.fontFamily,
+              fontSize: "1.2rem",
+              color: "#2D1B6B",
+            }}
+          >
+            Loading emotions...
+          </Typography>
         </Box>
       </>
     );
@@ -174,7 +279,15 @@ export default function ViewEmotions({ user }) {
       <>
         <Navbar />
         <Box sx={{ p: 4, textAlign: "center" }}>
-          <Typography color="error">{error}</Typography>
+          <Typography 
+            color="error"
+            sx={{
+              fontFamily: poppins.style.fontFamily,
+              fontSize: "1.2rem",
+            }}
+          >
+            {error}
+          </Typography>
         </Box>
       </>
     );
@@ -195,7 +308,7 @@ export default function ViewEmotions({ user }) {
       <Navbar />
 
       {/* Header with image */}
-      <Box position="relative" width="100%" height="234px">
+      <Box position="relative" width="100%" height={{ xs: "200px", md: "234px" }}>
         <Box
           position="absolute"
           top={16}
@@ -226,31 +339,51 @@ export default function ViewEmotions({ user }) {
         />
       </Box>
 
-      {/* Emotions Content */}
+      {/* Main Content */}
       <Box
         sx={{
           padding: { xs: "2rem 1.5rem", md: "3rem 8rem" },
-          paddingBottom: "10rem",
-          marginBottom: "8rem",
+          paddingBottom: "8rem",
+          marginBottom: "4rem",
         }}
       >
+        {/* Page Title */}
         <Typography
           sx={{
-            fontSize: "2rem",
-            fontWeight: 600,
-            color: "#2D1B6B",
+            fontSize: { xs: "0.9rem", md: "1rem" },
+            fontWeight: 400,
+            color: "#666",
             lineHeight: "normal",
             fontFamily: poppins.style.fontFamily,
-            mb: 2,
+            mb: 1,
+            textTransform: "uppercase",
+            letterSpacing: "0.5px",
           }}
         >
-          Emotional Analysis
+          Journal
         </Typography>
 
         <Typography
           sx={{
-            fontSize: "1.5rem",
-            fontWeight: 400,
+            fontSize: { xs: "2.5rem", md: "3.5rem" },
+            fontWeight: 700,
+            color: "#2D1B6B",
+            lineHeight: "1.1",
+            fontFamily: poppins.style.fontFamily,
+            mb: 6,
+          }}
+        >
+          Emotions
+        </Typography>
+
+        {/* Mood Distribution Chart */}
+        <MoodDistributionChart />
+
+        {/* Journal Info */}
+        <Typography
+          sx={{
+            fontSize: { xs: "1.3rem", md: "1.5rem" },
+            fontWeight: 600,
             color: "#2D1B6B",
             lineHeight: "normal",
             fontFamily: poppins.style.fontFamily,
@@ -261,114 +394,125 @@ export default function ViewEmotions({ user }) {
         </Typography>
 
         <Typography
-          mt={1}
-          mb={3}
-          fontWeight={500}
-          fontSize="1.2rem"
-          color="#2D1B6B"
           sx={{
+            fontSize: { xs: "1rem", md: "1.1rem" },
+            fontWeight: 400,
+            color: "#666",
             fontFamily: poppins.style.fontFamily,
-            fontWeight: 300,
+            mb: 6,
           }}
         >
           {formatDate(journalData?.date_created)}
         </Typography>
 
-        {/* Emotions List */}
-        <Typography
-          sx={{
-            fontSize: "1.8rem",
-            fontWeight: 600,
-            color: "#2D1B6B",
-            lineHeight: "normal",
-            fontFamily: poppins.style.fontFamily,
-            mb: 4,
-          }}
-        >
-          Detected Emotions
-        </Typography>
-
-        <Grid container spacing={3}>
+        {/* Emotion Cards Grid */}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, md: 3 } }}>
           {getEmotions().map((emotion, index) => (
-            <Grid item xs={12} key={index}>
-              <Card
-                sx={{
-                  borderRadius: "16px",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  border: `2px solid ${emotion.color}20`,
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                    <Avatar
-                      sx={{
-                        backgroundColor: emotion.color,
-                        mr: 2,
-                        width: 48,
-                        height: 48,
-                      }}
-                    >
-                      <Typography sx={{ fontSize: "1.5rem" }}>
-                        {emotion.icon}
-                      </Typography>
-                    </Avatar>
-                    <Box sx={{ flex: 1 }}>
+            <Card
+              key={index}
+              sx={{
+                borderRadius: "20px",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                background: "rgba(255,255,255,0.95)",
+                backdropFilter: "blur(20px)",
+                height: { xs: "160px", md: "180px" },
+                width: "100%",
+                "&:hover": {
+                  transform: "translateY(-8px)",
+                  boxShadow: "0 20px 40px rgba(0,0,0,0.12)",
+                },
+              }}
+            >
+                <CardContent 
+                  sx={{ 
+                    p: { xs: 3, md: 4 },
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 3,
+                    height: "100%",
+                  }}
+                >
+                  {/* Emotion Icon and Info */}
+                  <Avatar
+                    sx={{
+                      background: emotion.gradientColor,
+                      width: { xs: 56, md: 64 },
+                      height: { xs: 56, md: 64 },
+                      boxShadow: `0 4px 20px ${emotion.color}40`,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Typography sx={{ fontSize: { xs: "1.5rem", md: "1.8rem" } }}>
+                      {emotion.icon}
+                    </Typography>
+                  </Avatar>
+
+                  {/* Emotion Details */}
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                       <Typography
                         sx={{
-                          fontSize: "1.3rem",
+                          fontSize: { xs: "1.3rem", md: "1.5rem" },
                           fontWeight: 600,
                           color: "#2D1B6B",
                           fontFamily: poppins.style.fontFamily,
+                          mr: "auto",
                         }}
                       >
                         {emotion.emotion}
                       </Typography>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", mt: 1 }}
+                      <Typography
+                        sx={{
+                          fontSize: { xs: "1.2rem", md: "1.4rem" },
+                          fontWeight: 700,
+                          color: emotion.color,
+                          fontFamily: poppins.style.fontFamily,
+                        }}
                       >
-                        <LinearProgress
-                          variant="determinate"
-                          value={emotion.intensity}
-                          sx={{
-                            flex: 1,
-                            mr: 2,
-                            height: 8,
-                            borderRadius: 4,
-                            backgroundColor: `${emotion.color}20`,
-                            "& .MuiLinearProgress-bar": {
-                              backgroundColor: emotion.color,
-                              borderRadius: 4,
-                            },
-                          }}
-                        />
-                        <Typography
-                          sx={{
-                            fontSize: "1rem",
-                            fontWeight: 500,
-                            color: emotion.color,
-                            fontFamily: poppins.style.fontFamily,
-                          }}
-                        >
-                          {emotion.intensity}%
-                        </Typography>
-                      </Box>
+                        {emotion.intensity}%
+                      </Typography>
                     </Box>
+
+                    {/* Progress Bar */}
+                    <Box sx={{ mb: 2 }}>
+                      <LinearProgress
+                        variant="determinate"
+                        value={emotion.intensity}
+                        sx={{
+                          height: 8,
+                          borderRadius: 4,
+                          backgroundColor: `${emotion.color}15`,
+                          "& .MuiLinearProgress-bar": {
+                            background: emotion.gradientColor,
+                            borderRadius: 4,
+                          },
+                        }}
+                      />
+                    </Box>
+
+                    {/* Description */}
+                    <Typography
+                      sx={{
+                        fontSize: { xs: "0.95rem", md: "1rem" },
+                        color: "#666",
+                        lineHeight: 1.5,
+                        fontFamily: poppins.style.fontFamily,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {emotion.description}
+                    </Typography>
                   </Box>
-                  <Typography
-                    sx={{
-                      fontSize: "1rem",
-                      color: "#4A3E8E",
-                      lineHeight: 1.6,
-                      fontFamily: poppins.style.fontFamily,
-                    }}
-                  >
-                    {emotion.description}
-                  </Typography>
                 </CardContent>
               </Card>
-            </Grid>
-          ))}
-        </Grid>
+            ))}
+        </Box>
       </Box>
     </>
   );
