@@ -20,6 +20,7 @@ import Navbar from "@/components/navbar";
 import { useState, useEffect } from "react";
 import { Poppins, Raleway, Quicksand } from "next/font/google";
 import { createClient } from "@/utils/supabase/server-props";
+import Head from "next/head";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -89,6 +90,16 @@ export default function ViewInsights({ user }) {
 
   return (
     <>
+      <Head>
+        <title>View Insights</title>
+        <meta
+          name="description"
+          content="Elevate your mental wellness, mindset, and cognitive strength with the next level of journaling."
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/assets/logo.png" />
+      </Head>
+
       <Navbar />
 
       {/* Header with image */}

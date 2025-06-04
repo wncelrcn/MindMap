@@ -8,6 +8,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: "Journal text is required" });
   }
 
+  // Check if API key exists
+  if (!process.env.OPENROUTER_API_KEY) {
+    return res.status(500).json({ message: "API key not configured" });
+  }
+
   let journalString = "";
   if (Array.isArray(journal_text)) {
     journal_text.forEach((entry) => {
@@ -19,59 +24,27 @@ export default async function handler(req, res) {
     journalString = String(journal_text);
   }
 
-  const prompt = `
-    You are a helpful therapist that analyzes journal entries and provides a summary of the user's mood and thoughts.
-    The journal entry is:
-    ${journalString}
-    Please provide a concise summary of the user's mood and thoughts.
+  const systemPrompt = `You are a helpful therapist that analyzes journal entries and provides a summary of the user's mood and thoughts.
 
-    Use second person view.
-    Use "The Journal is about" in your response.
-    Use "you" in your response.
+Please provide a concise summary of the user's mood and thoughts.
 
-    Do not call the user "the user".
-    Do not use "their" or "they" in your response.
-    Do not use "I" in your response.
-    Do not use "me" in your response.
-    Do not use "my" in your response.
-    Do not use "mine" in your response.
-    Do not use "myself" in your response.
-    Do not use "I'm" in your response.
+Use second person view.
+Use "The journal is about" in your response.
+Use "you" in your response.
 
-    Do not submit in markdown format.
-    Do not include any other text in your response.
-    `;
+Do not call the user "the user".
+Do not use "their" or "they" in your response.
+Do not use "I" in your response.
+Do not use "me" in your response.
+Do not use "my" in your response.
+Do not use "mine" in your response.
+Do not use "myself" in your response.
+Do not use "I'm" in your response.
 
-  // Try Gemini first
+Do not submit in markdown format.
+Do not include any other text in your response.`;
+
   try {
-    const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: prompt }],
-            },
-          ],
-        }),
-      }
-    );
-
-    const geminiResult = await geminiResponse.json();
-    const geminiSummary =
-      geminiResult?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-
-    if (geminiSummary) {
-      return res
-        .status(200)
-        .json({ summary: geminiSummary, source: "gemini", raw: geminiResult });
-    }
-
-    // If Gemini fails, try OpenRouter
     const openRouterResponse = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
       {
@@ -81,21 +54,31 @@ export default async function handler(req, res) {
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "openai/gpt-3.5-turbo",
+          model: "deepseek/deepseek-chat-v3-0324:free",
           messages: [
             {
               role: "system",
-              content: prompt,
+              content: systemPrompt,
             },
             {
               role: "user",
-              content: `The journal entry is:\n${journalString}\nPlease provide a concise summary of the user's mood and thoughts.`,
+              content: `The journal entry is:\n${journalString}`,
             },
           ],
           max_tokens: 128,
+          temperature: 0.7,
         }),
       }
     );
+
+    if (!openRouterResponse.ok) {
+      const errorText = await openRouterResponse.text();
+      return res.status(500).json({
+        message: "OpenRouter API error",
+        status: openRouterResponse.status,
+        details: errorText,
+      });
+    }
 
     const openRouterResult = await openRouterResponse.json();
     const openRouterSummary =
@@ -105,16 +88,19 @@ export default async function handler(req, res) {
       return res.status(200).json({
         summary: openRouterSummary,
         source: "openrouter",
-        raw: openRouterResult,
       });
     }
 
-    // If both fail
+    // If OpenRouter fails
     return res.status(500).json({
-      message: "Both Gemini and OpenRouter failed to generate a summary.",
+      message: "Failed to generate summary from OpenRouter.",
+      details: openRouterResult,
     });
   } catch (error) {
     console.error("Error generating summary:", error);
-    res.status(500).json({ message: "Failed to generate summary" });
+    res.status(500).json({
+      message: "Failed to generate summary",
+      error: error.message,
+    });
   }
 }

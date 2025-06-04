@@ -8,57 +8,27 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "No history provided" });
   }
 
-  const prompt = `
-    You are a helpful therapist. Here is the conversation so far between you and the user (in question/answer pairs). Based on the entire conversation, generate a new, deeper follow-up question to help the user reflect further.
+  // Check if API key exists
+  if (!process.env.OPENROUTER_API_KEY) {
+    return res.status(500).json({ error: "API key not configured" });
+  }
 
-    The question should be a single sentence that is a question.
-    The question should be a question that is related to the user's journaling text.
-    The question should be a question that is not too long or too short.
-    The question should be a question that is not too complex or too simple.
-    The question should be a question that is not too personal or too public.
-    The question should be a question that is not too vague or too specific.
-    The question should be a question that is not too leading or too leading.
+  const systemPrompt = `You are a helpful therapist. Based on the conversation history provided, generate a new, deeper follow-up question to help the user reflect further.
 
-    Do not include markdown formatting in the question.
-    Do not include any other text in the question.
+The question should be a single sentence that is a question.
+The question should be related to the user's journaling text.
+The question should be not too long or too short.
+The question should be not too complex or too simple.
+The question should be not too personal or too public.
+The question should be not too vague or too specific.
+The question should be thoughtful and encourage self-reflection.
 
-    Conversation so far:
-    ${history}
+Do not include markdown formatting in the question.
+Do not include any other text in the question.
 
-    Please generate a single, thoughtful follow-up question.`;
+Please generate a single, thoughtful follow-up question.`;
 
   try {
-    // Try Gemini first
-    const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: prompt }],
-            },
-          ],
-        }),
-      }
-    );
-
-    const geminiResult = await geminiResponse.json();
-    const geminiQuestion =
-      geminiResult?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-
-    if (geminiQuestion) {
-      return res.status(200).json({
-        question: geminiQuestion,
-        source: "gemini",
-        raw: geminiResult,
-      });
-    }
-
-    // If Gemini fails, try OpenRouter
     const openRouterResponse = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
       {
@@ -68,24 +38,33 @@ export default async function handler(req, res) {
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "openai/gpt-3.5-turbo",
+          model: "deepseek/deepseek-chat-v3-0324:free",
           messages: [
             {
               role: "system",
-              content:
-                "You are a helpful therapist. Here is the conversation so far between you and the user (in question/answer pairs). Based on the entire conversation, generate a new, deeper follow-up question to help the user reflect further. Conversation so far: " +
-                history +
-                " Please generate a single, thoughtful follow-up question.",
+              content: systemPrompt,
             },
             {
               role: "user",
-              content: lastText || "",
+              content: `Conversation so far:\n${history}\n\nLatest text: ${
+                lastText || ""
+              }`,
             },
           ],
-          max_tokens: 64,
+          max_tokens: 256,
+          temperature: 0.7,
         }),
       }
     );
+
+    if (!openRouterResponse.ok) {
+      const errorText = await openRouterResponse.text();
+      return res.status(500).json({
+        error: "OpenRouter API error",
+        status: openRouterResponse.status,
+        details: errorText,
+      });
+    }
 
     const openRouterResult = await openRouterResponse.json();
     const openRouterQuestion =
@@ -95,16 +74,19 @@ export default async function handler(req, res) {
       return res.status(200).json({
         question: openRouterQuestion,
         source: "openrouter",
-        raw: openRouterResult,
       });
     }
 
-    // If both fail
+    // If OpenRouter fails
     return res.status(500).json({
-      error: "Both Gemini and OpenRouter failed to generate a question.",
+      error: "Failed to generate question from OpenRouter.",
+      details: openRouterResult,
     });
   } catch (error) {
     console.error("Error generating question:", error);
-    res.status(500).json({ error: "Failed to generate question" });
+    res.status(500).json({
+      error: "Failed to generate question",
+      message: error.message,
+    });
   }
 }
