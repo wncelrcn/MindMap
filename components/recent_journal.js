@@ -70,7 +70,7 @@ export default function RecentJournal({
           width: "100%",
           minWidth: "16.5rem",
           maxWidth: "16.5rem",
-          height: "100%",
+          height: "280px", // Fixed height for consistent cards
           display: "block",
           textAlign: "left",
           borderRadius: 4,
@@ -87,7 +87,7 @@ export default function RecentJournal({
             background:
               "linear-gradient(135deg, #ccc9fd 0%, #F9F8FE 50%, #dec1e7 100%)",
             borderRadius: 4,
-            height: "100%",
+            height: "100%", // Fill the button container
             display: "flex",
             flexDirection: "column",
             transition: "all 0.3s ease",
@@ -101,6 +101,7 @@ export default function RecentJournal({
               borderBottom: "1px solid #cec2f3",
               borderRadius: "4px 4px 0 0",
               padding: "8px 16px",
+              flexShrink: 0, // Prevent this from shrinking
             }}
           >
             <Typography
@@ -135,44 +136,56 @@ export default function RecentJournal({
             </Typography>
           </Box>
 
-          <CardContent sx={{ p: 3 }}>
-            <Typography
-              variant="body2"
-              color="#2D1B6B"
-              mb={1}
-              sx={{
-                fontFamily: poppins.style.fontFamily,
-                fontWeight: 300,
-              }}
-              className={`${poppins.className}`}
-            >
-              Journal Created:
-            </Typography>
+          <CardContent 
+            sx={{ 
+              p: 3, 
+              display: "flex", 
+              flexDirection: "column",
+              flex: 1, // Take up remaining space
+              justifyContent: "space-between" // Distribute content evenly
+            }}
+          >
+            <Box>
+              <Typography
+                variant="body2"
+                color="#2D1B6B"
+                mb={1}
+                sx={{
+                  fontFamily: poppins.style.fontFamily,
+                  fontWeight: 300,
+                }}
+                className={`${poppins.className}`}
+              >
+                Journal Created:
+              </Typography>
 
-            <Typography
-              variant="h6"
-              component="h3"
-              fontWeight={600}
-              color="#2D1B6B"
-              className={`${poppins.className}`}
-              sx={{
-                mb: 4,
-                fontFamily: raleway.style.fontFamily,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-              }}
-            >
-              {title}
-            </Typography>
+              <Typography
+                variant="h6"
+                component="h3"
+                fontWeight={600}
+                color="#2D1B6B"
+                className={`${poppins.className}`}
+                sx={{
+                  mb: 2,
+                  fontFamily: raleway.style.fontFamily,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  lineHeight: 1.3, // Consistent line height
+                  minHeight: "2.6em", // Reserve space for 2 lines (2 * 1.3em)
+                }}
+              >
+                {title}
+              </Typography>
+            </Box>
 
             <Box
               sx={{
                 borderTop: "1px solid #CEC2F3",
                 pt: 2,
-                mt: "auto",
+                flexShrink: 0, // Prevent this section from shrinking
               }}
             >
               <Typography
