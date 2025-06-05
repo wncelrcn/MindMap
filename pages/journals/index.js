@@ -75,12 +75,12 @@ export default function Journals({ user }) {
   const [user_UID, setUser_UID] = useState(user.id);
   const [journalEntries, setJournalEntries] = useState([]);
   const [filteredEntries, setFilteredEntries] = useState([]);
-  
+
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedJournalType, setSelectedJournalType] = useState("");
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
-  
+
   // UI states
   const [filterMenuAnchor, setFilterMenuAnchor] = useState(null);
   const [dateDialogOpen, setDateDialogOpen] = useState(false);
@@ -115,20 +115,25 @@ export default function Journals({ user }) {
 
     // Search filter
     if (searchQuery.trim()) {
-      filtered = filtered.filter(entry =>
-        entry.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        entry.journal_entry?.default?.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (entry) =>
+          entry.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          entry.journal_entry?.default
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase())
       );
     }
 
     // Journal type filter
     if (selectedJournalType) {
-      filtered = filtered.filter(entry => entry.journal_type === selectedJournalType);
+      filtered = filtered.filter(
+        (entry) => entry.journal_type === selectedJournalType
+      );
     }
 
     // Date range filter
     if (dateRange.start || dateRange.end) {
-      filtered = filtered.filter(entry => {
+      filtered = filtered.filter((entry) => {
         const entryDate = new Date(entry.date_created);
         const startDate = dateRange.start ? new Date(dateRange.start) : null;
         const endDate = dateRange.end ? new Date(dateRange.end) : null;
@@ -164,7 +169,7 @@ export default function Journals({ user }) {
   const handleJournalTypeSelect = (type) => {
     const journalTypeMap = {
       "Free Journaling": "freeform",
-      "Guided Journaling": "guided"
+      "Guided Journaling": "guided",
     };
     setSelectedJournalType(journalTypeMap[type]);
     handleFilterClose();
@@ -202,7 +207,9 @@ export default function Journals({ user }) {
   // Format date for display
   const formatDateRange = () => {
     if (dateRange.start && dateRange.end) {
-      return `${new Date(dateRange.start).toLocaleDateString()} - ${new Date(dateRange.end).toLocaleDateString()}`;
+      return `${new Date(dateRange.start).toLocaleDateString()} - ${new Date(
+        dateRange.end
+      ).toLocaleDateString()}`;
     } else if (dateRange.start) {
       return `From ${new Date(dateRange.start).toLocaleDateString()}`;
     } else if (dateRange.end) {
@@ -248,27 +255,32 @@ export default function Journals({ user }) {
             <Grid
               container
               spacing={2}
-              alignItems="center"
-              sx={{ mt: 4, mb: 4 }}
-              flexDirection={{ xs: "column", sm: "row" }}
+              alignItems="stretch"
+              px={{ xs: 2, sm: 4, md: 1 }}
+              sx={{ mt: 4, mb: 4, flexWrap: "nowrap" }}
             >
               {/* Search Entry */}
               <Grid
                 item
-                xs={12}
-                md={6}
-                lg={5}
-                sx={{ width: { xs: "100%", md: "auto" }, maxWidth: { md: "800px" } }}
+                xs
+                sx={{
+                  flexGrow: 1,
+                  minWidth: 0,
+                  maxWidth: "100%",
+                  display: "flex",
+                  alignItems: "stretch",
+                }}
               >
                 <TextField
                   placeholder="Search Entry"
                   variant="outlined"
                   value={searchQuery}
                   onChange={handleSearchChange}
+                  fullWidth
                   sx={{
                     backgroundColor: "#f8f7fc",
                     borderRadius: 2,
-                    width: { xs: "100%", md: "650px" },
+                    width: "100%",
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "12px",
                       backgroundColor: "#f8f7fe",
@@ -300,111 +312,80 @@ export default function Journals({ user }) {
               {/* Button Container */}
               <Grid
                 item
-                container
-                xs={12}
-                md="auto"
-                spacing={2}
-                sx={{ 
-                  flexWrap: "nowrap",
-                  alignItems: "center",
+                sx={{
+                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "stretch",
+                  gap: 2,
                 }}
-                justifyContent={{ xs: "space-between", sm: "flex-start" }}
               >
                 {/* Apply Filter */}
-                <Grid item xs={5.5} sm="auto">
-                  <Button
-                    variant="outlined"
-                    startIcon={<FilterListIcon />}
-                    fullWidth
-                    onClick={handleFilterClick}
-                    sx={{
-                      textTransform: "none",
-                      fontFamily: poppins.style.fontFamily,
-                      color: selectedJournalType ? "#fff" : "#5A33B7",
-                      borderColor: "#e0d8f8",
-                      backgroundColor: selectedJournalType ? "#5A33B7" : "#f8f7fc",
-                      borderRadius: 5,
-                      px: { xs: 1, sm: 3 },
-                      py: 1.5,
-                      "&:hover": {
-                        backgroundColor: selectedJournalType ? "#4a2a9a" : "#ece7fa",
-                        borderColor: "#d0c6f0",
-                      },
-                    }}
-                  >
-                    {selectedJournalType === "freeform" 
-                      ? "Free Journaling" 
-                      : selectedJournalType === "guided" 
-                        ? "Guided Journaling" 
-                        : "Apply Filter"}
-                  </Button>
-                  <Menu
-                    anchorEl={filterMenuAnchor}
-                    open={Boolean(filterMenuAnchor)}
-                    onClose={handleFilterClose}
-                    sx={{
-                      "& .MuiPaper-root": {
-                        borderRadius: 2,
-                        mt: 1,
-                        minWidth: 180,
-                      },
-                    }}
-                  >
-                    <MenuItem
-                      onClick={() => handleJournalTypeSelect("Free Journaling")}
-                      sx={{ fontFamily: poppins.style.fontFamily }}
-                    >
-                      Free Journaling
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => handleJournalTypeSelect("Guided Journaling")}
-                      sx={{ fontFamily: poppins.style.fontFamily }}
-                    >
-                      Guided Journaling
-                    </MenuItem>
-                    <MenuItem
-                      onClick={clearFilters}
-                      sx={{ 
-                        fontFamily: poppins.style.fontFamily,
-                        color: "#5A33B7",
-                        fontWeight: 500
-                      }}
-                    >
-                      Clear All Filters
-                    </MenuItem>
-                  </Menu>
-                </Grid>
-
+                <Button
+                  variant="outlined"
+                  startIcon={<FilterListIcon />}
+                  onClick={handleFilterClick}
+                  sx={{
+                    textTransform: "none",
+                    fontFamily: poppins.style.fontFamily,
+                    color: selectedJournalType ? "#fff" : "#5A33B7",
+                    borderColor: "#e0d8f8",
+                    backgroundColor: selectedJournalType
+                      ? "#5A33B7"
+                      : "#f8f7fc",
+                    borderRadius: 5,
+                    px: { xs: 1, sm: 3 },
+                    py: 1.5,
+                    height: "100%",
+                    "&:hover": {
+                      backgroundColor: selectedJournalType
+                        ? "#4a2a9a"
+                        : "#ece7fa",
+                      borderColor: "#d0c6f0",
+                    },
+                  }}
+                >
+                  {selectedJournalType === "freeform"
+                    ? "Free Journaling"
+                    : selectedJournalType === "guided"
+                    ? "Guided Journaling"
+                    : "Apply Filter"}
+                </Button>
                 {/* Select Date */}
-                <Grid item xs={5.5} sm="auto">
-                  <Button
-                    variant="outlined"
-                    startIcon={<CalendarTodayIcon />}
-                    fullWidth
-                    onClick={handleDateDialogOpen}
-                    sx={{
-                      textTransform: "none",
-                      fontFamily: poppins.style.fontFamily,
-                      color: (dateRange.start || dateRange.end) ? "#fff" : "#5A33B7",
-                      borderColor: "#e0d8f8",
-                      backgroundColor: (dateRange.start || dateRange.end) ? "#5A33B7" : "#f8f7fc",
-                      borderRadius: 5,
-                      px: { xs: 1, sm: 3 },
-                      py: 1.5,
-                      "&:hover": {
-                        backgroundColor: (dateRange.start || dateRange.end) ? "#4a2a9a" : "#ece7fa",
-                        borderColor: "#d0c6f0",
-                      },
-                    }}
-                  >
-                    {formatDateRange()}
-                  </Button>
-                </Grid>
+                <Button
+                  variant="outlined"
+                  startIcon={<CalendarTodayIcon />}
+                  onClick={handleDateDialogOpen}
+                  sx={{
+                    textTransform: "none",
+                    fontFamily: poppins.style.fontFamily,
+                    color:
+                      dateRange.start || dateRange.end ? "#fff" : "#5A33B7",
+                    borderColor: "#e0d8f8",
+                    backgroundColor:
+                      dateRange.start || dateRange.end ? "#5A33B7" : "#f8f7fc",
+                    borderRadius: 5,
+                    px: { xs: 1, sm: 3 },
+                    py: 1.5,
+                    height: "100%",
+                    "&:hover": {
+                      backgroundColor:
+                        dateRange.start || dateRange.end
+                          ? "#4a2a9a"
+                          : "#ece7fa",
+                      borderColor: "#d0c6f0",
+                    },
+                  }}
+                >
+                  {formatDateRange()}
+                </Button>
               </Grid>
             </Grid>
 
             {/* Active Filters Display */}
-            {(searchQuery || selectedJournalType || dateRange.start || dateRange.end) && (
+            {(searchQuery ||
+              selectedJournalType ||
+              dateRange.start ||
+              dateRange.end) && (
               <Box sx={{ mb: 3 }}>
                 <Typography
                   variant="body2"
@@ -415,14 +396,20 @@ export default function Journals({ user }) {
                   }}
                 >
                   Active filters: {searchQuery && `Search: "${searchQuery}"`}
-                  {searchQuery && (selectedJournalType || dateRange.start || dateRange.end) && " • "}
-                  {selectedJournalType && `Type: ${
-                    selectedJournalType === "freeform" 
-                      ? "Free Journaling" 
-                      : "Guided Journaling"
-                  }`}
-                  {selectedJournalType && (dateRange.start || dateRange.end) && " • "}
-                  {(dateRange.start || dateRange.end) && `Date: ${formatDateRange()}`}
+                  {searchQuery &&
+                    (selectedJournalType || dateRange.start || dateRange.end) &&
+                    " • "}
+                  {selectedJournalType &&
+                    `Type: ${
+                      selectedJournalType === "freeform"
+                        ? "Free Journaling"
+                        : "Guided Journaling"
+                    }`}
+                  {selectedJournalType &&
+                    (dateRange.start || dateRange.end) &&
+                    " • "}
+                  {(dateRange.start || dateRange.end) &&
+                    `Date: ${formatDateRange()}`}
                 </Typography>
                 <Typography
                   variant="body2"
@@ -431,17 +418,18 @@ export default function Journals({ user }) {
                     color: "#666",
                   }}
                 >
-                  Showing {filteredEntries.length} of {journalEntries.length} entries
+                  Showing {filteredEntries.length} of {journalEntries.length}{" "}
+                  entries
                 </Typography>
               </Box>
             )}
 
             {/* Journal Cards */}
-            <Grid 
-              container 
-              spacing={3} 
+            <Grid
+              container
+              spacing={3}
               sx={{ mb: 20 }}
-              justifyContent={{ xs: "center", md: "flex-start" }}
+              justifyContent={{ xs: "center", md: "center" }}
             >
               {filteredEntries.length === 0 ? (
                 <Grid item xs={12}>
@@ -452,10 +440,9 @@ export default function Journals({ user }) {
                       textAlign: "center",
                     }}
                   >
-                    {journalEntries.length === 0 
+                    {journalEntries.length === 0
                       ? "No journals found. Start writing your first entry!"
-                      : "No journals match your current filters. Try adjusting your search criteria."
-                    }
+                      : "No journals match your current filters. Try adjusting your search criteria."}
                   </Typography>
                 </Grid>
               ) : (
@@ -504,7 +491,9 @@ export default function Journals({ user }) {
                 label="Start Date"
                 type="date"
                 value={tempDateRange.start}
-                onChange={(e) => setTempDateRange({ ...tempDateRange, start: e.target.value })}
+                onChange={(e) =>
+                  setTempDateRange({ ...tempDateRange, start: e.target.value })
+                }
                 InputLabelProps={{ shrink: true }}
                 fullWidth
                 sx={{
@@ -523,7 +512,9 @@ export default function Journals({ user }) {
                 label="End Date"
                 type="date"
                 value={tempDateRange.end}
-                onChange={(e) => setTempDateRange({ ...tempDateRange, end: e.target.value })}
+                onChange={(e) =>
+                  setTempDateRange({ ...tempDateRange, end: e.target.value })
+                }
                 InputLabelProps={{ shrink: true }}
                 fullWidth
                 sx={{
@@ -546,7 +537,8 @@ export default function Journals({ user }) {
                   fontStyle: "italic",
                 }}
               >
-                Leave either field empty to filter from/until a specific date only.
+                Leave either field empty to filter from/until a specific date
+                only.
               </Typography>
             </Stack>
           </DialogContent>

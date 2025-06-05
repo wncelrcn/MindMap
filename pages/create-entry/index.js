@@ -457,9 +457,6 @@ export default function Journal({ user }) {
             py={{ xs: 2, sm: 3 }}
             px={{ xs: 2, sm: 4 }}
             zIndex={10}
-            sx={{
-              boxShadow: "0 -2px 8px rgba(0,0,0,0.1)",
-            }}
           >
             <Button
               variant="contained"
@@ -470,11 +467,11 @@ export default function Journal({ user }) {
                 textTransform: "none",
                 fontWeight: 500,
                 borderRadius: "12px",
-                padding: { xs: "0.8rem 1.5rem", sm: "0.95rem 2rem" },
+                padding: { xs: "0.8rem 1.5rem", sm: "0.8rem 1.5rem" },
                 boxShadow: "none",
-                maxWidth: { xs: "90%", sm: "600px", md: "500px" },
-                width: "fit-content",
-                minWidth: { xs: "280px", sm: "auto" },
+                width: "100%",
+                maxWidth: { xs: "400px", sm: "550px", md: "550px" },
+                minWidth: { xs: "0", sm: "0" },
                 "&:hover": {
                   backgroundColor: "#D4C7F3",
                 },
@@ -484,7 +481,7 @@ export default function Journal({ user }) {
                 sx={{
                   fontFamily: poppins.style.fontFamily,
                   fontWeight: 400,
-                  fontSize: { xs: "0.9rem", sm: "1rem", md: "1.1rem" },
+                  fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
                   textAlign: "center",
                   lineHeight: 1.4,
                 }}
