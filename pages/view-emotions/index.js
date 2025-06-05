@@ -62,6 +62,7 @@ export default function ViewEmotions({ user }) {
   const [user_UID, setUser_UID] = useState(user.id);
   const [loading, setLoading] = useState(true);
   const [journalData, setJournalData] = useState(null);
+  const [emotionsData, setEmotionsData] = useState(null);
   const [error, setError] = useState(null);
 
   const formatDate = (dateString) => {
@@ -74,7 +75,7 @@ export default function ViewEmotions({ user }) {
   };
 
   useEffect(() => {
-    const fetchJournal = async () => {
+    const fetchJournalAndEmotions = async () => {
       try {
         const currentJournalID = sessionStorage.getItem("currentJournalId");
         const currentJournalType = sessionStorage.getItem("currentJournalType");
@@ -84,23 +85,45 @@ export default function ViewEmotions({ user }) {
           return;
         }
 
-        const response = await fetch(`/api/fetch-journal/id_journal`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: currentJournalID,
-            type: currentJournalType,
+        // Fetch journal data and emotions data in parallel
+        const [journalResponse, emotionsResponse] = await Promise.all([
+          fetch(`/api/fetch-journal/id_journal`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: currentJournalID,
+              type: currentJournalType,
+            }),
           }),
-        });
-        const data = await response.json();
+          fetch(`/api/fetch-journal/emotions`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              journal_id: currentJournalID,
+              journal_type: currentJournalType,
+            }),
+          }),
+        ]);
 
-        if (!response.ok) {
-          throw new Error(data.message || "Failed to fetch journal");
+        const journalData = await journalResponse.json();
+        const emotionsData = await emotionsResponse.json();
+
+        if (!journalResponse.ok) {
+          throw new Error(journalData.message || "Failed to fetch journal");
         }
 
-        setJournalData(data.entry);
+        setJournalData(journalData.entry);
+
+        // Set emotions data if available
+        if (emotionsResponse.ok && emotionsData.emotions) {
+          setEmotionsData(emotionsData.emotions);
+        } else {
+          console.warn("No emotions data available:", emotionsData.message);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -108,71 +131,108 @@ export default function ViewEmotions({ user }) {
       }
     };
 
-    fetchJournal();
+    fetchJournalAndEmotions();
   }, [user_UID]);
 
   const getEmotions = () => {
-    if (!journalData) return [];
+    if (!emotionsData || !Array.isArray(emotionsData)) {
+      // Return default emotions if no data available
+      return [
+        {
+          emotion: "No Data",
+          intensity: 0,
+          description:
+            "Emotions analysis is not available for this journal entry.",
+          color: "#999999",
+          gradientColor: "linear-gradient(135deg, #999999 0%, #666666 100%)",
+          icon: "📊",
+        },
+      ];
+    }
 
-    return [
-      {
-        emotion: "Joy",
-        intensity: 75,
-        description:
-          "Strong positive emotions detected throughout the journal entry, particularly when discussing achievements and relationships.",
+    // Map emotion labels to display properties
+    const emotionConfig = {
+      joy: {
         color: "#FFD700",
         gradientColor: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
         icon: "😊",
+        displayName: "Joy",
       },
-      {
-        emotion: "Gratitude", 
-        intensity: 85,
-        description:
-          "High levels of appreciation and thankfulness expressed towards various aspects of life.",
-        color: "#32CD32",
-        gradientColor: "linear-gradient(135deg, #32CD32 0%, #228B22 100%)",
-        icon: "🙏",
+      sadness: {
+        color: "#4682B4",
+        gradientColor: "linear-gradient(135deg, #4682B4 0%, #1E3A8A 100%)",
+        icon: "😢",
+        displayName: "Sadness",
       },
-      {
-        emotion: "Anxiety",
-        intensity: 35,
-        description:
-          "Mild concerns about future uncertainties, but well-managed and acknowledged.",
+      anger: {
         color: "#FF6B6B",
         gradientColor: "linear-gradient(135deg, #FF6B6B 0%, #FF4757 100%)",
-        icon: "😰",
+        icon: "😠",
+        displayName: "Anger",
       },
-      {
-        emotion: "Hope",
-        intensity: 90,
-        description:
-          "Overwhelming sense of optimism and positive expectations for the future.",
-        color: "#87CEEB",
-        gradientColor: "linear-gradient(135deg, #87CEEB 0%, #4682B4 100%)",
-        icon: "🌟",
+      fear: {
+        color: "#9333EA",
+        gradientColor: "linear-gradient(135deg, #9333EA 0%, #6B21A8 100%)",
+        icon: "😨",
+        displayName: "Fear",
       },
-      {
-        emotion: "Reflection",
-        intensity: 70,
-        description:
-          "Deep contemplative thoughts about personal growth and life experiences.",
-        color: "#DDA0DD",
-        gradientColor: "linear-gradient(135deg, #DDA0DD 0%, #9370DB 100%)",
+      surprise: {
+        color: "#F59E0B",
+        gradientColor: "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)",
+        icon: "😲",
+        displayName: "Surprise",
+      },
+      disgust: {
+        color: "#84CC16",
+        gradientColor: "linear-gradient(135deg, #84CC16 0%, #65A30D 100%)",
+        icon: "🤢",
+        displayName: "Disgust",
+      },
+      neutral: {
+        color: "#6B7280",
+        gradientColor: "linear-gradient(135deg, #6B7280 0%, #4B5563 100%)",
+        icon: "😐",
+        displayName: "Neutral",
+      },
+    };
+
+    // Convert API data to display format
+    return emotionsData.map((emotion) => {
+      const config = emotionConfig[emotion.label] || {
+        color: "#999999",
+        gradientColor: "linear-gradient(135deg, #999999 0%, #666666 100%)",
         icon: "🤔",
-      },
-    ];
+        displayName:
+          emotion.label.charAt(0).toUpperCase() + emotion.label.slice(1),
+      };
+
+      return {
+        emotion: config.displayName,
+        intensity: Math.round(emotion.score * 100), // Convert to percentage
+        description:
+          emotion.desc ||
+          `You appear to be experiencing ${config.displayName.toLowerCase()} based on the themes and expressions in your journal entry.`,
+        color: config.color,
+        gradientColor: config.gradientColor,
+        icon: config.icon,
+      };
+    });
   };
 
   // Mood distribution visualization component
   const MoodDistributionChart = () => {
     const emotions = getEmotions();
-    const totalIntensity = emotions.reduce((sum, emotion) => sum + emotion.intensity, 0);
-    
+    const totalIntensity = emotions.reduce(
+      (sum, emotion) => sum + emotion.intensity,
+      0
+    );
+
     return (
       <Paper
         elevation={0}
         sx={{
-          background: "linear-gradient(135deg, #FF6B9D 0%, #C44AFF 25%, #4ECDC4 75%, #45B7D1 100%)",
+          background:
+            "linear-gradient(135deg, #FF6B9D 0%, #C44AFF 25%, #4ECDC4 75%, #45B7D1 100%)",
           borderRadius: "24px",
           p: 4,
           mb: 4,
@@ -205,17 +265,17 @@ export default function ViewEmotions({ user }) {
         >
           How you felt
         </Typography>
-        
+
         {/* Emotion bubbles positioned across the gradient */}
         {emotions.map((emotion, index) => {
           const positions = [
             { left: "15%", top: "40%" }, // Joy
-            { left: "75%", top: "25%" }, // Gratitude  
+            { left: "75%", top: "25%" }, // Gratitude
             { left: "25%", top: "70%" }, // Anxiety
             { left: "60%", top: "60%" }, // Hope
             { left: "45%", top: "35%" }, // Reflection
           ];
-          
+
           return (
             <Box
               key={emotion.emotion}
@@ -279,7 +339,7 @@ export default function ViewEmotions({ user }) {
       <>
         <Navbar />
         <Box sx={{ p: 4, textAlign: "center" }}>
-          <Typography 
+          <Typography
             color="error"
             sx={{
               fontFamily: poppins.style.fontFamily,
@@ -308,7 +368,11 @@ export default function ViewEmotions({ user }) {
       <Navbar />
 
       {/* Header with image */}
-      <Box position="relative" width="100%" height={{ xs: "200px", md: "234px" }}>
+      <Box
+        position="relative"
+        width="100%"
+        height={{ xs: "200px", md: "234px" }}
+      >
         <Box
           position="absolute"
           top={16}
@@ -406,7 +470,13 @@ export default function ViewEmotions({ user }) {
         </Typography>
 
         {/* Emotion Cards Grid */}
-        <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, md: 3 } }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: { xs: 2, md: 3 },
+          }}
+        >
           {getEmotions().map((emotion, index) => (
             <Card
               key={index}
@@ -425,93 +495,93 @@ export default function ViewEmotions({ user }) {
                 },
               }}
             >
-                <CardContent 
-                  sx={{ 
-                    p: { xs: 3, md: 4 },
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 3,
-                    height: "100%",
+              <CardContent
+                sx={{
+                  p: { xs: 3, md: 4 },
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 3,
+                  height: "100%",
+                }}
+              >
+                {/* Emotion Icon and Info */}
+                <Avatar
+                  sx={{
+                    background: emotion.gradientColor,
+                    width: { xs: 56, md: 64 },
+                    height: { xs: 56, md: 64 },
+                    boxShadow: `0 4px 20px ${emotion.color}40`,
+                    flexShrink: 0,
                   }}
                 >
-                  {/* Emotion Icon and Info */}
-                  <Avatar
-                    sx={{
-                      background: emotion.gradientColor,
-                      width: { xs: 56, md: 64 },
-                      height: { xs: 56, md: 64 },
-                      boxShadow: `0 4px 20px ${emotion.color}40`,
-                      flexShrink: 0,
-                    }}
-                  >
-                    <Typography sx={{ fontSize: { xs: "1.5rem", md: "1.8rem" } }}>
-                      {emotion.icon}
-                    </Typography>
-                  </Avatar>
+                  <Typography sx={{ fontSize: { xs: "1.5rem", md: "1.8rem" } }}>
+                    {emotion.icon}
+                  </Typography>
+                </Avatar>
 
-                  {/* Emotion Details */}
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                      <Typography
-                        sx={{
-                          fontSize: { xs: "1.3rem", md: "1.5rem" },
-                          fontWeight: 600,
-                          color: "#2D1B6B",
-                          fontFamily: poppins.style.fontFamily,
-                          mr: "auto",
-                        }}
-                      >
-                        {emotion.emotion}
-                      </Typography>
-                      <Typography
-                        sx={{
-                          fontSize: { xs: "1.2rem", md: "1.4rem" },
-                          fontWeight: 700,
-                          color: emotion.color,
-                          fontFamily: poppins.style.fontFamily,
-                        }}
-                      >
-                        {emotion.intensity}%
-                      </Typography>
-                    </Box>
-
-                    {/* Progress Bar */}
-                    <Box sx={{ mb: 2 }}>
-                      <LinearProgress
-                        variant="determinate"
-                        value={emotion.intensity}
-                        sx={{
-                          height: 8,
-                          borderRadius: 4,
-                          backgroundColor: `${emotion.color}15`,
-                          "& .MuiLinearProgress-bar": {
-                            background: emotion.gradientColor,
-                            borderRadius: 4,
-                          },
-                        }}
-                      />
-                    </Box>
-
-                    {/* Description */}
+                {/* Emotion Details */}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                     <Typography
                       sx={{
-                        fontSize: { xs: "0.95rem", md: "1rem" },
-                        color: "#666",
-                        lineHeight: 1.5,
+                        fontSize: { xs: "1.3rem", md: "1.5rem" },
+                        fontWeight: 600,
+                        color: "#2D1B6B",
                         fontFamily: poppins.style.fontFamily,
-                        display: "-webkit-box",
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
+                        mr: "auto",
                       }}
                     >
-                      {emotion.description}
+                      {emotion.emotion}
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: { xs: "1.2rem", md: "1.4rem" },
+                        fontWeight: 700,
+                        color: emotion.color,
+                        fontFamily: poppins.style.fontFamily,
+                      }}
+                    >
+                      {emotion.intensity}%
                     </Typography>
                   </Box>
-                </CardContent>
-              </Card>
-            ))}
+
+                  {/* Progress Bar */}
+                  <Box sx={{ mb: 2 }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={emotion.intensity}
+                      sx={{
+                        height: 8,
+                        borderRadius: 4,
+                        backgroundColor: `${emotion.color}15`,
+                        "& .MuiLinearProgress-bar": {
+                          background: emotion.gradientColor,
+                          borderRadius: 4,
+                        },
+                      }}
+                    />
+                  </Box>
+
+                  {/* Description */}
+                  <Typography
+                    sx={{
+                      fontSize: { xs: "0.95rem", md: "1rem" },
+                      color: "#666",
+                      lineHeight: 1.5,
+                      fontFamily: poppins.style.fontFamily,
+                      display: "-webkit-box",
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {emotion.description}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          ))}
         </Box>
       </Box>
     </>

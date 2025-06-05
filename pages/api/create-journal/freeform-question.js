@@ -38,7 +38,7 @@ Please generate a single, thoughtful follow-up question.`;
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "deepseek/deepseek-chat-v3-0324:free",
+          model: "meta-llama/llama-3.3-8b-instruct:free",
           messages: [
             {
               role: "system",
@@ -59,6 +59,17 @@ Please generate a single, thoughtful follow-up question.`;
 
     if (!openRouterResponse.ok) {
       const errorText = await openRouterResponse.text();
+
+      // Handle rate limit specifically
+      if (openRouterResponse.status === 429) {
+        return res.status(429).json({
+          error: "Rate limit exceeded",
+          message:
+            "You've reached the daily limit for free requests. Please try again later or add credits to your OpenRouter account.",
+          details: errorText,
+        });
+      }
+
       return res.status(500).json({
         error: "OpenRouter API error",
         status: openRouterResponse.status,

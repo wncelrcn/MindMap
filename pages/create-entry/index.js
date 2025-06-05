@@ -1,5 +1,15 @@
 import Navbar from "@/components/navbar";
-import { Box, TextField, Typography, Button, useTheme } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Typography,
+  Button,
+  useTheme,
+  Modal,
+  CircularProgress,
+  Fade,
+  LinearProgress,
+} from "@mui/material";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -57,6 +67,11 @@ export default function Journal({ user }) {
   const [showButton, setShowButton] = useState(false);
   const [error, setError] = useState(null);
 
+  // Loading states
+  const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+  const [loadingStep, setLoadingStep] = useState("");
+  const [progress, setProgress] = useState(0);
+
   const router = useRouter();
 
   useEffect(() => {
@@ -85,7 +100,6 @@ export default function Journal({ user }) {
   const handleGoDeeper = async () => {
     setShowButton(false);
 
-    // Build the conversation history as a string
     let history = "";
     if (content.trim()) {
       history += `Q: Journal Entry\nA: ${content.trim()}\n`;
@@ -96,7 +110,6 @@ export default function Journal({ user }) {
       }
     });
 
-    // The last answer is either the main content (if no sections) or the last section's content
     let lastText = "";
     if (sections.length === 0) {
       lastText = content;
@@ -104,7 +117,6 @@ export default function Journal({ user }) {
       lastText = sections[sections.length - 1].content;
     }
 
-    // Send the full history and the last answer (for clarity)
     const res = await fetch("/api/create-journal/freeform-question", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -142,6 +154,11 @@ export default function Journal({ user }) {
         return;
       }
 
+      // Start loading
+      setIsGeneratingInsights(true);
+      setProgress(0);
+      setLoadingStep("Preparing your journal...");
+
       // Build journalData as an array of {question, answer} objects
       const journalData = [];
       if (content.trim()) {
@@ -159,14 +176,41 @@ export default function Journal({ user }) {
         }
       });
 
-      const summaryRes = await fetch("/api/analyze-journal/journal_summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ journal_text: journalData }),
-      });
+      setProgress(20);
+      setLoadingStep("Analyzing your thoughts and emotions...");
+
+      // Call both summary and emotions APIs in parallel
+      const [summaryRes, emotionsRes] = await Promise.all([
+        fetch("/api/analyze-journal/journal_summary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ journal_text: journalData }),
+        }),
+        fetch("/api/analyze-journal/journal_emotions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ journal_text: journalData }),
+        }),
+      ]);
+
+      setProgress(60);
+      setLoadingStep("Processing insights...");
 
       const summaryData = await summaryRes.json();
+      const emotionsData = await emotionsRes.json();
 
+      if (!summaryRes.ok) {
+        throw new Error(summaryData.message || "Failed to generate summary");
+      }
+
+      if (!emotionsRes.ok) {
+        console.warn("Emotions analysis failed:", emotionsData.message);
+      }
+
+      setProgress(75);
+      setLoadingStep("Saving your journal entry...");
+
+      // Create the journal entry
       const res = await fetch("/api/create-journal/freeform", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -184,8 +228,42 @@ export default function Journal({ user }) {
         throw new Error(data.message || "Failed to create entry");
       }
 
-      router.push("/dashboard");
+      setProgress(90);
+      setLoadingStep("Finalizing your insights...");
+
+      // Save emotions data if available
+      if (
+        emotionsRes.ok &&
+        emotionsData.emotions &&
+        data.data &&
+        data.data[0]
+      ) {
+        try {
+          await fetch("/api/create-journal/save-emotions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              journal_id: data.data[0].journal_id,
+              user_UID: user_UID,
+              emotions: emotionsData.emotions,
+              journal_type: "freeform",
+            }),
+          });
+        } catch (emotionError) {
+          console.warn("Failed to save emotions data:", emotionError);
+        }
+      }
+
+      setProgress(100);
+      setLoadingStep("Complete! Redirecting...");
+
+      // Small delay to show completion
+      setTimeout(() => {
+        setIsGeneratingInsights(false);
+        router.push("/dashboard");
+      }, 1000);
     } catch (error) {
+      setIsGeneratingInsights(false);
       setError(error.message);
       console.error("Error creating journal entry:", error);
     }
@@ -194,6 +272,160 @@ export default function Journal({ user }) {
   const handleSuggestionsClick = () => {
     router.push("/guided-journaling");
   };
+
+  // Loading Modal Component
+  const LoadingModal = () => (
+    <Modal
+      open={isGeneratingInsights}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backdropFilter: "blur(10px)",
+      }}
+    >
+      <Fade in={isGeneratingInsights}>
+        <Box
+          sx={{
+            background: "linear-gradient(135deg, #F9F8FE 0%, #E2DDF9 100%)",
+            borderRadius: "24px",
+            padding: { xs: "2rem", md: "3rem" },
+            maxWidth: { xs: "90%", md: "500px" },
+            width: "100%",
+            textAlign: "center",
+            border: "2px solid rgba(78, 43, 189, 0.1)",
+            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          {/* Header */}
+          <Typography
+            sx={{
+              fontSize: { xs: "1.5rem", md: "1.8rem" },
+              fontWeight: 600,
+              color: "#2D1B6B",
+              fontFamily: poppins.style.fontFamily,
+              mb: 2,
+            }}
+          >
+            Generating Your Insights
+          </Typography>
+
+          {/* Animated Brain Icon */}
+          <Box
+            sx={{
+              position: "relative",
+              display: "flex",
+              justifyContent: "center",
+              mb: 3,
+            }}
+          >
+            <CircularProgress
+              size={80}
+              thickness={2}
+              sx={{
+                color: "#4E2BBD",
+                position: "absolute",
+                animationDuration: "2s",
+              }}
+            />
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #4E2BBD 0%, #9333EA 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "2rem",
+              }}
+            >
+              🧠
+            </Box>
+          </Box>
+
+          {/* Progress Bar */}
+          <Box sx={{ mb: 3 }}>
+            <LinearProgress
+              variant="determinate"
+              value={progress}
+              sx={{
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: "rgba(78, 43, 189, 0.1)",
+                "& .MuiLinearProgress-bar": {
+                  background:
+                    "linear-gradient(90deg, #4E2BBD 0%, #9333EA 100%)",
+                  borderRadius: 4,
+                },
+              }}
+            />
+            <Typography
+              sx={{
+                fontSize: "0.9rem",
+                fontWeight: 500,
+                color: "#4E2BBD",
+                fontFamily: poppins.style.fontFamily,
+                mt: 1,
+              }}
+            >
+              {progress}%
+            </Typography>
+          </Box>
+
+          {/* Loading Step */}
+          <Typography
+            sx={{
+              fontSize: { xs: "1rem", md: "1.1rem" },
+              fontWeight: 400,
+              color: "#6B46C1",
+              fontFamily: poppins.style.fontFamily,
+              mb: 2,
+              minHeight: "1.5rem",
+            }}
+          >
+            {loadingStep}
+          </Typography>
+
+          {/* Features List */}
+          <Box sx={{ textAlign: "left", mt: 3 }}>
+            <Typography
+              sx={{
+                fontSize: "0.9rem",
+                fontWeight: 500,
+                color: "#2D1B6B",
+                fontFamily: poppins.style.fontFamily,
+                mb: 1,
+              }}
+            >
+              What we're creating for you:
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+              {[
+                "📝 Personalized mood summary",
+                "🎭 Detailed emotion analysis",
+                "💡 Insights into your feelings",
+                "📊 Interactive mood visualization",
+              ].map((feature, index) => (
+                <Typography
+                  key={index}
+                  sx={{
+                    fontSize: "0.85rem",
+                    color: "#666",
+                    fontFamily: poppins.style.fontFamily,
+                    opacity: progress > (index + 1) * 25 ? 1 : 0.5,
+                    transition: "opacity 0.3s ease",
+                  }}
+                >
+                  {feature}
+                </Typography>
+              ))}
+            </Box>
+          </Box>
+        </Box>
+      </Fade>
+    </Modal>
+  );
 
   return (
     <>
@@ -209,6 +441,9 @@ export default function Journal({ user }) {
 
       <Box>
         <Navbar />
+
+        {/* Loading Modal */}
+        <LoadingModal />
 
         {/* Header with image */}
         <Box position="relative" width="100%" height="234px">
@@ -467,11 +702,15 @@ export default function Journal({ user }) {
                 textTransform: "none",
                 fontWeight: 500,
                 borderRadius: "12px",
-                padding: { xs: "0.8rem 1.5rem", sm: "0.8rem 1.5rem" },
+                padding: {
+                  xs: "0.95rem 1.5rem",
+                  sm: "0.95rem 1.5rem",
+                  md: "0.95rem 2rem",
+                },
                 boxShadow: "none",
-                width: "100%",
-                maxWidth: { xs: "400px", sm: "550px", md: "550px" },
-                minWidth: { xs: "0", sm: "0" },
+                maxWidth: { xs: "600px", sm: "600px", md: "600px" },
+                width: "fit-content",
+                minWidth: { xs: "280px", sm: "auto", md: "auto" },
                 "&:hover": {
                   backgroundColor: "#D4C7F3",
                 },
@@ -481,7 +720,7 @@ export default function Journal({ user }) {
                 sx={{
                   fontFamily: poppins.style.fontFamily,
                   fontWeight: 400,
-                  fontSize: { xs: "0.85rem", sm: "0.95rem", md: "1rem" },
+                  fontSize: { xs: "0.9rem", sm: "1rem", md: "1.1rem" },
                   textAlign: "center",
                   lineHeight: 1.4,
                 }}
