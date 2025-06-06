@@ -274,7 +274,7 @@ export default function Questions({ user }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ journal_text: journalData }),
         }),
-        fetch("/api/analyze-journal/journal_emotions", {
+        fetch("/api/analyze-journal/journal_emotions_fastapi", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ journal_text: journalData }),

@@ -177,7 +177,7 @@ export default function Journal({ user }) {
       });
 
       setProgress(20);
-      setLoadingStep("Analyzing your thoughts and emotions...");
+      setLoadingStep("Analyzing your thoughts and emotions with AI...");
 
       // Call both summary and emotions APIs in parallel
       const [summaryRes, emotionsRes] = await Promise.all([
@@ -186,7 +186,7 @@ export default function Journal({ user }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ journal_text: journalData }),
         }),
-        fetch("/api/analyze-journal/journal_emotions", {
+        fetch("/api/analyze-journal/journal_emotions_fastapi", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ journal_text: journalData }),
@@ -204,7 +204,7 @@ export default function Journal({ user }) {
       }
 
       if (!emotionsRes.ok) {
-        console.warn("Emotions analysis failed:", emotionsData.message);
+        console.warn("FastAPI emotions analysis failed:", emotionsData.message);
       }
 
       setProgress(75);

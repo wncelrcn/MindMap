@@ -42,9 +42,7 @@ Do not use "myself" in your response.
 Do not use "I'm" in your response.
 
 Do not submit in markdown format.
-Do not include any other text in your response.
-
-Make sure that your response is within 120 words.`;
+Do not include any other text in your response.`;
 
   try {
     const openRouterResponse = await fetch(
@@ -56,7 +54,7 @@ Make sure that your response is within 120 words.`;
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "meta-llama/llama-3.3-8b-instruct:free",
+          model: "deepseek/deepseek-chat-v3-0324:free",
           messages: [
             {
               role: "system",
@@ -67,7 +65,7 @@ Make sure that your response is within 120 words.`;
               content: `The journal entry is:\n${journalString}`,
             },
           ],
-          max_tokens: 256,
+          max_tokens: 128,
           temperature: 0.7,
         }),
       }

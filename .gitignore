@@ -3,7 +3,7 @@
 # dependencies
 /node_modules
 /.pnp
-.pnp.*
+.pnp.js
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
@@ -30,8 +30,12 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# local env files
+.env*.local
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # vercel
 .vercel
@@ -39,3 +43,21 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Python backend
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+backend/*.pyo
+backend/*.pyd
+backend/.Python
+backend/pip-log.txt
+backend/pip-delete-this-directory.txt
+backend/.coverage
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.idea/
+backend/.vscode/
+backend/*.egg-info/
+backend/dist/
+backend/build/
