@@ -1,6 +1,6 @@
 import Head from "next/head";
-import Footer from "@/components/footer";
-import SupportFooter from "@/components/support_footer";
+import Footer from "@/components/layout/footer";
+import SupportFooter from "@/components/layout/support_footer";
 import {
   Box,
   Container,
@@ -10,13 +10,13 @@ import {
   InputAdornment,
   Button,
 } from "@mui/material";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/layout/navbar";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import RecapCard from "@/components/recap_card";
+import RecapCard from "@/components/cards/recap_card";
 
 import { createClient } from "@/utils/supabase/server-props";
 

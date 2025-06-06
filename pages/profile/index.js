@@ -1,8 +1,8 @@
 import Head from "next/head";
 import NextImage from "next/image";
-import Footer from "@/components/footer";
-import SupportFooter from "@/components/support_footer";
-import Navbar from "@/components/navbar";
+import Footer from "@/components/layout/footer";
+import SupportFooter from "@/components/layout/support_footer";
+import Navbar from "@/components/layout/navbar";
 import {
   Box,
   Typography,

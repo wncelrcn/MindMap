@@ -1,6 +1,6 @@
 import Head from "next/head";
-import Footer from "@/components/footer";
-import SupportFooter from "@/components/support_footer";
+import Footer from "@/components/layout/footer";
+import SupportFooter from "@/components/layout/support_footer";
 import {
   Box,
   Typography,
@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState } from "react";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/layout/navbar";
 import Link from "next/link";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";

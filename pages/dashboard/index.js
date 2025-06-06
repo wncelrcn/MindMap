@@ -2,8 +2,8 @@
 // Objective: This page will display the dashboard of the recap of the user.
 
 import Head from "next/head";
-import Footer from "@/components/footer";
-import SupportFooter from "@/components/support_footer";
+import Footer from "@/components/layout/footer";
+import SupportFooter from "@/components/layout/support_footer";
 import {
   Box,
   Typography,
@@ -14,10 +14,10 @@ import {
   CardContent,
 } from "@mui/material";
 import Link from "next/link";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/layout/navbar";
 import { useEffect, useState } from "react";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
-import RecentJournal from "@/components/recent_journal";
+import RecentJournal from "@/components/cards/recent_journal";
 import { createClient } from "@/utils/supabase/server-props";
 import { useRouter } from "next/router";
 

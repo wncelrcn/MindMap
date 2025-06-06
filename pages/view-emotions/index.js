@@ -5,12 +5,13 @@ import {
   Card,
   CardContent,
   LinearProgress,
-  Avatar,
   Paper,
+  Avatar,
 } from "@mui/material";
 import Link from "next/link";
-import Image from "next/image";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/layout/navbar";
+import MoodDistributionChart from "@/components/MoodDistributionChart";
+import { processEmotionData } from "@/utils/helper/emotion/emotionConfig";
 import { useState, useEffect } from "react";
 import { Poppins, Raleway, Quicksand } from "next/font/google";
 import { createClient } from "@/utils/supabase/server-props";
@@ -132,226 +133,8 @@ export default function ViewEmotions({ user }) {
   }, [user_UID]);
 
   const getEmotions = () => {
-    if (!emotionsData || !Array.isArray(emotionsData)) {
-      // Return default emotions if no data available
-      return [
-        {
-          emotion: "No Data",
-          intensity: 0,
-          description:
-            "Emotions analysis is not available for this journal entry.",
-          color: "#999999",
-          gradientColor: "linear-gradient(135deg, #999999 0%, #666666 100%)",
-          icon: "📊",
-        },
-      ];
-    }
-
-    // Map emotion labels to display properties
-    const emotionConfig = {
-      sadness: {
-        color: "#4682B4",
-        gradientColor: "linear-gradient(135deg, #4682B4 0%, #1E3A8A 100%)",
-        icon: "😢",
-        displayName: "Sadness",
-      },
-      anger: {
-        color: "#FF6B6B",
-        gradientColor: "linear-gradient(135deg, #FF6B6B 0%, #FF4757 100%)",
-        icon: "😠",
-        displayName: "Anger",
-      },
-      love: {
-        color: "#FF69B4",
-        gradientColor: "linear-gradient(135deg, #FF69B4 0%, #FF1493 100%)",
-        icon: "❤️",
-        displayName: "Love",
-      },
-      surprise: {
-        color: "#F59E0B",
-        gradientColor: "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)",
-        icon: "😲",
-        displayName: "Surprise",
-      },
-      fear: {
-        color: "#9333EA",
-        gradientColor: "linear-gradient(135deg, #9333EA 0%, #6B21A8 100%)",
-        icon: "😱",
-        displayName: "Fear",
-      },
-      happiness: {
-        color: "#FFD700",
-        gradientColor: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
-        icon: "😄",
-        displayName: "Happiness",
-      },
-      joy: {
-        color: "#FFD700",
-        gradientColor: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
-        icon: "😄",
-        displayName: "Joy",
-      },
-      neutral: {
-        color: "#6B7280",
-        gradientColor: "linear-gradient(135deg, #6B7280 0%, #4B5563 100%)",
-        icon: "😐",
-        displayName: "Neutral",
-      },
-      disgust: {
-        color: "#84CC16",
-        gradientColor: "linear-gradient(135deg, #84CC16 0%, #65A30D 100%)",
-        icon: "🤢",
-        displayName: "Disgust",
-      },
-      shame: {
-        color: "#DC2626",
-        gradientColor: "linear-gradient(135deg, #DC2626 0%, #B91C1C 100%)",
-        icon: "🙈",
-        displayName: "Shame",
-      },
-      guilt: {
-        color: "#7C3AED",
-        gradientColor: "linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)",
-        icon: "😔",
-        displayName: "Guilt",
-      },
-      confusion: {
-        color: "#64748B",
-        gradientColor: "linear-gradient(135deg, #64748B 0%, #475569 100%)",
-        icon: "😕",
-        displayName: "Confusion",
-      },
-      desire: {
-        color: "#EF4444",
-        gradientColor: "linear-gradient(135deg, #EF4444 0%, #DC2626 100%)",
-        icon: "🔥",
-        displayName: "Desire",
-      },
-      sarcasm: {
-        color: "#10B981",
-        gradientColor: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
-        icon: "😏",
-        displayName: "Sarcasm",
-      },
-    };
-
-    // Convert API data to display format
-    return emotionsData.map((emotion) => {
-      const config = emotionConfig[emotion.label] || {
-        color: "#999999",
-        gradientColor: "linear-gradient(135deg, #999999 0%, #666666 100%)",
-        icon: "💭",
-        displayName:
-          emotion.label.charAt(0).toUpperCase() + emotion.label.slice(1),
-      };
-
-      return {
-        emotion: config.displayName,
-        intensity: Math.round(emotion.score * 100), // Convert to percentage
-        description:
-          emotion.desc ||
-          `You appear to be experiencing ${config.displayName.toLowerCase()} based on the themes and expressions in your journal entry.`,
-        color: config.color,
-        gradientColor: config.gradientColor,
-        icon: config.icon,
-      };
-    });
-  };
-
-  // Mood distribution visualization component
-  const MoodDistributionChart = () => {
-    const emotions = getEmotions();
-    const totalIntensity = emotions.reduce(
-      (sum, emotion) => sum + emotion.intensity,
-      0
-    );
-
-    return (
-      <Paper
-        elevation={0}
-        sx={{
-          background:
-            "linear-gradient(135deg, #FF6B9D 0%, #C44AFF 25%, #4ECDC4 75%, #45B7D1 100%)",
-          borderRadius: "24px",
-          p: 4,
-          mb: 4,
-          position: "relative",
-          overflow: "hidden",
-          minHeight: "280px",
-        }}
-      >
-        <Typography
-          sx={{
-            fontSize: { xs: "1.1rem", md: "1.3rem" },
-            fontWeight: 400,
-            color: "white",
-            opacity: 0.9,
-            fontFamily: poppins.style.fontFamily,
-            mb: 1,
-          }}
-        >
-          Mood Distribution Insights
-        </Typography>
-        <Typography
-          sx={{
-            fontSize: { xs: "0.9rem", md: "1rem" },
-            fontWeight: 300,
-            color: "white",
-            opacity: 0.8,
-            fontFamily: poppins.style.fontFamily,
-            mb: 3,
-          }}
-        >
-          How you felt
-        </Typography>
-
-        {/* Emotion bubbles positioned across the gradient */}
-        {emotions.map((emotion, index) => {
-          const positions = [
-            { left: "15%", top: "40%" }, // Joy
-            { left: "75%", top: "25%" }, // Gratitude
-            { left: "25%", top: "70%" }, // Anxiety
-            { left: "60%", top: "60%" }, // Hope
-            { left: "45%", top: "35%" }, // Reflection
-          ];
-
-          return (
-            <Box
-              key={emotion.emotion}
-              sx={{
-                position: "absolute",
-                ...positions[index],
-                transform: "translate(-50%, -50%)",
-                textAlign: "center",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: { xs: "0.75rem", md: "0.85rem" },
-                  fontWeight: 400,
-                  color: "white",
-                  opacity: 0.9,
-                  fontFamily: poppins.style.fontFamily,
-                  mb: 0.5,
-                }}
-              >
-                {emotion.intensity}%
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: { xs: "0.85rem", md: "1rem" },
-                  fontWeight: 500,
-                  color: "white",
-                  fontFamily: poppins.style.fontFamily,
-                }}
-              >
-                {emotion.emotion}
-              </Typography>
-            </Box>
-          );
-        })}
-      </Paper>
-    );
+    // Use shared utility function for processing emotions
+    return processEmotionData(emotionsData);
   };
 
   if (loading) {
@@ -407,11 +190,7 @@ export default function ViewEmotions({ user }) {
       <Navbar />
 
       {/* Header with image */}
-      <Box
-        position="relative"
-        width="100%"
-        height={{ xs: "200px", md: "234px" }}
-      >
+      <Box position="relative" width="100%" height={{ xs: "50px", md: "70px" }}>
         <Box
           position="absolute"
           top={16}
@@ -433,13 +212,6 @@ export default function ViewEmotions({ user }) {
             </a>
           </Link>
         </Box>
-        <Image
-          src="/assets/header.png"
-          alt="Journal Emotions"
-          layout="fill"
-          objectFit="cover"
-          priority
-        />
       </Box>
 
       {/* Main Content */}
@@ -455,11 +227,10 @@ export default function ViewEmotions({ user }) {
           sx={{
             fontSize: { xs: "0.9rem", md: "1rem" },
             fontWeight: 400,
-            color: "#666",
+            color: "#2D1B6B",
             lineHeight: "normal",
             fontFamily: poppins.style.fontFamily,
             mb: 1,
-            textTransform: "uppercase",
             letterSpacing: "0.5px",
           }}
         >
@@ -473,40 +244,37 @@ export default function ViewEmotions({ user }) {
             color: "#2D1B6B",
             lineHeight: "1.1",
             fontFamily: poppins.style.fontFamily,
-            mb: 6,
+            mb: 4,
           }}
         >
           Emotions
         </Typography>
+        <Typography
+          sx={{
+            fontSize: { xs: "1.1rem", md: "1.3rem" },
+            fontWeight: 400,
+            color: "#2D1B6B",
+            opacity: 1,
+            fontFamily: poppins.style.fontFamily,
+          }}
+        >
+          Mood Distribution Insights
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: { xs: "0.9rem", md: "1rem" },
+            fontWeight: 300,
+            color: "#2D1B6B",
+            opacity: 1,
+            fontFamily: poppins.style.fontFamily,
+            mb: 3,
+          }}
+        >
+          How you felt
+        </Typography>
 
         {/* Mood Distribution Chart */}
-        <MoodDistributionChart />
-
-        {/* Journal Info */}
-        <Typography
-          sx={{
-            fontSize: { xs: "1.3rem", md: "1.5rem" },
-            fontWeight: 600,
-            color: "#2D1B6B",
-            lineHeight: "normal",
-            fontFamily: poppins.style.fontFamily,
-            mb: 1,
-          }}
-        >
-          {journalData?.title || "Untitled Journal"}
-        </Typography>
-
-        <Typography
-          sx={{
-            fontSize: { xs: "1rem", md: "1.1rem" },
-            fontWeight: 400,
-            color: "#666",
-            fontFamily: poppins.style.fontFamily,
-            mb: 6,
-          }}
-        >
-          {formatDate(journalData?.date_created)}
-        </Typography>
+        <MoodDistributionChart emotions={emotionsData} />
 
         {/* Emotion Cards Grid */}
         <Box

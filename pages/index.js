@@ -13,11 +13,11 @@ import {
   ThemeProvider,
   createTheme,
 } from "@mui/material";
-import LandingHeader from "@/components/landing_header";
-import FeatureCarousel from "@/components/feature_carousel";
-import TestimonialCarousel from "@/components/testimonial_carousel";
-import Footer from "@/components/footer";
-import SupportFooter from "@/components/support_footer";
+import LandingHeader from "@/components/layout/landing_header";
+import FeatureCarousel from "@/components/layout/feature_carousel";
+import TestimonialCarousel from "@/components/layout/testimonial_carousel";
+import Footer from "@/components/layout/footer";
+import SupportFooter from "@/components/layout/support_footer";
 
 // Configure Poppins font
 const poppins = Poppins({
@@ -275,8 +275,8 @@ export default function Home() {
           </Typography>
 
           {/* Testimonials Section with better responsive handling */}
-          <Box 
-            sx={{ 
+          <Box
+            sx={{
               width: "100%",
               overflow: "hidden", // Prevent horizontal scroll
               mb: 6, // Add margin bottom

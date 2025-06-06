@@ -1,6 +1,6 @@
 import Head from "next/head";
-import Footer from "@/components/footer";
-import SupportFooter from "@/components/support_footer";
+import Footer from "@/components/layout/footer";
+import SupportFooter from "@/components/layout/support_footer";
 import {
   Box,
   Container,
@@ -21,8 +21,8 @@ import {
   Select,
   Stack,
 } from "@mui/material";
-import Navbar from "@/components/navbar";
-import RecentJournal from "@/components/recent_journal";
+import Navbar from "@/components/layout/navbar";
+import RecentJournal from "@/components/cards/recent_journal";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";

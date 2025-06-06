@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/layout/navbar";
 import { useState, useEffect } from "react";
 import { Poppins, Raleway, Quicksand } from "next/font/google";
 import { createClient } from "@/utils/supabase/server-props";

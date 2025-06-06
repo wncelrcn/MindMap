@@ -1,4 +1,4 @@
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/layout/navbar";
 import {
   Box,
   TextField,

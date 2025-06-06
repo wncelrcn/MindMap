@@ -1,6 +1,6 @@
 import Head from "next/head";
-import Footer from "@/components/footer";
-import SupportFooter from "@/components/support_footer";
+import Footer from "@/components/layout/footer";
+import SupportFooter from "@/components/layout/support_footer";
 import {
   Box,
   Typography,
@@ -15,7 +15,7 @@ import {
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/server-props";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/layout/navbar";
 import Link from "next/link";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
@@ -67,39 +67,39 @@ export default function GuidedJournaling({ user }) {
     {
       title: "Journaling",
       description: "Structure your journaling practice and get clarity.",
-      image: "/assets/person-1.png",
+      image: "/assets/people/person-1.png",
       gradient: "linear-gradient(135deg, #d2c7f2 0%, #e4b1dc 100%)",
     },
     {
       title: "Productivity",
       description: "Stay focused and organized to maximize your time.",
-      image: "/assets/person-2.png",
+      image: "/assets/people/person-2.png",
       gradient:
         "linear-gradient(135deg, #faebf0 0%, #f9cfe4 50%, #eae1f5 100%)",
     },
     {
       title: "Growth",
       description: "Track progress and push yourself to improve.",
-      image: "/assets/person-3.png",
+      image: "/assets/people/person-3.png",
       gradient:
         "linear-gradient(135deg, #faebf0 0%, #f9cfe4 50%, #eae1f5 100%)",
     },
     {
       title: "Self-Reflection",
       description: "Gain clarity and self-awareness through writing.",
-      image: "/assets/person-4.png",
+      image: "/assets/people/person-4.png",
       gradient: "linear-gradient(135deg, #d2c7f2 0%, #e4b1dc 100%)",
     },
     {
       title: "Problem-Solving",
       description: "Break down challenges and find effective solutions.",
-      image: "/assets/person-5.png",
+      image: "/assets/people/person-5.png",
       gradient: "linear-gradient(135deg, #d2c7f2 0%, #e4b1dc 100%)",
     },
     {
       title: "Creative Expression",
       description: "Spark ideas and bring creativity to life.",
-      image: "/assets/person-6.png",
+      image: "/assets/people/person-6.png",
       gradient:
         "linear-gradient(135deg, #faebf0 0%, #f9cfe4 50%, #eae1f5 100%)",
     },
