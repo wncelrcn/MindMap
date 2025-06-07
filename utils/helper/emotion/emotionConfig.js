@@ -67,8 +67,8 @@ export const emotionConfig = {
     displayName: "Guilt",
   },
   confusion: {
-    color: "#64748B",
-    gradientColor: "linear-gradient(135deg, #64748B 0%, #475569 100%)",
+    color: "#1E3A8A",
+    gradientColor: "linear-gradient(135deg, #1E3A8A 0%, #1E40AF 100%)",
     icon: "😕",
     displayName: "Confusion",
   },
