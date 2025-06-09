@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { journal_id, user_UID, emotions, journal_type } = req.body;
+    const { journal_id, user_UID, emotions, journal_type, theme } = req.body;
 
     if (!journal_id || !user_UID || !emotions || !journal_type) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -24,6 +24,7 @@ export default async function handler(req, res) {
         journal_id: journal_id,
         user_UID: user_UID,
         emotions: emotions,
+        theme: theme,
       })
       .select();
 

@@ -1,3 +1,26 @@
+const journalingThemes = [
+  "Self-Reflection",
+  "Goal Setting",
+  "Gratitude",
+  "Emotional Processing",
+  "Daily Experiences",
+  "Creativity",
+  "Personal Growth",
+  "Mental Health",
+  "Mindfulness",
+  "Memories",
+  "Dream Journaling",
+  "Travel",
+  "Health and Wellness",
+  "Relationships",
+  "Career and Productivity",
+  "Spirituality",
+  "Affirmations",
+  "Problem-Solving",
+  "Nature and Environment",
+  "Hobbies and Interests",
+];
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
@@ -24,25 +47,32 @@ export default async function handler(req, res) {
     journalString = String(journal_text);
   }
 
-  const systemPrompt = `You are a helpful therapist that analyzes journal entries and provides a summary of the user's mood and thoughts.
+  const systemPrompt = `You are a helpful therapist that analyzes journal entries and provides a summary of the user's mood and thoughts, as well as identifies the main theme.
 
-Please provide a concise summary of the user's mood and thoughts.
+Please provide:
+1. A concise summary of the user's mood and thoughts
+2. The most appropriate theme from this list: ${journalingThemes.join(", ")}
 
-Use second person view.
-Use "The journal is about" in your response.
-Use "you" in your response.
+For the summary:
+- Use second person view
+- Use "The journal is about" in your response
+- Use "you" in your response
+- Do not call the user "the user"
+- Do not use "their" or "they" in your response
+- Do not use "I" in your response
+- Do not use "me" in your response
+- Do not use "my" in your response
+- Do not use "mine" in your response
+- Do not use "myself" in your response
+- Do not use "I'm" in your response
 
-Do not call the user "the user".
-Do not use "their" or "they" in your response.
-Do not use "I" in your response.
-Do not use "me" in your response.
-Do not use "my" in your response.
-Do not use "mine" in your response.
-Do not use "myself" in your response.
-Do not use "I'm" in your response.
+Format your response as JSON with this exact structure:
+{
+  "summary": "your summary here",
+  "theme": "exact theme from the list"
+}
 
-Do not submit in markdown format.
-Do not include any other text in your response.`;
+Do not include any other text outside the JSON structure.`;
 
   try {
     const openRouterResponse = await fetch(
@@ -81,14 +111,51 @@ Do not include any other text in your response.`;
     }
 
     const openRouterResult = await openRouterResponse.json();
-    const openRouterSummary =
+    const openRouterContent =
       openRouterResult?.choices?.[0]?.message?.content?.trim();
 
-    if (openRouterSummary) {
-      return res.status(200).json({
-        summary: openRouterSummary,
-        source: "openrouter",
-      });
+    if (openRouterContent) {
+      try {
+        // Clean the response - remove markdown code blocks if present
+        let cleanedContent = openRouterContent;
+        if (cleanedContent.includes("```json")) {
+          cleanedContent = cleanedContent
+            .replace(/```json\s*/g, "")
+            .replace(/\s*```/g, "");
+        }
+        if (cleanedContent.includes("```")) {
+          cleanedContent = cleanedContent
+            .replace(/```\s*/g, "")
+            .replace(/\s*```/g, "");
+        }
+
+        // Parse the JSON response from the AI
+        const parsedResult = JSON.parse(cleanedContent);
+
+        // Validate that the theme is from our list
+        const validTheme = journalingThemes.includes(parsedResult.theme)
+          ? parsedResult.theme
+          : "Self-Reflection"; // Default fallback
+
+        console.log("Parsed result:", parsedResult);
+        console.log("Valid theme:", validTheme);
+
+        return res.status(200).json({
+          summary: parsedResult.summary,
+          theme: validTheme,
+          source: "openrouter",
+        });
+      } catch (parseError) {
+        console.error("JSON parsing error:", parseError);
+        console.log("Original content:", openRouterContent);
+
+        // If JSON parsing fails, treat as legacy format (summary only)
+        return res.status(200).json({
+          summary: openRouterContent,
+          theme: "Self-Reflection",
+          source: "openrouter",
+        });
+      }
     }
 
     // If OpenRouter fails
