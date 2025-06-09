@@ -350,6 +350,49 @@ export default function Journals({ user }) {
                     ? "Guided Journaling"
                     : "Apply Filter"}
                 </Button>
+                <Menu
+                  anchorEl={filterMenuAnchor}
+                  open={Boolean(filterMenuAnchor)}
+                  onClose={handleFilterClose}
+                  PaperProps={{
+                    sx: {
+                      mt: 1,
+                      borderRadius: 2,
+                      minWidth: 180,
+                    },
+                  }}
+                >
+                  <MenuItem 
+                    onClick={() => handleJournalTypeSelect("Free Journaling")}
+                    sx={{ 
+                      fontFamily: poppins.style.fontFamily,
+                      py: 1.5,
+                    }}
+                  >
+                    Free Journaling
+                  </MenuItem>
+                  <MenuItem 
+                    onClick={() => handleJournalTypeSelect("Guided Journaling")}
+                    sx={{ 
+                      fontFamily: poppins.style.fontFamily,
+                      py: 1.5,
+                    }}
+                  >
+                    Guided Journaling
+                  </MenuItem>
+                  {selectedJournalType && (
+                    <MenuItem 
+                      onClick={clearFilters}
+                      sx={{ 
+                        fontFamily: poppins.style.fontFamily,
+                        py: 1.5,
+                        color: '#666',
+                      }}
+                    >
+                      Clear Filter
+                    </MenuItem>
+                  )}
+                </Menu>
                 {/* Select Date */}
                 <Button
                   variant="outlined"
