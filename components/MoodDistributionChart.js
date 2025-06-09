@@ -28,13 +28,17 @@ const MoodDistributionChart = ({ emotions: rawEmotions }) => {
     if (emotions.length === 1) {
       const emotion = emotions[0];
       const intensity = emotion.intensity / 100;
+      // Ensure minimum opacity for visibility, especially for neutral emotions
+      const minOpacity = 25; // Minimum 25% opacity
+      const maxOpacity = 85; // Maximum 85% opacity
+
       return `radial-gradient(circle at center, ${emotion.color}${Math.round(
-        intensity * 80 + 40
-      )} 0%, ${emotion.color}${Math.round(intensity * 60 + 25)} 35%, ${
+        intensity * (maxOpacity - minOpacity) + minOpacity
+      )} 0%, ${emotion.color}${Math.round(intensity * (60 - 20) + 20)} 35%, ${
         emotion.color
-      }${Math.round(intensity * 35 + 15)} 70%, ${emotion.color}${Math.round(
-        intensity * 15 + 5
-      )} 100%)`;
+      }${Math.round(intensity * (35 - 15) + 15)} 70%, ${
+        emotion.color
+      }${Math.round(intensity * (15 - 8) + 8)} 100%)`;
     }
 
     // Calculate positions for spread out circles without overlap
@@ -74,12 +78,12 @@ const MoodDistributionChart = ({ emotions: rawEmotions }) => {
         const position = emotionPositions[index];
         if (!position) return null;
 
-        // Calculate intensity-based spread and opacity - more prominent
+        // Calculate intensity-based spread and opacity - ensure minimum visibility
         const intensity = emotion.intensity / 100;
         const spread = Math.round(intensity * 50 + 30); // 30% to 80% spread
-        const opacity = Math.round(intensity * 70 + 40); // 40% to 110% opacity (capped at 100)
-        const midOpacity = Math.round(opacity * 0.7); // Stronger mid-point
-        const falloff = Math.round(intensity * 20 + 10); // 10% to 30% falloff
+        const opacity = Math.round(intensity * 50 + 50); // 50% to 100% opacity (better minimum visibility)
+        const midOpacity = Math.round(opacity * 0.75); // Stronger mid-point
+        const falloff = Math.round(intensity * 15 + 10); // 10% to 25% falloff
 
         // Create more vibrant color stops
         return `radial-gradient(circle at ${position.left} ${position.top}, ${
@@ -92,9 +96,12 @@ const MoodDistributionChart = ({ emotions: rawEmotions }) => {
       })
       .filter(Boolean);
 
-    // Create subtle base gradient for overall cohesion
-    const baseGradient =
-      "radial-gradient(ellipse at center, rgba(255, 255, 255, 0.0) 0%, rgba(255, 255, 255, 0.0) 100%)";
+    // Create subtle base gradient using the dominant emotion's color for cohesion
+    const dominantEmotion = emotions.reduce((prev, current) =>
+      prev.intensity > current.intensity ? prev : current
+    );
+
+    const baseGradient = `radial-gradient(ellipse at center, ${dominantEmotion.color}08 0%, ${dominantEmotion.color}15 50%, ${dominantEmotion.color}25 100%)`;
 
     // Combine all gradients
     return [baseGradient, ...radialGradients].join(", ");
