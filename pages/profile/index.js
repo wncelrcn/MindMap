@@ -3,6 +3,7 @@ import NextImage from "next/image";
 import Footer from "@/components/layout/footer";
 import SupportFooter from "@/components/layout/support_footer";
 import Navbar from "@/components/layout/navbar";
+import RecurringJournalTopics from "@/components/profile/RecurringJournalTopics";
 import {
   Box,
   Typography,
@@ -25,9 +26,6 @@ import { Raleway, Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/utils/supabase/server-props";
 import { supabase } from "@/lib/supabase";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import SpaIcon from "@mui/icons-material/Spa";
-import WorkIcon from "@mui/icons-material/Work";
 import FlipCameraAndroidIcon from "@mui/icons-material/FlipCameraAndroid";
 import EditIcon from "@mui/icons-material/Edit";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
@@ -87,6 +85,8 @@ export default function Profile({ user }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [updating, setUpdating] = useState(false);
+  const [topThemes, setTopThemes] = useState([]);
+  const [themesLoading, setThemesLoading] = useState(true);
   const fileInputRef = useRef(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -143,7 +143,35 @@ export default function Profile({ user }) {
       }
     };
 
+    const fetchTopThemes = async () => {
+      try {
+        const response = await fetch("/api/profile/theme", {
+          method: "GET",
+          credentials: "include", // Include cookies for authentication
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.topThemes && data.topThemes.length > 0) {
+            // Extract just the theme names for the component
+            const themeNames = data.topThemes.map((item) => item.theme);
+            setTopThemes(themeNames);
+          }
+          // If no themes returned, keep the default themes
+        } else {
+          console.error("Failed to fetch themes:", response.statusText);
+          // Keep default themes on error
+        }
+      } catch (error) {
+        console.error("Error fetching themes:", error);
+        // Keep default themes on error
+      } finally {
+        setThemesLoading(false);
+      }
+    };
+
     fetchUserData();
+    fetchTopThemes();
   }, [user]);
 
   const handleFlip = () => {
@@ -714,63 +742,10 @@ export default function Profile({ user }) {
                   }}
                 >
                   {/* Recurring Journal Topics */}
-                  <Box
-                    sx={{
-                      backgroundColor: "#5C35C2",
-                      borderRadius: 4,
-                      p: 2.5,
-                      color: "white",
-                    }}
-                  >
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontFamily: poppins.style.fontFamily,
-                        mb: 2,
-                        fontSize: "1.2rem",
-                      }}
-                    >
-                      Recurring Journal Topics
-                    </Typography>
-
-                    <Stack spacing={2}>
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <FavoriteIcon sx={{ mr: 1, fontSize: "1.4rem" }} />
-                        <Typography
-                          sx={{
-                            fontFamily: poppins.style.fontFamily,
-                            fontSize: "1rem",
-                          }}
-                        >
-                          Interpersonal Relationship
-                        </Typography>
-                      </Box>
-
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <SpaIcon sx={{ mr: 1, fontSize: "1.4rem" }} />
-                        <Typography
-                          sx={{
-                            fontFamily: poppins.style.fontFamily,
-                            fontSize: "1rem",
-                          }}
-                        >
-                          Personal Well-being and Emotional State
-                        </Typography>
-                      </Box>
-
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <WorkIcon sx={{ mr: 1, fontSize: "1.4rem" }} />
-                        <Typography
-                          sx={{
-                            fontFamily: poppins.style.fontFamily,
-                            fontSize: "1rem",
-                          }}
-                        >
-                          Work Life Balance
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </Box>
+                  <RecurringJournalTopics
+                    topicTexts={topThemes}
+                    loading={themesLoading}
+                  />
 
                   <Box
                     sx={{
