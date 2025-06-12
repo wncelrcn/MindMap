@@ -24,10 +24,42 @@ const raleway = Raleway({
   variable: "--font-raleway",
 });
 
-export default function RecapCard({}) {
+export default function RecapCard({ recap, count }) {
   const router = useRouter();
 
-  const handleClick = () => {};
+  const handleClick = () => {
+    // Navigate to view recap page with recap data
+    router.push({
+      pathname: "/view-recap",
+      query: {
+        recapId: `${recap.date_range_start}_${recap.date_range_end}`,
+        dateStart: recap.date_range_start,
+        dateEnd: recap.date_range_end,
+      },
+    });
+  };
+
+  // Format date range for display
+  const formatDateRange = (startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    const startMonth = start
+      .toLocaleDateString("en-US", { month: "short" })
+      .toUpperCase();
+    const endMonth = end
+      .toLocaleDateString("en-US", { month: "short" })
+      .toUpperCase();
+
+    const startDay = start.getDate();
+    const endDay = end.getDate();
+
+    if (startMonth === endMonth) {
+      return `${startMonth} ${startDay}-${endDay}`;
+    } else {
+      return `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
+    }
+  };
 
   return (
     <Grid container spacing={4} justifyContent="center">
@@ -65,7 +97,7 @@ export default function RecapCard({}) {
             padding: 3,
           }}
         >
-          {/* Date in top right */}
+          {/* Count and Date in top right */}
           <Box
             sx={{
               position: "absolute",
@@ -84,7 +116,7 @@ export default function RecapCard({}) {
                 mb: 0.5,
               }}
             >
-              5
+              {count}
             </Typography>
             <Typography
               sx={{
@@ -95,7 +127,7 @@ export default function RecapCard({}) {
                 letterSpacing: "0.1em",
               }}
             >
-              OCT '9
+              {formatDateRange(recap.date_range_start, recap.date_range_end)}
             </Typography>
           </Box>
 
@@ -135,7 +167,8 @@ export default function RecapCard({}) {
                 letterSpacing: "-0.02em",
               }}
             >
-              Growth in Challenges
+              {formatDateRange(recap.date_range_start, recap.date_range_end)}{" "}
+              Recap
             </Typography>
           </Box>
         </Card>

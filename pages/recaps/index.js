@@ -19,6 +19,7 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import RecapCard from "@/components/cards/recap_card";
 
 import { createClient } from "@/utils/supabase/server-props";
+import { createClient as createComponentClient } from "@/utils/supabase/component";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -62,11 +63,43 @@ export async function getServerSideProps(context) {
 export default function WeeklyRecap({ user }) {
   const [username, setUsername] = useState(user.user_metadata.name);
   const [user_UID, setUser_UID] = useState(user.id);
+  const [recaps, setRecaps] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecaps = async () => {
+      const supabase = createComponentClient();
+
+      try {
+        const { data, error } = await supabase
+          .from("recap")
+          .select(
+            "user_UID, weekly_summary, mood, date_range_start, date_range_end, created_at, feeling, contributing, moments, cope, remember"
+          )
+          .eq("user_UID", user_UID)
+          .order("date_range_start", { ascending: false });
+
+        if (error) {
+          console.error("Error fetching recaps:", error);
+        } else {
+          setRecaps(data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching recaps:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user_UID) {
+      fetchRecaps();
+    }
+  }, [user_UID]);
 
   return (
     <>
       <Head>
-        <title>MindMap - Weekly Recap</title>
+        <title>MindMap - Recaps</title>
         <meta
           name="description"
           content="Your weekly journaling insights and emotional wellness summary."
@@ -77,7 +110,6 @@ export default function WeeklyRecap({ user }) {
 
       <Box display="flex" flexDirection="column" minHeight="100vh">
         <Navbar />
-        {/* Main Content */}
 
         {/* Main Content */}
         <Box sx={{ flex: 1, mt: 3 }}>
@@ -215,14 +247,48 @@ export default function WeeklyRecap({ user }) {
               </Grid>
             </Grid>
 
-            {/* Journal Cards */}
+            {/* Recap Cards */}
             <Grid container spacing={4} sx={{ mb: 20 }}>
-              <RecapCard />
-              <RecapCard />
-              <RecapCard />
-              <RecapCard />
-              <RecapCard />
-              <RecapCard />
+              {loading ? (
+                <Grid item xs={12}>
+                  <Typography
+                    sx={{
+                      textAlign: "center",
+                      color: "#5A4B7A",
+                      fontFamily: poppins.style.fontFamily,
+                      fontSize: "1.2rem",
+                    }}
+                  >
+                    Loading your recaps...
+                  </Typography>
+                </Grid>
+              ) : recaps.length === 0 ? (
+                <Grid item xs={12}>
+                  <Typography
+                    sx={{
+                      textAlign: "center",
+                      color: "#5A4B7A",
+                      fontFamily: poppins.style.fontFamily,
+                      fontSize: "1.2rem",
+                    }}
+                  >
+                    No recaps found. Start journaling to generate your first
+                    weekly recap!
+                  </Typography>
+                </Grid>
+              ) : (
+                recaps.map((recap, index) => (
+                  <Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    key={`${recap.date_range_start}-${recap.date_range_end}`}
+                  >
+                    <RecapCard recap={recap} count={index + 1} />
+                  </Grid>
+                ))
+              )}
             </Grid>
           </Container>
         </Box>
