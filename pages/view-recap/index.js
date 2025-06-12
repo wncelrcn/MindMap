@@ -1,4 +1,4 @@
-import { Box, Typography, Chip } from "@mui/material";
+import { Box, Typography, Chip, useTheme, useMediaQuery } from "@mui/material";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useSwipeable } from "react-swipeable";
@@ -22,6 +22,8 @@ export default function ViewRecap() {
   const [recapData, setRecapData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("User");
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const variants = {
     incoming: (direction) => ({
@@ -183,6 +185,17 @@ export default function ViewRecap() {
     }
   };
 
+  const getFontSizeForContent = (text = "") => {
+    const length = text.length;
+    if (length > 400) {
+      return { xs: "0.85rem", md: "0.9rem" };
+    }
+    if (length > 250) {
+      return { xs: "0.9rem", md: "1rem" };
+    }
+    return { xs: "1rem", md: "1.1rem" };
+  };
+
   if (loading) {
     return (
       <Box
@@ -290,9 +303,12 @@ export default function ViewRecap() {
                   background: "#fff",
                   borderRadius: 16,
                   boxShadow: "0 16px 48px rgba(60,40,120,0.16)",
-                  padding: 40,
-                  width: 600,
-                  height: 700,
+                  padding: isMobile ? "32px 24px" : "40px",
+                  width: isMobile ? "90%" : 600,
+                  height: "auto",
+                  minHeight: isMobile ? "80vh" : 700,
+                  maxHeight: isMobile ? "90vh" : "auto",
+                  overflowY: isMobile ? "auto" : "hidden",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
@@ -307,7 +323,7 @@ export default function ViewRecap() {
                     {/* Intro Card */}
                     <Typography
                       sx={{
-                        fontSize: "1.5rem",
+                        fontSize: { xs: "1.2rem", md: "1.5rem" },
                         color: "#5A33B7",
                         fontWeight: 500,
                         mb: 2,
@@ -318,10 +334,10 @@ export default function ViewRecap() {
                     </Typography>
                     <Typography
                       sx={{
-                        fontSize: "3rem",
+                        fontSize: { xs: "2.5rem", md: "3rem" },
                         fontWeight: 600,
                         color: "#2D1B6B",
-                        mb: 6,
+                        mb: { xs: 4, md: 6 },
                         textAlign: "center",
                         fontFamily: poppins.style.fontFamily,
                       }}
@@ -330,9 +346,9 @@ export default function ViewRecap() {
                     </Typography>
                     <Typography
                       sx={{
-                        fontSize: "1.5rem",
+                        fontSize: { xs: "1.2rem", md: "1.5rem" },
                         color: "#333",
-                        mb: 4,
+                        mb: { xs: 3, md: 4 },
                         textAlign: "center",
                         fontFamily: poppins.style.fontFamily,
                       }}
@@ -345,7 +361,7 @@ export default function ViewRecap() {
                       sx={{
                         display: "flex",
                         gap: 1,
-                        mb: 6,
+                        mb: { xs: 4, md: 6 },
                         flexWrap: "wrap",
                         justifyContent: "center",
                       }}
@@ -370,13 +386,13 @@ export default function ViewRecap() {
                       sx={{
                         backgroundColor: "#5A33B7",
                         color: "white",
-                        px: 4,
-                        py: 2,
+                        px: { xs: 3, md: 4 },
+                        py: { xs: 1.5, md: 2 },
                         borderRadius: "50px",
                         cursor: "pointer",
                         fontFamily: poppins.style.fontFamily,
                         fontWeight: 600,
-                        fontSize: "1.1rem",
+                        fontSize: { xs: "1rem", md: "1.1rem" },
                         "&:hover": {
                           backgroundColor: "#4A2A97",
                         },
@@ -394,8 +410,8 @@ export default function ViewRecap() {
                         <Box
                           sx={{
                             position: "absolute",
-                            top: 24,
-                            right: 24,
+                            top: { xs: 16, md: 24 },
+                            right: { xs: 16, md: 24 },
                             color: "#5A33B7",
                             fontSize: "1.5rem",
                           }}
@@ -413,17 +429,19 @@ export default function ViewRecap() {
                       )}
 
                     {/* Icon */}
-                    <Typography sx={{ fontSize: "3rem", mb: 3 }}>
+                    <Typography
+                      sx={{ fontSize: { xs: "2.5rem", md: "3rem" }, mb: 2 }}
+                    >
                       {currentCard.icon}
                     </Typography>
 
                     {/* Title */}
                     <Typography
                       sx={{
-                        fontSize: "1.8rem",
+                        fontSize: { xs: "1.6rem", md: "1.8rem" },
                         fontWeight: 600,
                         color: "#5A33B7",
-                        mb: 4,
+                        mb: { xs: 3, md: 4 },
                         textAlign: "center",
                         fontFamily: poppins.style.fontFamily,
                       }}
@@ -434,12 +452,12 @@ export default function ViewRecap() {
                     {/* Content */}
                     <Typography
                       sx={{
-                        fontSize: "1.1rem",
+                        fontSize: getFontSizeForContent(currentCard.content),
                         color: "#333",
                         lineHeight: 1.6,
                         textAlign: "center",
-                        mb: 4,
-                        maxWidth: "80%",
+                        mb: { xs: 3, md: 4 },
+                        maxWidth: { xs: "95%", md: "80%" },
                         fontFamily: poppins.style.fontFamily,
                       }}
                     >
@@ -451,8 +469,8 @@ export default function ViewRecap() {
                       <Box
                         sx={{
                           position: "absolute",
-                          bottom: 24,
-                          right: 24,
+                          bottom: { xs: 16, md: 24 },
+                          right: { xs: 16, md: 24 },
                           color: "#999",
                           fontStyle: "italic",
                           fontSize: "0.9rem",
@@ -466,8 +484,8 @@ export default function ViewRecap() {
                         onClick={() => router.push("/recaps")}
                         sx={{
                           position: "absolute",
-                          bottom: 24,
-                          right: 24,
+                          bottom: { xs: 16, md: 24 },
+                          right: { xs: 16, md: 24 },
                           backgroundColor: "#5A33B7",
                           color: "white",
                           px: 3,
@@ -492,8 +510,8 @@ export default function ViewRecap() {
                 <Typography
                   sx={{
                     position: "absolute",
-                    bottom: 24,
-                    left: 24,
+                    bottom: { xs: 16, md: 24 },
+                    left: { xs: 16, md: 24 },
                     color: "#999",
                     fontSize: "0.9rem",
                     fontFamily: poppins.style.fontFamily,
