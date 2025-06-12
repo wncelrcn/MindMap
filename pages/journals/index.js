@@ -362,18 +362,18 @@ export default function Journals({ user }) {
                     },
                   }}
                 >
-                  <MenuItem 
+                  <MenuItem
                     onClick={() => handleJournalTypeSelect("Free Journaling")}
-                    sx={{ 
+                    sx={{
                       fontFamily: poppins.style.fontFamily,
                       py: 1.5,
                     }}
                   >
                     Free Journaling
                   </MenuItem>
-                  <MenuItem 
+                  <MenuItem
                     onClick={() => handleJournalTypeSelect("Guided Journaling")}
-                    sx={{ 
+                    sx={{
                       fontFamily: poppins.style.fontFamily,
                       py: 1.5,
                     }}
@@ -381,12 +381,12 @@ export default function Journals({ user }) {
                     Guided Journaling
                   </MenuItem>
                   {selectedJournalType && (
-                    <MenuItem 
+                    <MenuItem
                       onClick={clearFilters}
-                      sx={{ 
+                      sx={{
                         fontFamily: poppins.style.fontFamily,
                         py: 1.5,
-                        color: '#666',
+                        color: "#666",
                       }}
                     >
                       Clear Filter
