@@ -1,6 +1,17 @@
 import Navbar from "@/components/layout/navbar";
 import LoadingModal from "@/components/LoadingModal";
-import { Box, TextField, Typography, Button, useTheme } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Typography,
+  Button,
+  useTheme,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
@@ -62,6 +73,7 @@ export default function Journal({ user }) {
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const [loadingStep, setLoadingStep] = useState("");
   const [progress, setProgress] = useState(0);
+  const [openShortEntryDialog, setOpenShortEntryDialog] = useState(false);
 
   const router = useRouter();
 
@@ -142,6 +154,15 @@ export default function Journal({ user }) {
         !sections.some((section) => section.content.trim())
       ) {
         setError("Please enter some content before saving");
+        return;
+      }
+
+      const fullText =
+        content.trim() + " " + sections.map((s) => s.content.trim()).join(" ");
+      const wordCount = fullText.split(/\s+/).filter(Boolean).length;
+
+      if (wordCount < 30) {
+        setOpenShortEntryDialog(true);
         return;
       }
 
@@ -276,6 +297,83 @@ export default function Journal({ user }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/assets/logo.png" />
       </Head>
+
+      <Dialog
+        open={openShortEntryDialog}
+        onClose={() => setOpenShortEntryDialog(false)}
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: "16px",
+            padding: "1rem",
+            fontFamily: poppins.style.fontFamily,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontFamily: poppins.style.fontFamily,
+            fontWeight: 600,
+            color: "#2D1B6B",
+          }}
+        >
+          Entry Too Short for Insights
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText
+            sx={{
+              fontFamily: poppins.style.fontFamily,
+              color: "#4A3E8E",
+            }}
+          >
+            Your journal entry seems a bit short to generate meaningful
+            insights. We recommend writing a bit more to get the best results.
+            <br />
+            <br />
+            If you're having trouble, you can also try our guided journaling
+            prompts.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ padding: "0 1rem 1rem" }}>
+          <Button
+            onClick={() => router.push("/guided-journaling")}
+            sx={{
+              backgroundColor: "#E2DDF9",
+              color: "#4E2BBD",
+              textTransform: "none",
+              fontWeight: 500,
+              borderRadius: "12px",
+              padding: "0.5rem 1.5rem",
+              boxShadow: "none",
+              fontFamily: poppins.style.fontFamily,
+              "&:hover": {
+                backgroundColor: "#D4C7F3",
+              },
+            }}
+          >
+            Try Guided Journaling
+          </Button>
+          <Button
+            onClick={() => setOpenShortEntryDialog(false)}
+            autoFocus
+            sx={{
+              backgroundColor: "#4E2BBD",
+              color: "#fff",
+              textTransform: "none",
+              fontWeight: 500,
+              borderRadius: "12px",
+              padding: "0.5rem 1.5rem",
+              boxShadow: "none",
+              marginLeft: "1rem",
+              fontFamily: poppins.style.fontFamily,
+              "&:hover": {
+                backgroundColor: "#40249c",
+              },
+            }}
+          >
+            Continue Writing
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Box>
         <Navbar />

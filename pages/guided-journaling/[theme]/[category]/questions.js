@@ -9,6 +9,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  DialogContentText,
 } from "@mui/material";
 import Head from "next/head";
 import Image from "next/image";
@@ -72,6 +73,7 @@ export default function Questions({ user }) {
   const [themeId, setThemeId] = useState(null);
   const [categoryId, setCategoryId] = useState(null);
   const [questionSetId, setQuestionSetId] = useState(null);
+  const [openShortEntryDialog, setOpenShortEntryDialog] = useState(false);
 
   // Loading states for insights generation
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
@@ -242,6 +244,16 @@ export default function Questions({ user }) {
       const hasContent = Object.values(answers).some((answer) => answer.trim());
       if (!hasContent) {
         setError("Please answer at least one question before saving.");
+        return;
+      }
+
+      const fullText = Object.values(answers)
+        .map((a) => a.trim())
+        .join(" ");
+      const wordCount = fullText.split(/\s+/).filter(Boolean).length;
+
+      if (wordCount < 30) {
+        setOpenShortEntryDialog(true);
         return;
       }
 
@@ -667,6 +679,13 @@ export default function Questions({ user }) {
         onClose={handleCancelExit}
         aria-labelledby="exit-dialog-title"
         aria-describedby="exit-dialog-description"
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: "16px",
+            padding: "1rem",
+            fontFamily: poppins.style.fontFamily,
+          },
+        }}
       >
         <DialogTitle
           id="exit-dialog-title"
@@ -720,6 +739,60 @@ export default function Questions({ user }) {
             }}
           >
             Leave Without Saving
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={openShortEntryDialog}
+        onClose={() => setOpenShortEntryDialog(false)}
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: "16px",
+            padding: "1rem",
+            fontFamily: poppins.style.fontFamily,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontFamily: poppins.style.fontFamily,
+            fontWeight: 600,
+            color: "#2D1B6B",
+          }}
+        >
+          Entry Too Short for Insights
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText
+            sx={{
+              fontFamily: poppins.style.fontFamily,
+              color: "#4A3E8E",
+            }}
+          >
+            Your answers seem a bit short to generate meaningful insights. We
+            recommend writing a bit more to get the best results.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ padding: "0 1rem 1rem" }}>
+          <Button
+            onClick={() => setOpenShortEntryDialog(false)}
+            autoFocus
+            sx={{
+              backgroundColor: "#4E2BBD",
+              color: "#fff",
+              textTransform: "none",
+              fontWeight: 500,
+              borderRadius: "12px",
+              padding: "0.5rem 1.5rem",
+              boxShadow: "none",
+              fontFamily: poppins.style.fontFamily,
+              "&:hover": {
+                backgroundColor: "#40249c",
+              },
+            }}
+          >
+            Continue Writing
           </Button>
         </DialogActions>
       </Dialog>

@@ -143,25 +143,19 @@ export default function ViewRecap() {
 
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => {
+      if (index === 0) return;
       // Swiping left = going to next card (forward)
       if (index < cardContents.length - 1) {
         setDirection(1);
         setIndex((i) => i + 1);
-      } else {
-        // Wrap around to the first card
-        setDirection(1);
-        setIndex(0);
       }
     },
     onSwipedRight: () => {
+      if (index === 0) return;
       // Swiping right = going to previous card (backward)
       if (index > 0) {
         setDirection(-1);
         setIndex((i) => i - 1);
-      } else {
-        // Wrap around to the last card
-        setDirection(-1);
-        setIndex(cardContents.length - 1);
       }
     },
     trackMouse: true,
