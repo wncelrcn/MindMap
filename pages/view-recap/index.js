@@ -23,6 +23,21 @@ export default function ViewRecap() {
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("User");
 
+  const variants = {
+    incoming: (direction) => ({
+      x: direction > 0 ? "100%" : "-100%",
+      opacity: 0,
+    }),
+    active: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: (direction) => ({
+      x: direction > 0 ? "-100%" : "100%",
+      opacity: 0.2,
+    }),
+  };
+
   useEffect(() => {
     const fetchRecapData = async () => {
       if (!dateStart || !dateEnd) return;
@@ -130,26 +145,30 @@ export default function ViewRecap() {
     onSwipedLeft: () => {
       // Swiping left = going to next card (forward)
       if (index < cardContents.length - 1) {
-        setDirection(1); // Moving forward
+        setDirection(1);
         setIndex((i) => i + 1);
       } else {
-        // At the last card, navigate back to recaps page
-        router.push("/recaps");
+        // Wrap around to the first card
+        setDirection(1);
+        setIndex(0);
       }
     },
     onSwipedRight: () => {
       // Swiping right = going to previous card (backward)
       if (index > 0) {
-        setDirection(-1); // Moving backward
+        setDirection(-1);
         setIndex((i) => i - 1);
+      } else {
+        // Wrap around to the last card
+        setDirection(-1);
+        setIndex(cardContents.length - 1);
       }
     },
     trackMouse: true,
   });
 
   const handleIntroButtonClick = () => {
-    // Going from intro (index 0) to next card (index 1)
-    setDirection(1); // Moving forward, so next card comes from right
+    setDirection(1);
     setIndex(1);
   };
 
@@ -265,25 +284,13 @@ export default function ViewRecap() {
               <motion.div
                 key={index}
                 custom={direction}
-                initial={{
-                  x: direction > 0 ? 300 : direction < 0 ? -300 : 0,
-                  opacity: 0,
-                  scale: 0.9,
-                }}
-                animate={{
-                  x: 0,
-                  opacity: 1,
-                  scale: 1,
-                }}
-                exit={{
-                  x: direction > 0 ? -300 : direction < 0 ? 300 : 0,
-                  opacity: 0,
-                  scale: 0.9,
-                }}
+                variants={variants}
+                initial="incoming"
+                animate="active"
+                exit="exit"
                 transition={{
-                  x: { type: "spring", stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.3 },
-                  scale: { type: "spring", stiffness: 300, damping: 30 },
+                  duration: 0.5,
+                  ease: [0.56, 0.03, 0.12, 1.04],
                 }}
                 style={{
                   background: "#fff",
@@ -298,6 +305,7 @@ export default function ViewRecap() {
                   justifyContent: "center",
                   position: "relative",
                   fontFamily: poppins.style.fontFamily,
+                  willChange: "transform",
                 }}
               >
                 {currentCard.type === "intro" ? (
