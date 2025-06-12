@@ -1,6 +1,3 @@
-// Goal: Finish UI
-// Objective: This page will display the dashboard of the recap of the user.
-
 import Head from "next/head";
 import Footer from "@/components/layout/footer";
 import SupportFooter from "@/components/layout/support_footer";
@@ -58,11 +55,16 @@ export async function getServerSideProps(context) {
     },
   };
 }
+import { useRecap } from "@/contexts/RecapContext";
+
 export default function DashboardPage({ user }) {
   const router = useRouter();
   const [username, setUsername] = useState(user.user_metadata.name);
   const [user_UID, setUser_UID] = useState(user.id);
   const [recentJournals, setRecentJournals] = useState([]);
+
+  // Use recap context instead of local state
+  const { recapData, recapLoading } = useRecap();
 
   useEffect(() => {
     const fetchData = async () => {
