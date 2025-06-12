@@ -106,7 +106,7 @@ export default function ViewInsights({ user }) {
           position="absolute"
           top={16}
           zIndex={1}
-          sx={{ padding: { xs: "1.5rem", md: "2rem 8rem" } }}
+          sx={{ padding: { xs: "1rem", sm: "1.5rem", md: "2rem 4rem", lg: "2rem 8rem" } }}
         >
           <Link href="/view-journal" passHref legacyBehavior>
             <a>
@@ -128,15 +128,20 @@ export default function ViewInsights({ user }) {
       {/* Main Content */}
       <Box
         sx={{
-          padding: { xs: "2rem 1.5rem", md: "3rem 8rem" },
-          paddingBottom: "8rem",
-          marginBottom: "4rem",
+          padding: { 
+            xs: "1.5rem 1rem", 
+            sm: "2rem 1.5rem", 
+            md: "3rem 4rem", 
+            lg: "3rem 8rem" 
+          },
+          paddingBottom: { xs: "4rem", sm: "6rem", md: "8rem" },
+          marginBottom: { xs: "2rem", sm: "3rem", md: "4rem" },
         }}
       >
         {/* Page Title */}
         <Typography
           sx={{
-            fontSize: { xs: "0.9rem", md: "1rem" },
+            fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
             fontWeight: 400,
             color: "#2D1B6B",
             lineHeight: "normal",
@@ -150,62 +155,60 @@ export default function ViewInsights({ user }) {
 
         <Typography
           sx={{
-            fontSize: { xs: "2.5rem", md: "3.5rem" },
+            fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem", lg: "3.5rem" },
             fontWeight: 700,
             color: "#2D1B6B",
             lineHeight: "1.1",
             fontFamily: poppins.style.fontFamily,
-            mb: 4,
+            mb: { xs: 3, sm: 4, md: 4 },
           }}
         >
           Insights
         </Typography>
 
         {/* Insights Header */}
-
-        <Box sx={{ mb: 12 }}>
+        <Box sx={{ mb: { xs: 6, sm: 8, md: 10, lg: 12 } }}>
           {/* Top Row - 2 Cards */}
           <Box
             sx={{
               display: "flex",
-              gap: 3,
-              mb: 3,
-              flexWrap: { xs: "wrap", md: "nowrap" },
+              gap: { xs: 2, sm: 2.5, md: 3 },
+              mb: { xs: 2, sm: 2.5, md: 3 },
+              flexDirection: { xs: "column", sm: "column", md: "row" },
             }}
           >
-            {/* Card 1 */}
+            {/* Card 1 - Top Left */}
             <Card
               sx={{
-                flex: "0 0 75%",
-                minWidth: { xs: "100%", md: "75%" },
-                height: 280,
+                flex: { md: "0 0 75%" },
+                width: { xs: "100%", md: "75%" },
+                height: { xs: 200, sm: 220, md: 260, lg: 280 },
                 border: "1px solid black",
-                borderRadius: "20px",
+                borderRadius: { xs: "16px", sm: "18px", md: "20px" },
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 position: "relative",
                 overflow: "hidden",
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background:
-                    "linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)",
-                  pointerEvents: "none",
-                },
+                backgroundImage: "url('/assets/insights/bg-topleft.png')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                order: { xs: 1, md: 1 },
               }}
             >
               <CardContent
-                sx={{ textAlign: "left", padding: "2rem", zIndex: 1 }}
+                sx={{ 
+                  textAlign: "left", 
+                  padding: { xs: "1.5rem", sm: "1.75rem", md: "2rem" }, 
+                  zIndex: 1,
+                  width: "100%",
+                }}
               >
                 <Typography
                   sx={{
-                    fontSize: { xs: "1.1rem", md: "1.3rem" },
-                    fontWeight: 300,
+                    fontSize: { xs: "0.95rem", sm: "1.05rem", md: "1.2rem", lg: "1.3rem" },
+                    fontWeight: 400,
                     textAlign: "left",
                     color: "#1565C0",
                     lineHeight: "1.4",
@@ -220,40 +223,37 @@ export default function ViewInsights({ user }) {
               </CardContent>
             </Card>
 
-            {/* Card 2 */}
+            {/* Card 2 - Top Right */}
             <Card
               sx={{
-                flex: "0 0 25%",
-                minWidth: { xs: "100%", md: "25%" },
-                height: 280,
+                flex: { md: "0 0 25%" },
+                width: { xs: "100%", md: "25%" },
+                height: { xs: 120, sm: 140, md: 260, lg: 280 },
                 border: "1px solid black",
-                borderRadius: "20px",
+                borderRadius: { xs: "16px", sm: "18px", md: "20px" },
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "center",
+                justifyContent: "flex-end",
                 position: "relative",
                 overflow: "hidden",
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background:
-                    "linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)",
-                  pointerEvents: "none",
-                },
+                backgroundImage: "url('/assets/insights/bg-topright.png')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                order: { xs: 2, md: 2 },
               }}
             >
               <CardContent
-                sx={{ textAlign: "center", padding: "2rem", zIndex: 1 }}
+                sx={{ 
+                  textAlign: "center", 
+                  padding: { xs: "1rem 1.5rem", sm: "1rem 1.75rem", md: "1rem 2rem 2rem 2rem" }, 
+                  zIndex: 1 
+                }}
               >
-                {/* ICON */}
                 <Typography
                   sx={{
-                    fontSize: "1.5rem",
+                    fontSize: { xs: "1.2rem", sm: "1.3rem", md: "1.4rem", lg: "1.5rem" },
                     fontWeight: 600,
                     color: "#2E7D32",
                     fontFamily: poppins.style.fontFamily,
@@ -269,44 +269,41 @@ export default function ViewInsights({ user }) {
           <Box
             sx={{
               display: "flex",
-              gap: 3,
-              flexWrap: { xs: "wrap", md: "nowrap" },
+              gap: { xs: 2, sm: 2.5, md: 3 },
+              flexDirection: { xs: "column", sm: "column", md: "row" },
             }}
           >
-            {/* Card 3 */}
+            {/* Card 3 - Bottom Left */}
             <Card
               sx={{
-                flex: "0 0 25%",
-                minWidth: { xs: "100%", md: "25%" },
-                height: 280,
+                flex: { md: "0 0 25%" },
+                width: { xs: "100%", md: "25%" },
+                height: { xs: 120, sm: 140, md: 260, lg: 280 },
                 border: "1px solid black",
-                borderRadius: "20px",
+                borderRadius: { xs: "16px", sm: "18px", md: "20px" },
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "center",
+                justifyContent: "flex-end",
                 position: "relative",
                 overflow: "hidden",
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background:
-                    "linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)",
-                  pointerEvents: "none",
-                },
+                backgroundImage: "url('/assets/insights/bg-bottomleft.png')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                order: { xs: 3, md: 1 },
               }}
             >
               <CardContent
-                sx={{ textAlign: "center", padding: "2rem", zIndex: 1 }}
+                sx={{ 
+                  textAlign: "center", 
+                  padding: { xs: "1rem 1.5rem", sm: "1rem 1.75rem", md: "1rem 2rem 2rem 2rem" }, 
+                  zIndex: 1 
+                }}
               >
-                {/* ICON */}
                 <Typography
                   sx={{
-                    fontSize: "1.5rem",
+                    fontSize: { xs: "1.2rem", sm: "1.3rem", md: "1.4rem", lg: "1.5rem" },
                     fontWeight: 600,
                     color: "#E65100",
                     fontFamily: poppins.style.fontFamily,
@@ -317,44 +314,43 @@ export default function ViewInsights({ user }) {
               </CardContent>
             </Card>
 
-            {/* Card 4 */}
+            {/* Card 4 - Bottom Right */}
             <Card
               sx={{
-                flex: "0 0 75%",
-                minWidth: { xs: "100%", md: "75%" },
-                height: 280,
+                flex: { md: "0 0 75%" },
+                width: { xs: "100%", md: "75%" },
+                height: { xs: 200, sm: 220, md: 260, lg: 280 },
                 border: "1px solid black",
-                borderRadius: "20px",
+                borderRadius: { xs: "16px", sm: "18px", md: "20px" },
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 position: "relative",
                 overflow: "hidden",
-                "&::before": {
-                  content: '""',
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background:
-                    "linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)",
-                  pointerEvents: "none",
-                },
+                backgroundImage: "url('/assets/insights/bg-bottomright.png')",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+                order: { xs: 4, md: 2 },
               }}
             >
               <CardContent
-                sx={{ textAlign: "right", padding: "2rem", zIndex: 1 }}
+                sx={{ 
+                  textAlign: "right", 
+                  padding: { xs: "1.5rem", sm: "1.75rem", md: "2rem" }, 
+                  zIndex: 1,
+                  width: "100%",
+                }}
               >
                 <Typography
                   sx={{
-                    fontSize: { xs: "1.1rem", md: "1.3rem" },
-                    fontWeight: 300,
+                    fontSize: { xs: "0.95rem", sm: "1.05rem", md: "1.2rem", lg: "1.3rem" },
+                    fontWeight: 400,
                     color: "#6A1B9A",
                     lineHeight: "1.4",
                     fontFamily: poppins.style.fontFamily,
                     maxWidth: "100%",
-                    textAlign: "right",
+                    textAlign: { xs: "left", md: "right" },
                   }}
                 >
                   Your journal entries suggest a generally positive emotional
