@@ -21,6 +21,12 @@ import {
   DialogContent,
   DialogActions,
   Avatar,
+  Card,
+  CardContent,
+  Tooltip,
+  Chip,
+  Fade,
+  Zoom,
 } from "@mui/material";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState, useRef } from "react";
@@ -29,6 +35,9 @@ import { supabase } from "@/lib/supabase";
 import FlipCameraAndroidIcon from "@mui/icons-material/FlipCameraAndroid";
 import EditIcon from "@mui/icons-material/Edit";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import axios from "axios";
 
 // Font configurations
@@ -52,9 +61,7 @@ const quicksand = Quicksand({
 
 export async function getServerSideProps(context) {
   const supabase = createClient(context);
-
   const { data, error } = await supabase.auth.getUser();
-
   if (error || !data) {
     return {
       redirect: {
@@ -63,7 +70,6 @@ export async function getServerSideProps(context) {
       },
     };
   }
-
   return {
     props: {
       user: data.user,
@@ -71,12 +77,30 @@ export async function getServerSideProps(context) {
   };
 }
 
+// Badge color effects mapping
+const badgeEffects = {
+  'soft-green-glow': { backgroundColor: '#4CAF50', boxShadow: '0 0 20px rgba(76, 175, 80, 0.6)' },
+  'warm-blue-ripple': { backgroundColor: '#2196F3', boxShadow: '0 0 20px rgba(33, 150, 243, 0.6)' },
+  'vibrant-purple-sparkle': { backgroundColor: '#9C27B0', boxShadow: '0 0 20px rgba(156, 39, 176, 0.6)' },
+  'light-yellow-fade': { backgroundColor: '#FFEB3B', boxShadow: '0 0 20px rgba(255, 235, 59, 0.6)' },
+  'rich-orange-pulse': { backgroundColor: '#FF9800', boxShadow: '0 0 20px rgba(255, 152, 0, 0.6)' },
+  'deep-gold-radiant': { backgroundColor: '#FFD700', boxShadow: '0 0 20px rgba(255, 215, 0, 0.8)' },
+  'deep-indigo-starry': { backgroundColor: '#3F51B5', boxShadow: '0 0 20px rgba(63, 81, 181, 0.6)' },
+  'golden-yellow-twinkle': { backgroundColor: '#FFC107', boxShadow: '0 0 20px rgba(255, 193, 7, 0.6)' },
+  'soft-teal-swirl': { backgroundColor: '#009688', boxShadow: '0 0 20px rgba(0, 150, 136, 0.6)' },
+  'emerald-green-glow': { backgroundColor: '#4CAF50', boxShadow: '0 0 20px rgba(76, 175, 80, 0.8)' },
+  'soft-lavender-wave': { backgroundColor: '#E1BEE7', boxShadow: '0 0 20px rgba(225, 190, 231, 0.6)' },
+  'bright-cyan-pulse': { backgroundColor: '#00BCD4', boxShadow: '0 0 20px rgba(0, 188, 212, 0.6)' },
+  'fresh-green-bloom': { backgroundColor: '#8BC34A', boxShadow: '0 0 20px rgba(139, 195, 74, 0.6)' },
+  'deep-silver-reflective': { backgroundColor: '#9E9E9E', boxShadow: '0 0 20px rgba(158, 158, 158, 0.6)' },
+  'fiery-red-spark': { backgroundColor: '#F44336', boxShadow: '0 0 20px rgba(244, 67, 54, 0.6)' },
+  'vivid-magenta-flame': { backgroundColor: '#E91E63', boxShadow: '0 0 20px rgba(233, 30, 99, 0.6)' },
+};
+
 export default function Profile({ user }) {
   const [username, setUsername] = useState(user.user_metadata.name);
   const [user_UID, setUser_UID] = useState(user.id);
-  const [profilePicture, setProfilePicture] = useState(
-    "/assets/default_profile.png"
-  );
+  const [profilePicture, setProfilePicture] = useState("/assets/default_profile.png");
   const [aboutMe, setAboutMe] = useState("");
   const [isFlipped, setIsFlipped] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -87,6 +111,9 @@ export default function Profile({ user }) {
   const [updating, setUpdating] = useState(false);
   const [topThemes, setTopThemes] = useState([]);
   const [themesLoading, setThemesLoading] = useState(true);
+  const [badges, setBadges] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [badgesLoading, setBadgesLoading] = useState(true);
   const fileInputRef = useRef(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -97,49 +124,27 @@ export default function Profile({ user }) {
         try {
           const { data, error } = await supabase
             .from("user_table")
-            .select("username, profile_pic_url, about_me", "email")
+            .select("username, profile_pic_url, about_me")
             .eq("email", user.email)
             .single();
 
           if (error) {
             console.error("Error fetching user data:", error);
           } else {
-            // Check profile picture URL
             if (data.profile_pic_url) {
-              // Extract filename from URL
               const urlParts = data.profile_pic_url.split("/");
               const filename = urlParts[urlParts.length - 1];
-
-              if (filename.includes(`${data.username}_profile.png`)) {
-                // If filename contains username_profile.png or new_profile.png, use it
-                // Add timestamp to prevent browser caching
-                setProfilePicture(`${data.profile_pic_url}?t=${Date.now()}`);
-              } else {
-                // Otherwise check if it's a valid URL or use default
-                const validUrl =
-                  data.profile_pic_url &&
-                  data.profile_pic_url.startsWith("http");
-                setProfilePicture(
-                  validUrl
-                    ? `${data.profile_pic_url}?t=${Date.now()}`
-                    : "/assets/default_profile.png"
-                );
-              }
-            } else {
-              // If no profile pic URL, use default
-              setProfilePicture("/assets/default_profile.png");
+              const validUrl = data.profile_pic_url && data.profile_pic_url.startsWith("http");
+              setProfilePicture(
+                validUrl ? `${data.profile_pic_url}?t=${Date.now()}` : "/assets/default_profile.png"
+              );
             }
-
             setAboutMe(data.about_me || "");
             setNewAboutMe(data.about_me || "");
           }
         } catch (error) {
           console.error("Failed to fetch user data:", error);
-        } finally {
-          setLoading(false);
         }
-      } else {
-        setLoading(false);
       }
     };
 
@@ -147,31 +152,48 @@ export default function Profile({ user }) {
       try {
         const response = await fetch("/api/profile/theme", {
           method: "GET",
-          credentials: "include", // Include cookies for authentication
+          credentials: "include",
         });
-
         if (response.ok) {
           const data = await response.json();
           if (data.topThemes && data.topThemes.length > 0) {
-            // Extract just the theme names for the component
-            const themeNames = data.topThemes.map((item) => item.theme);
-            setTopThemes(themeNames);
+            setTopThemes(data.topThemes.map((item) => item.theme));
           }
-          // If no themes returned, keep the default themes
         } else {
           console.error("Failed to fetch themes:", response.statusText);
-          // Keep default themes on error
         }
       } catch (error) {
         console.error("Error fetching themes:", error);
-        // Keep default themes on error
       } finally {
         setThemesLoading(false);
       }
     };
 
-    fetchUserData();
-    fetchTopThemes();
+    const fetchBadgesAndStats = async () => {
+      try {
+        // Check for new badge unlocks
+        const checkResponse = await axios.post("/api/badges/check-unlock");
+        if (checkResponse.data.success) {
+          // Fetch updated badges and stats
+          const badgesResponse = await axios.get("/api/badges/user-badges");
+          if (badgesResponse.data.success) {
+            setBadges(badgesResponse.data.badges || []);
+            setStats(badgesResponse.data.stats);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching badges and stats:", error);
+      } finally {
+        setBadgesLoading(false);
+      }
+    };
+
+    const initialize = async () => {
+      await Promise.all([fetchUserData(), fetchTopThemes(), fetchBadgesAndStats()]);
+      setLoading(false);
+    };
+
+    initialize();
   }, [user]);
 
   const handleFlip = () => {
@@ -192,28 +214,20 @@ export default function Profile({ user }) {
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // Check file size - reject if over 5MB
       if (file.size > 5 * 1024 * 1024) {
         alert("Image is too large. Please select an image under 5MB.");
         return;
       }
-
       setSelectedFile(file);
-
-      // Create a preview with canvas to optimize
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
         img.onload = () => {
-          // Use canvas to resize the image before preview
           const canvas = document.createElement("canvas");
           const MAX_WIDTH = 300;
           const MAX_HEIGHT = 300;
-
           let width = img.width;
           let height = img.height;
-
-          // Calculate new dimensions while maintaining aspect ratio
           if (width > height) {
             if (width > MAX_WIDTH) {
               height = Math.round((height * MAX_WIDTH) / width);
@@ -225,16 +239,11 @@ export default function Profile({ user }) {
               height = MAX_HEIGHT;
             }
           }
-
           canvas.width = width;
           canvas.height = height;
-
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
-
-          // Get optimized preview URL and use for display
-          const optimizedPreview = canvas.toDataURL("image/jpeg", 0.7);
-          setPreviewUrl(optimizedPreview);
+          setPreviewUrl(canvas.toDataURL("image/jpeg", 0.7));
         };
         img.src = e.target.result;
       };
@@ -244,7 +253,6 @@ export default function Profile({ user }) {
 
   const handleUpdateProfile = async () => {
     if (!user || !user.email) return;
-
     setUpdating(true);
     try {
       const updateData = {
@@ -255,27 +263,18 @@ export default function Profile({ user }) {
         },
         aboutMe: newAboutMe,
       };
-
       if (selectedFile) {
         const reader = new FileReader();
         reader.readAsDataURL(selectedFile);
         reader.onload = async () => {
-          // Get the base64 string
           let base64String = reader.result.split(",")[1];
-
-          // If file is large, apply additional optimization in client
           if (selectedFile.size > 1 * 1024 * 1024) {
-            // Create an image for canvas-based optimization
             const img = new Image();
             img.onload = async () => {
               const canvas = document.createElement("canvas");
-              // Set to reasonable dimensions for a profile picture
               const MAX_DIM = 500;
-
               let width = img.width;
               let height = img.height;
-
-              // Resize while keeping aspect ratio
               if (width > height) {
                 if (width > MAX_DIM) {
                   height = Math.round((height * MAX_DIM) / width);
@@ -287,87 +286,48 @@ export default function Profile({ user }) {
                   height = MAX_DIM;
                 }
               }
-
               canvas.width = width;
               canvas.height = height;
-
               const ctx = canvas.getContext("2d");
               ctx.drawImage(img, 0, 0, width, height);
-
-              // Get optimized data URL
-              const optimizedDataUrl = canvas.toDataURL("image/jpeg", 0.8);
-
-              // Extract base64 string
-              base64String = optimizedDataUrl.split(",")[1];
-
+              base64String = canvas.toDataURL("image/jpeg", 0.8).split(",")[1];
               updateData.profileImage = {
                 name: "profile_picture.jpg",
                 type: "image/jpeg",
                 data: base64String,
               };
-
-              try {
-                const response = await axios.post(
-                  "/api/profile/update_profile",
-                  updateData
-                );
-
-                if (response.data.success) {
-                  window.location.reload();
-                }
-              } catch (err) {
-                console.error("API error:", err.response?.data || err.message);
-                alert("Failed to update profile. Please try again.");
-              } finally {
-                setUpdating(false);
-              }
+              await postUpdate(updateData);
             };
             img.src = reader.result;
           } else {
-            // Smaller files can proceed without client-side optimization
             updateData.profileImage = {
               name: selectedFile.name,
               type: selectedFile.type,
               data: base64String,
             };
-
-            try {
-              const response = await axios.post(
-                "/api/profile/update_profile",
-                updateData
-              );
-
-              if (response.data.success) {
-                window.location.reload();
-              }
-            } catch (err) {
-              console.error("API error:", err.response?.data || err.message);
-              alert("Failed to update profile. Please try again.");
-            } finally {
-              setUpdating(false);
-            }
+            await postUpdate(updateData);
           }
         };
       } else {
-        // Just update aboutMe without image
-        try {
-          const response = await axios.post(
-            "/api/profile/update_profile",
-            updateData
-          );
-
-          if (response.data.success) {
-            window.location.reload();
-          }
-        } catch (err) {
-          console.error("API error:", err.response?.data || err.message);
-          alert("Failed to update profile. Please try again.");
-        } finally {
-          setUpdating(false);
-        }
+        await postUpdate(updateData);
       }
     } catch (error) {
       console.error("Error updating profile:", error);
+      alert("Failed to update profile. Please try again.");
+      setUpdating(false);
+    }
+  };
+
+  const postUpdate = async (updateData) => {
+    try {
+      const response = await axios.post("/api/profile/update_profile", updateData);
+      if (response.data.success) {
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error("API error:", err.response?.data || err.message);
+      alert("Failed to update profile. Please try again.");
+    } finally {
       setUpdating(false);
     }
   };
@@ -394,7 +354,6 @@ export default function Profile({ user }) {
         sx={{ backgroundColor: "#FFFFFF" }}
       >
         <Navbar />
-
         <Container
           maxWidth="lg"
           sx={{
@@ -429,7 +388,6 @@ export default function Profile({ user }) {
               />
             </Box>
           )}
-
           <Box
             sx={{
               display: "flex",
@@ -451,7 +409,6 @@ export default function Profile({ user }) {
                 mb: { xs: 4, md: 0 },
               }}
             >
-              {/* Edit Profile Button */}
               <Box
                 onClick={handleOpenEditDialog}
                 sx={{
@@ -479,8 +436,6 @@ export default function Profile({ user }) {
                 </Typography>
                 <EditIcon fontSize="xs" />
               </Box>
-
-              {/* Profile Picture */}
               <Box
                 sx={{
                   position: "relative",
@@ -500,8 +455,6 @@ export default function Profile({ user }) {
                   style={{ objectFit: "cover" }}
                 />
               </Box>
-
-              {/* Name with Gradient */}
               <Typography
                 variant="h2"
                 component="h1"
@@ -511,8 +464,7 @@ export default function Profile({ user }) {
                   fontWeight: 700,
                   fontSize: { xs: "2rem", md: "4rem" },
                   mb: 3,
-                  background:
-                    "linear-gradient(90deg, #5C35C2 0%, #ED6D6C 100%)",
+                  background: "linear-gradient(90deg, #5C35C2 0%, #ED6D6C 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -520,8 +472,6 @@ export default function Profile({ user }) {
               >
                 {username}
               </Typography>
-
-              {/* About Me Section */}
               <Box sx={{ mb: { xs: 2, md: 4 }, textAlign: "center", px: 2 }}>
                 <Typography
                   variant="h5"
@@ -549,10 +499,8 @@ export default function Profile({ user }) {
                 </Typography>
               </Box>
             </Box>
-
             {/* Right Section - Insights and Badges */}
             <Box sx={{ flex: 1 }}>
-              {/* Insights Section */}
               <Typography
                 variant="h5"
                 sx={{
@@ -565,7 +513,6 @@ export default function Profile({ user }) {
               >
                 Insights
               </Typography>
-
               <Box
                 sx={{
                   display: "flex",
@@ -574,7 +521,6 @@ export default function Profile({ user }) {
                   mb: { xs: 3, sm: 5 },
                 }}
               >
-                {/* Personality Card */}
                 <Box
                   sx={{
                     flex: "0 0 auto",
@@ -605,7 +551,6 @@ export default function Profile({ user }) {
                       >
                         Personality
                       </Typography>
-
                       <Box sx={{ mb: "auto" }}>
                         <Typography
                           variant="h4"
@@ -667,8 +612,6 @@ export default function Profile({ user }) {
                           Maverick
                         </Typography>
                       </Box>
-
-                      {/* Purple zigzag icon */}
                       <Box sx={{ position: "absolute", top: 20, right: 20 }}>
                         <svg
                           width="30"
@@ -700,7 +643,6 @@ export default function Profile({ user }) {
                       >
                         Personality
                       </Typography>
-
                       <Typography
                         sx={{
                           fontFamily: poppins.style.fontFamily,
@@ -716,8 +658,6 @@ export default function Profile({ user }) {
                       </Typography>
                     </>
                   )}
-
-                  {/* Flip Icon */}
                   <IconButton
                     onClick={handleFlip}
                     sx={{
@@ -731,8 +671,6 @@ export default function Profile({ user }) {
                     <FlipCameraAndroidIcon fontSize="medium" />
                   </IconButton>
                 </Box>
-
-                {/* Recurring Journal Topics, Mascot, and Discover More */}
                 <Box
                   sx={{
                     flex: 1,
@@ -741,12 +679,10 @@ export default function Profile({ user }) {
                     gap: 3,
                   }}
                 >
-                  {/* Recurring Journal Topics */}
                   <RecurringJournalTopics
                     topicTexts={topThemes}
                     loading={themesLoading}
                   />
-
                   <Box
                     sx={{
                       display: "flex",
@@ -755,7 +691,6 @@ export default function Profile({ user }) {
                       flex: 1,
                     }}
                   >
-                    {/* Total Journal Entries Card */}
                     <Box
                       sx={{
                         flex: 1,
@@ -783,21 +718,21 @@ export default function Profile({ user }) {
                       >
                         Journal Entries
                       </Typography>
-
-                      <Typography
-                        variant="h1"
-                        sx={{
-                          fontFamily: poppins.style.fontFamily,
-                          fontWeight: 700,
-                          fontSize: { xs: "3.5rem", sm: "5rem", md: "6.5rem" },
-                          lineHeight: 1,
-                        }}
-                      >
-                        5
-                      </Typography>
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <EmojiEventsIcon sx={{ mr: 1 }} />
+                        <Typography
+                          variant="h1"
+                          sx={{
+                            fontFamily: poppins.style.fontFamily,
+                            fontWeight: 700,
+                            fontSize: { xs: "3.5rem", sm: "5rem", md: "6.5rem" },
+                            lineHeight: 1,
+                          }}
+                        >
+                          {stats?.total_entries || 0}
+                        </Typography>
+                      </Box>
                     </Box>
-
-                    {/* Streak Score Card */}
                     <Box
                       sx={{
                         flex: 1,
@@ -824,51 +759,35 @@ export default function Profile({ user }) {
                       >
                         Streak Score
                       </Typography>
-
-                      <Typography
-                        variant="h1"
-                        sx={{
-                          fontFamily: poppins.style.fontFamily,
-                          fontWeight: 700,
-                          fontSize: { xs: "2.8rem", sm: "3.5rem", md: "4rem" },
-                          lineHeight: 1,
-                        }}
-                      >
-                        10
-                      </Typography>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          mt: 2,
-                        }}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          fill="currentColor"
-                          className="bi bi-fire"
-                          viewBox="0 0 16 16"
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <LocalFireDepartmentIcon sx={{ mr: 1 }} />
+                        <Typography
+                          variant="h1"
+                          sx={{
+                            fontFamily: poppins.style.fontFamily,
+                            fontWeight: 700,
+                            fontSize: { xs: "2.8rem", sm: "3.5rem", md: "4rem" },
+                            lineHeight: 1,
+                          }}
                         >
-                          <path d="M8 16c3.314 0 6-2 6-5.5 0-1.5-.5-4-2.5-6 .25 1.5-1.25 2-1.25 2C11 4 9 .5 6 0c.357 2 .5 4-2 6-1.25 1-2 2.729-2 4.5C2 14 4.686 16 8 16m0-1c-1.657 0-3-1-3-2.75 0-.75.25-2 1.25-3C6.125 10 7 10.5 7 10.5c-.375-1.25.5-3.25 2-3.5-.179 1-.25 2 1 3 .625.5 1 1.364 1 2.25C11 14 9.657 15 8 15" />
-                        </svg>
+                          {stats?.current_streak || 0}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
+                        <TrendingUpIcon sx={{ mr: 1, fontSize: "1rem" }} />
                         <Typography
                           sx={{
                             fontFamily: poppins.style.fontFamily,
-                            ml: 1,
                             fontSize: { xs: "0.7rem", sm: "0.9rem" },
                           }}
                         >
-                          All Time High: 7
+                          All Time High: {stats?.all_time_high_streak || 0}
                         </Typography>
                       </Box>
                     </Box>
                   </Box>
                 </Box>
               </Box>
-
-              {/* Badges Section */}
               <Typography
                 variant="h5"
                 sx={{
@@ -882,168 +801,175 @@ export default function Profile({ user }) {
               >
                 Badges
               </Typography>
-
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "repeat(1, 1fr)",
-                    sm: "repeat(2, 1fr)",
-                  },
-                  gap: { xs: 2, sm: 3 },
-                  "& img": { maxWidth: "100%" },
-                }}
-              >
+              {badgesLoading ? (
+                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                  <CircularProgress sx={{ color: "#5C35C2" }} />
+                </Box>
+              ) : (
                 <Box
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    mb: { xs: 2, sm: 0 },
+                    display: "grid",
+                    gridTemplateColumns: {
+                      xs: "repeat(1, 1fr)",
+                      sm: "repeat(2, 1fr)",
+                      md: "repeat(3, 1fr)",
+                    },
+                    gap: { xs: 2, sm: 3 },
                   }}
                 >
-                  <Box
-                    sx={{
-                      width: { xs: 70, sm: 100 },
-                      height: { xs: 70, sm: 100 },
-                      mr: 2,
-                      position: "relative",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <NextImage
-                      src="/assets/Group 47668.png"
-                      alt="Mindfulness Badge"
-                      fill
-                      style={{ objectFit: "contain" }}
-                    />
-                  </Box>
-                  <Box>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontFamily: poppins.style.fontFamily,
-                        color: "#5C35C2",
-                        fontWeight: 600,
-                        fontSize: { xs: "0.9rem", sm: "1rem" },
-                      }}
-                    >
-                      John's Mindfulness Practice
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontFamily: quicksand.style.fontFamily,
-                        color: "#777",
-                        fontSize: { xs: "0.8rem", sm: "0.9rem" },
-                      }}
-                    >
-                      January
-                    </Typography>
-                  </Box>
-                </Box>
-
-                {/* Badge 2 - Journal Master */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    mb: { xs: 2, sm: 0 },
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: { xs: 70, sm: 100 },
-                      height: { xs: 70, sm: 100 },
-                      mr: 2,
-                      position: "relative",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <NextImage
-                      src="/assets/Group 47669.png"
-                      alt="Journal Master Badge"
-                      fill
-                      style={{ objectFit: "contain" }}
-                    />
-                  </Box>
-                  <Box>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        fontFamily: poppins.style.fontFamily,
-                        color: "#5C35C2",
-                        fontWeight: 600,
-                        fontSize: { xs: "0.9rem", sm: "1rem" },
-                      }}
-                    >
-                      Journal Master
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontFamily: quicksand.style.fontFamily,
-                        color: "#777",
-                        fontSize: { xs: "0.8rem", sm: "0.9rem" },
-                      }}
-                    >
-                      January
-                    </Typography>
-                  </Box>
-                </Box>
-
-                {/* Badge 3-6 - Unlocked Badge Placeholders */}
-                {[...Array(4)].map((_, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      mb: { xs: 2, sm: index < 2 ? 2 : 0 },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: { xs: 70, sm: 100 },
-                        height: { xs: 70, sm: 100 },
-                        mr: 2,
-                        position: "relative",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <NextImage
-                        src="/assets/Group 47671.png"
-                        alt="Unlocked Badge"
-                        fill
-                        style={{ objectFit: "contain" }}
-                      />
-                    </Box>
-                    <Box>
-                      <Typography
-                        variant="subtitle1"
+                  {badges.map((badge) => (
+                    <Fade in={true} key={badge.id}>
+                      <Box
                         sx={{
-                          fontFamily: poppins.style.fontFamily,
-                          color: "#5C35C2",
-                          fontWeight: 600,
-                          fontSize: { xs: "0.9rem", sm: "1rem" },
+                          display: "flex",
+                          alignItems: "center",
+                          mb: { xs: 2, sm: 0 },
                         }}
                       >
-                        Complete your Goals to Unlock the Badge
-                      </Typography>
-                    </Box>
-                  </Box>
-                ))}
-              </Box>
+                        <Tooltip
+                          title={
+                            <Box>
+                              <Typography
+                                sx={{
+                                  fontFamily: poppins.style.fontFamily,
+                                  color: "white",
+                                  fontSize: "0.9rem",
+                                }}
+                              >
+                                {badge.badges.description}
+                              </Typography>
+                              <Typography
+                                sx={{
+                                  fontFamily: quicksand.style.fontFamily,
+                                  color: "#ccc",
+                                  fontSize: "0.8rem",
+                                  mt: 1,
+                                }}
+                              >
+                                Criteria: {badge.badges.criteria}
+                              </Typography>
+                            </Box>
+                          }
+                          placement="top"
+                        >
+                          <Box
+                            sx={{
+                              width: { xs: 70, sm: 80 },
+                              height: { xs: 70, sm: 80 },
+                              mr: 2,
+                              position: "relative",
+                              flexShrink: 0,
+                              borderRadius: "50%",
+                              ...badgeEffects[badge.badges.color_effect],
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              p: 1,
+                            }}
+                          >
+                            <NextImage
+                              src={badge.badges.image_url || "/assets/Group 47671.png"}
+                              alt={badge.badges.name}
+                              fill
+                              style={{ objectFit: "contain" }}
+                            />
+                          </Box>
+                        </Tooltip>
+                        <Box>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{
+                              fontFamily: poppins.style.fontFamily,
+                              color: "#5C35C2",
+                              fontWeight: 600,
+                              fontSize: { xs: "0.9rem", sm: "1rem" },
+                            }}
+                          >
+                            {badge.badges.name}
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: quicksand.style.fontFamily,
+                              color: "#777",
+                              fontSize: { xs: "0.8rem", sm: "0.9rem" },
+                            }}
+                          >
+                            {new Date(badge.unlocked_at).toLocaleDateString("en-US", {
+                              month: "long",
+                              year: "numeric",
+                            })}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Fade>
+                  ))}
+                  {badges.length < 6 &&
+                    [...Array(6 - badges.length)].map((_, index) => (
+                      <Box
+                        key={`placeholder-${index}`}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          mb: { xs: 2, sm: 0 },
+                          opacity: 0.6,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: { xs: 70, sm: 80 },
+                            height: { xs: 70, sm: 80 },
+                            mr: 2,
+                            position: "relative",
+                            flexShrink: 0,
+                            borderRadius: "50%",
+                            backgroundColor: "#e0e0e0",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <NextImage
+                            src="/assets/Group 47671.png"
+                            alt="Locked Badge"
+                            fill
+                            style={{ objectFit: "contain", opacity: 0.5 }}
+                          />
+                        </Box>
+                        <Box>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{
+                              fontFamily: poppins.style.fontFamily,
+                              color: "#5C35C2",
+                              fontWeight: 600,
+                              fontSize: { xs: "0.9rem", sm: "1rem" },
+                            }}
+                          >
+                            Locked Badge
+                          </Typography>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: quicksand.style.fontFamily,
+                              color: "#777",
+                              fontSize: { xs: "0.8rem", sm: "0.9rem" },
+                            }}
+                          >
+                            Complete goals to unlock
+                          </Typography>
+                        </Box>
+                      </Box>
+                    ))}
+                </Box>
+              )}
             </Box>
           </Box>
         </Container>
-
-        {/* Footer Section */}
         <Box component="footer">
           <SupportFooter />
           <Footer />
         </Box>
-
-        {/* Edit Profile Dialog */}
         <Dialog
           open={editDialogOpen}
           onClose={handleCloseEditDialog}
@@ -1061,7 +987,6 @@ export default function Profile({ user }) {
           </DialogTitle>
           <DialogContent sx={{ p: 3 }}>
             <Stack spacing={3}>
-              {/* Profile Picture Upload */}
               <Box
                 sx={{
                   display: "flex",
@@ -1133,8 +1058,6 @@ export default function Profile({ user }) {
                   Click to upload a new profile picture
                 </Typography>
               </Box>
-
-              {/* About Me Section */}
               <TextField
                 label="About Me"
                 multiline
@@ -1144,15 +1067,9 @@ export default function Profile({ user }) {
                 fullWidth
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    "& fieldset": {
-                      borderColor: "#5C35C2",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "#5C35C2",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#5C35C2",
-                    },
+                    "& fieldset": { borderColor: "#5C35C2" },
+                    "&:hover fieldset": { borderColor: "#5C35C2" },
+                    "&.Mui-focused fieldset": { borderColor: "#5C35C2" },
                   },
                   "& .MuiFormLabel-root": {
                     fontFamily: poppins.style.fontFamily,
@@ -1183,9 +1100,7 @@ export default function Profile({ user }) {
               sx={{
                 fontFamily: poppins.style.fontFamily,
                 backgroundColor: "#5C35C2",
-                "&:hover": {
-                  backgroundColor: "#4527A0",
-                },
+                "&:hover": { backgroundColor: "#4527A0" },
                 px: 4,
               }}
             >
