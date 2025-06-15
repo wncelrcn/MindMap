@@ -248,9 +248,24 @@ export default function ViewJournal({ user }) {
           zIndex={10}
           mb={10}
         >
-          <Link href="/view-insights" passHref legacyBehavior>
+          <Link 
+            href={{
+              pathname: "/view-insights",
+              query: { 
+                journalId: journalData?.journal_id || sessionStorage.getItem("currentJournalId"),
+                journalType: sessionStorage.getItem("currentJournalType")
+              }
+            }} 
+            passHref 
+            legacyBehavior
+          >
             <Button
               variant="contained"
+              onClick={() => {
+                // Save to session storage as backup
+                sessionStorage.setItem("insightJournalId", journalData?.journal_id || sessionStorage.getItem("currentJournalId"));
+                sessionStorage.setItem("insightJournalType", sessionStorage.getItem("currentJournalType"));
+              }}
               sx={{
                 backgroundColor: "#4E2BBD",
                 color: "#fff",
@@ -260,6 +275,9 @@ export default function ViewJournal({ user }) {
                 padding: "0.95rem 3.5rem",
                 boxShadow: "none",
                 cursor: "pointer",
+                '&:hover': {
+                  backgroundColor: "#3d2396",
+                }
               }}
             >
               <Typography

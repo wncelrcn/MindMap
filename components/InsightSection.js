@@ -51,9 +51,7 @@ export default function InsightSection({
           display: "flex",
           alignItems: "center",
           gap: { xs: 1.5, sm: 2, md: 3 },
-          height: { xs: "auto", sm: "160px", md: "180px" },
-          minHeight: { xs: "120px", sm: "160px" },
-          overflow: "hidden",
+          minHeight: { xs: "120px", sm: "160px", md: "180px" },
           flexDirection: { xs: "column", sm: "row" },
         }}
       >
