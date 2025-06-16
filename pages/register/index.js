@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import {
   Box,
@@ -11,10 +11,15 @@ import {
   Link,
   Stack,
   MenuItem,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import Image from "next/image";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import { createClient } from "@/utils/supabase/component";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import Loading from "@/components/Loading";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -42,9 +47,29 @@ export default function Register() {
   const [gender, setGender] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const supabase = createClient();
+
+  useEffect(() => {
+    // Simulate loading time for all elements
+    const timer = setTimeout(() => {
+      setPageLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleClickShowConfirmPassword = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -340,7 +365,7 @@ export default function Register() {
 
                 <TextField
                   label="Password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   variant="standard"
                   fullWidth
                   required
@@ -358,6 +383,30 @@ export default function Register() {
                       fontFamily: "var(--font-poppins)",
                     },
                   }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment
+                        position="end"
+                        sx={{ marginBottom: "8px" }}
+                      >
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          edge="end"
+                          size="small"
+                          sx={{
+                            color: "#2D1B6B",
+                            padding: "4px",
+                            "& .MuiSvgIcon-root": {
+                              fontSize: "1.2rem",
+                            },
+                          }}
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                   sx={{
                     "& .MuiInput-underline:before": {
                       borderBottom: "2px solid #2D1B6B",
@@ -372,7 +421,7 @@ export default function Register() {
 
                 <TextField
                   label="Confirm Password"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   variant="standard"
                   fullWidth
                   required
@@ -389,6 +438,34 @@ export default function Register() {
                       color: "#5F518E",
                       fontFamily: "var(--font-poppins)",
                     },
+                  }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment
+                        position="end"
+                        sx={{ marginBottom: "8px" }}
+                      >
+                        <IconButton
+                          aria-label="toggle confirm password visibility"
+                          onClick={handleClickShowConfirmPassword}
+                          edge="end"
+                          size="small"
+                          sx={{
+                            color: "#2D1B6B",
+                            padding: "4px",
+                            "& .MuiSvgIcon-root": {
+                              fontSize: "1.2rem",
+                            },
+                          }}
+                        >
+                          {showConfirmPassword ? (
+                            <VisibilityOff />
+                          ) : (
+                            <Visibility />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
                   }}
                   sx={{
                     "& .MuiInput-underline:before": {

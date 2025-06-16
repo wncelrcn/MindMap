@@ -11,10 +11,14 @@ import {
   Link,
   Stack,
   Alert,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import Image from "next/image";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import { createClient } from "@/utils/supabase/component";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -39,6 +43,7 @@ export default function Login() {
   const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -113,6 +118,10 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -258,7 +267,7 @@ export default function Login() {
 
                 <TextField
                   label="Password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   variant="standard"
                   fullWidth
                   required
@@ -275,6 +284,30 @@ export default function Login() {
                       color: "#5F518E",
                       fontFamily: "var(--font-poppins)",
                     },
+                  }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment
+                        position="end"
+                        sx={{ marginBottom: "8px" }}
+                      >
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          edge="end"
+                          size="small"
+                          sx={{
+                            color: "#2D1B6B",
+                            padding: "4px",
+                            "& .MuiSvgIcon-root": {
+                              fontSize: "1.2rem",
+                            },
+                          }}
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
                   }}
                   sx={{
                     "& .MuiInput-underline:before": {
@@ -302,7 +335,7 @@ export default function Login() {
                     fontFamily: "var(--font-poppins)",
                   }}
                 >
-                  {loading ? "Logging in..." : "Login"}
+                  {loading ? "Logging In" : "Login"}
                 </Button>
 
                 <Typography

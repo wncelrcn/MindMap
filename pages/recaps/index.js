@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Footer from "@/components/layout/footer";
 import SupportFooter from "@/components/layout/support_footer";
+import Loading from "@/components/Loading";
 import {
   Box,
   Container,
@@ -84,6 +85,7 @@ export default function WeeklyRecap({ user }) {
   const [dateDialogOpen, setDateDialogOpen] = useState(false);
   const [tempDateRange, setTempDateRange] = useState({ start: "", end: "" });
 
+  // Fetch recaps
   useEffect(() => {
     const fetchRecaps = async () => {
       const supabase = createComponentClient();
@@ -115,7 +117,7 @@ export default function WeeklyRecap({ user }) {
     }
   }, [user_UID]);
 
-  // Filter function
+  // Filter recaps
   useEffect(() => {
     let filtered = [...recapEntries];
 
@@ -169,6 +171,10 @@ export default function WeeklyRecap({ user }) {
     }
     setFilteredRecaps(filtered);
   }, [recapEntries, searchQuery, dateRange]);
+
+  if (loading) {
+    return <Loading />;
+  }
 
   // Handle search input
   const handleSearchChange = (event) => {
@@ -373,9 +379,7 @@ export default function WeeklyRecap({ user }) {
 
             {/* Recap Cards */}
             <Grid container spacing={4} justifyContent="center" sx={{ mb: 20 }}>
-              {loading ? (
-                <Typography>Loading recaps...</Typography>
-              ) : filteredRecaps.length > 0 ? (
+              {filteredRecaps.length > 0 ? (
                 filteredRecaps.map((recap, index) => (
                   <Grid item key={index} xs={12} sm={6} md={4}>
                     <RecapCard

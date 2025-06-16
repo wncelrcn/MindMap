@@ -18,6 +18,7 @@ import { requireAuth } from "@/lib/requireAuth";
 import { useRouter } from "next/router";
 import { Poppins, Quicksand } from "next/font/google";
 import { createClient } from "@/utils/supabase/server-props";
+import Loading from "@/components/Loading";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -407,7 +408,7 @@ export default function Questions({ user }) {
   };
 
   // Display additional debugging information when there's an error
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loading />;
 
   return (
     <>

@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { createClient } from "@/utils/supabase/component";
 import { Poppins } from "next/font/google";
 import Head from "next/head";
+import Loading from "@/components/Loading";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -197,19 +198,7 @@ export default function ViewRecap() {
   };
 
   if (loading) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-        sx={{ fontFamily: poppins.style.fontFamily }}
-      >
-        <Typography variant="h5" color="#5A33B7">
-          Loading your Recap...
-        </Typography>
-      </Box>
-    );
+    return <Loading />;
   }
 
   if (!recapData) {

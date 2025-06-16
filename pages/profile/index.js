@@ -39,6 +39,7 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import axios from "axios";
+import Loading from "@/components/Loading";
 
 // Font configurations
 const poppins = Poppins({
@@ -79,28 +80,78 @@ export async function getServerSideProps(context) {
 
 // Badge color effects mapping
 const badgeEffects = {
-  'soft-green-glow': { backgroundColor: '#4CAF50', boxShadow: '0 0 20px rgba(76, 175, 80, 0.6)' },
-  'warm-blue-ripple': { backgroundColor: '#2196F3', boxShadow: '0 0 20px rgba(33, 150, 243, 0.6)' },
-  'vibrant-purple-sparkle': { backgroundColor: '#9C27B0', boxShadow: '0 0 20px rgba(156, 39, 176, 0.6)' },
-  'light-yellow-fade': { backgroundColor: '#FFEB3B', boxShadow: '0 0 20px rgba(255, 235, 59, 0.6)' },
-  'rich-orange-pulse': { backgroundColor: '#FF9800', boxShadow: '0 0 20px rgba(255, 152, 0, 0.6)' },
-  'deep-gold-radiant': { backgroundColor: '#FFD700', boxShadow: '0 0 20px rgba(255, 215, 0, 0.8)' },
-  'deep-indigo-starry': { backgroundColor: '#3F51B5', boxShadow: '0 0 20px rgba(63, 81, 181, 0.6)' },
-  'golden-yellow-twinkle': { backgroundColor: '#FFC107', boxShadow: '0 0 20px rgba(255, 193, 7, 0.6)' },
-  'soft-teal-swirl': { backgroundColor: '#009688', boxShadow: '0 0 20px rgba(0, 150, 136, 0.6)' },
-  'emerald-green-glow': { backgroundColor: '#4CAF50', boxShadow: '0 0 20px rgba(76, 175, 80, 0.8)' },
-  'soft-lavender-wave': { backgroundColor: '#E1BEE7', boxShadow: '0 0 20px rgba(225, 190, 231, 0.6)' },
-  'bright-cyan-pulse': { backgroundColor: '#00BCD4', boxShadow: '0 0 20px rgba(0, 188, 212, 0.6)' },
-  'fresh-green-bloom': { backgroundColor: '#8BC34A', boxShadow: '0 0 20px rgba(139, 195, 74, 0.6)' },
-  'deep-silver-reflective': { backgroundColor: '#9E9E9E', boxShadow: '0 0 20px rgba(158, 158, 158, 0.6)' },
-  'fiery-red-spark': { backgroundColor: '#F44336', boxShadow: '0 0 20px rgba(244, 67, 54, 0.6)' },
-  'vivid-magenta-flame': { backgroundColor: '#E91E63', boxShadow: '0 0 20px rgba(233, 30, 99, 0.6)' },
+  "soft-green-glow": {
+    backgroundColor: "#4CAF50",
+    boxShadow: "0 0 20px rgba(76, 175, 80, 0.6)",
+  },
+  "warm-blue-ripple": {
+    backgroundColor: "#2196F3",
+    boxShadow: "0 0 20px rgba(33, 150, 243, 0.6)",
+  },
+  "vibrant-purple-sparkle": {
+    backgroundColor: "#9C27B0",
+    boxShadow: "0 0 20px rgba(156, 39, 176, 0.6)",
+  },
+  "light-yellow-fade": {
+    backgroundColor: "#FFEB3B",
+    boxShadow: "0 0 20px rgba(255, 235, 59, 0.6)",
+  },
+  "rich-orange-pulse": {
+    backgroundColor: "#FF9800",
+    boxShadow: "0 0 20px rgba(255, 152, 0, 0.6)",
+  },
+  "deep-gold-radiant": {
+    backgroundColor: "#FFD700",
+    boxShadow: "0 0 20px rgba(255, 215, 0, 0.8)",
+  },
+  "deep-indigo-starry": {
+    backgroundColor: "#3F51B5",
+    boxShadow: "0 0 20px rgba(63, 81, 181, 0.6)",
+  },
+  "golden-yellow-twinkle": {
+    backgroundColor: "#FFC107",
+    boxShadow: "0 0 20px rgba(255, 193, 7, 0.6)",
+  },
+  "soft-teal-swirl": {
+    backgroundColor: "#009688",
+    boxShadow: "0 0 20px rgba(0, 150, 136, 0.6)",
+  },
+  "emerald-green-glow": {
+    backgroundColor: "#4CAF50",
+    boxShadow: "0 0 20px rgba(76, 175, 80, 0.8)",
+  },
+  "soft-lavender-wave": {
+    backgroundColor: "#E1BEE7",
+    boxShadow: "0 0 20px rgba(225, 190, 231, 0.6)",
+  },
+  "bright-cyan-pulse": {
+    backgroundColor: "#00BCD4",
+    boxShadow: "0 0 20px rgba(0, 188, 212, 0.6)",
+  },
+  "fresh-green-bloom": {
+    backgroundColor: "#8BC34A",
+    boxShadow: "0 0 20px rgba(139, 195, 74, 0.6)",
+  },
+  "deep-silver-reflective": {
+    backgroundColor: "#9E9E9E",
+    boxShadow: "0 0 20px rgba(158, 158, 158, 0.6)",
+  },
+  "fiery-red-spark": {
+    backgroundColor: "#F44336",
+    boxShadow: "0 0 20px rgba(244, 67, 54, 0.6)",
+  },
+  "vivid-magenta-flame": {
+    backgroundColor: "#E91E63",
+    boxShadow: "0 0 20px rgba(233, 30, 99, 0.6)",
+  },
 };
 
 export default function Profile({ user }) {
   const [username, setUsername] = useState(user.user_metadata.name);
   const [user_UID, setUser_UID] = useState(user.id);
-  const [profilePicture, setProfilePicture] = useState("/assets/default_profile.png");
+  const [profilePicture, setProfilePicture] = useState(
+    "/assets/default_profile.png"
+  );
   const [aboutMe, setAboutMe] = useState("");
   const [isFlipped, setIsFlipped] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -134,9 +185,12 @@ export default function Profile({ user }) {
             if (data.profile_pic_url) {
               const urlParts = data.profile_pic_url.split("/");
               const filename = urlParts[urlParts.length - 1];
-              const validUrl = data.profile_pic_url && data.profile_pic_url.startsWith("http");
+              const validUrl =
+                data.profile_pic_url && data.profile_pic_url.startsWith("http");
               setProfilePicture(
-                validUrl ? `${data.profile_pic_url}?t=${Date.now()}` : "/assets/default_profile.png"
+                validUrl
+                  ? `${data.profile_pic_url}?t=${Date.now()}`
+                  : "/assets/default_profile.png"
               );
             }
             setAboutMe(data.about_me || "");
@@ -189,7 +243,11 @@ export default function Profile({ user }) {
     };
 
     const initialize = async () => {
-      await Promise.all([fetchUserData(), fetchTopThemes(), fetchBadgesAndStats()]);
+      await Promise.all([
+        fetchUserData(),
+        fetchTopThemes(),
+        fetchBadgesAndStats(),
+      ]);
       setLoading(false);
     };
 
@@ -320,7 +378,10 @@ export default function Profile({ user }) {
 
   const postUpdate = async (updateData) => {
     try {
-      const response = await axios.post("/api/profile/update_profile", updateData);
+      const response = await axios.post(
+        "/api/profile/update_profile",
+        updateData
+      );
       if (response.data.success) {
         window.location.reload();
       }
@@ -331,6 +392,10 @@ export default function Profile({ user }) {
       setUpdating(false);
     }
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <>
@@ -363,31 +428,6 @@ export default function Profile({ user }) {
             position: "relative",
           }}
         >
-          {loading && (
-            <Box
-              sx={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "rgba(255, 255, 255, 1)",
-                zIndex: 10,
-              }}
-            >
-              <CircularProgress
-                size={60}
-                thickness={4}
-                sx={{
-                  color: "#5C35C2",
-                  marginTop: "-300px",
-                }}
-              />
-            </Box>
-          )}
           <Box
             sx={{
               display: "flex",
@@ -464,7 +504,8 @@ export default function Profile({ user }) {
                   fontWeight: 700,
                   fontSize: { xs: "2rem", md: "4rem" },
                   mb: 3,
-                  background: "linear-gradient(90deg, #5C35C2 0%, #ED6D6C 100%)",
+                  background:
+                    "linear-gradient(90deg, #5C35C2 0%, #ED6D6C 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
@@ -691,6 +732,7 @@ export default function Profile({ user }) {
                       flex: 1,
                     }}
                   >
+                    {/* Journal Entries */}
                     <Box
                       sx={{
                         flex: 1,
@@ -704,35 +746,64 @@ export default function Profile({ user }) {
                         maxWidth: { xs: "49%", sm: "none" },
                         color: "white",
                         flexDirection: "column",
+                        backgroundImage:
+                          "url('/assets/profile/entries-bg.png')",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
+                        position: "relative",
                       }}
                     >
-                      <Typography
-                        variant="h6"
+                      <Box
                         sx={{
-                          fontFamily: poppins.style.fontFamily,
-                          fontWeight: 600,
-                          mb: { xs: 1, sm: 2, md: 3 },
-                          fontSize: { xs: "0.9rem", sm: "1rem" },
-                          textAlign: "center",
+                          position: "relative",
+                          zIndex: 1,
+                          width: "100%",
+                          height: "100%",
+                          display: "flex",
+                          flexDirection: "column",
                         }}
                       >
-                        Journal Entries
-                      </Typography>
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <EmojiEventsIcon sx={{ mr: 1 }} />
                         <Typography
-                          variant="h1"
+                          variant="h6"
                           sx={{
                             fontFamily: poppins.style.fontFamily,
-                            fontWeight: 700,
-                            fontSize: { xs: "3.5rem", sm: "5rem", md: "6.5rem" },
-                            lineHeight: 1,
+                            fontWeight: 600,
+                            fontSize: { xs: "0.9rem", sm: "1rem" },
+                            textAlign: "center",
                           }}
                         >
-                          {stats?.total_entries || 0}
+                          Journal Entries
                         </Typography>
+                        <Box
+                          sx={{
+                            flex: 1,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Typography
+                            variant="h1"
+                            sx={{
+                              fontFamily: poppins.style.fontFamily,
+                              fontWeight: 700,
+                              fontSize: {
+                                xs: "3rem",
+                                sm: "4rem",
+                                md: "5rem",
+                                lg: "6rem",
+                              },
+                              lineHeight: 1,
+                              marginBottom: 2,
+                            }}
+                          >
+                            {stats?.total_entries || 0}
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
+                    {/* Streak Score */}
                     <Box
                       sx={{
                         flex: 1,
@@ -746,43 +817,75 @@ export default function Profile({ user }) {
                         maxWidth: { xs: "49%", sm: "none" },
                         color: "white",
                         flexDirection: "column",
+                        backgroundImage: "url('/assets/profile/streak-bg.png')",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
+                        position: "relative",
                       }}
                     >
-                      <Typography
-                        variant="h6"
+                      <Box
                         sx={{
-                          fontFamily: poppins.style.fontFamily,
-                          fontWeight: 600,
-                          mb: { xs: 1, sm: 2, md: 3 },
-                          fontSize: { xs: "0.9rem", sm: "1rem" },
+                          position: "relative",
+                          zIndex: 1,
+                          width: "100%",
+                          height: "100%",
+                          display: "flex",
+                          flexDirection: "column",
                         }}
                       >
-                        Streak Score
-                      </Typography>
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <LocalFireDepartmentIcon sx={{ mr: 1 }} />
                         <Typography
-                          variant="h1"
+                          variant="h6"
                           sx={{
                             fontFamily: poppins.style.fontFamily,
-                            fontWeight: 700,
-                            fontSize: { xs: "2.8rem", sm: "3.5rem", md: "4rem" },
-                            lineHeight: 1,
+                            fontWeight: 600,
+                            fontSize: { xs: "0.9rem", sm: "1rem" },
+                            textAlign: "center",
                           }}
                         >
-                          {stats?.current_streak || 0}
+                          Streak Score
                         </Typography>
-                      </Box>
-                      <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
-                        <TrendingUpIcon sx={{ mr: 1, fontSize: "1rem" }} />
-                        <Typography
+                        <Box
                           sx={{
-                            fontFamily: poppins.style.fontFamily,
-                            fontSize: { xs: "0.7rem", sm: "0.9rem" },
+                            flex: 1,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
                           }}
                         >
-                          All Time High: {stats?.all_time_high_streak || 0}
-                        </Typography>
+                          <Typography
+                            variant="h1"
+                            sx={{
+                              fontFamily: poppins.style.fontFamily,
+                              fontWeight: 700,
+                              fontSize: {
+                                xs: "3rem",
+                                sm: "4rem",
+                                md: "5rem",
+                              },
+                              lineHeight: 1,
+                            }}
+                          >
+                            {stats?.current_streak || 0}
+                          </Typography>
+                        </Box>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <LocalFireDepartmentIcon sx={{ mr: 1 }} />
+                          <Typography
+                            sx={{
+                              fontFamily: poppins.style.fontFamily,
+                              fontSize: { xs: "0.7rem", sm: "0.9rem" },
+                            }}
+                          >
+                            All Time High: {stats?.all_time_high_streak || 0}
+                          </Typography>
+                        </Box>
                       </Box>
                     </Box>
                   </Box>
@@ -815,6 +918,7 @@ export default function Profile({ user }) {
                       md: "repeat(3, 1fr)",
                     },
                     gap: { xs: 2, sm: 3 },
+                    mt: 5,
                   }}
                 >
                   {badges.map((badge) => (
@@ -868,7 +972,10 @@ export default function Profile({ user }) {
                             }}
                           >
                             <NextImage
-                              src={badge.badges.image_url || "/assets/Group 47671.png"}
+                              src={
+                                badge.badges.image_url ||
+                                "/assets/Group 47671.png"
+                              }
                               alt={badge.badges.name}
                               fill
                               style={{ objectFit: "contain" }}
@@ -895,10 +1002,13 @@ export default function Profile({ user }) {
                               fontSize: { xs: "0.8rem", sm: "0.9rem" },
                             }}
                           >
-                            {new Date(badge.unlocked_at).toLocaleDateString("en-US", {
-                              month: "long",
-                              year: "numeric",
-                            })}
+                            {new Date(badge.unlocked_at).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "long",
+                                year: "numeric",
+                              }
+                            )}
                           </Typography>
                         </Box>
                       </Box>
@@ -966,7 +1076,7 @@ export default function Profile({ user }) {
             </Box>
           </Box>
         </Container>
-        <Box component="footer">
+        <Box component="footer" sx={{ mt: 12 }}>
           <SupportFooter />
           <Footer />
         </Box>

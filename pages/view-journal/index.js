@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import { Poppins, Raleway, Quicksand } from "next/font/google";
 import { createClient } from "@/utils/supabase/server-props";
 import Head from "next/head";
+import Loading from "@/components/Loading";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -61,6 +62,7 @@ export default function ViewJournal({ user }) {
   const [journalData, setJournalData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mounted, setMounted] = useState(false);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -70,6 +72,10 @@ export default function ViewJournal({ user }) {
       month: "short",
     });
   };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const fetchJournal = async () => {
@@ -106,20 +112,22 @@ export default function ViewJournal({ user }) {
       }
     };
 
-    fetchJournal();
-  }, [user_UID]);
+    if (mounted) {
+      fetchJournal();
+    }
+  }, [mounted, user_UID]);
 
-  if (loading) {
-    return (
-      <>
-        <Navbar />
-        <Box sx={{ p: 4, textAlign: "center" }}>
-          <Typography>Loading journal...</Typography>
-        </Box>
-      </>
-    );
+  // Don't render anything until the component is mounted
+  if (!mounted) {
+    return null;
   }
 
+  // Show loading state while data is being fetched
+  if (loading) {
+    return <Loading />;
+  }
+
+  // Show error state if there's an error
   if (error) {
     return (
       <>
@@ -129,6 +137,11 @@ export default function ViewJournal({ user }) {
         </Box>
       </>
     );
+  }
+
+  // Don't render the main content until we have the journal data
+  if (!journalData) {
+    return <Loading />;
   }
 
   return (
@@ -248,23 +261,32 @@ export default function ViewJournal({ user }) {
           zIndex={10}
           mb={10}
         >
-          <Link 
+          <Link
             href={{
               pathname: "/view-insights",
-              query: { 
-                journalId: journalData?.journal_id || sessionStorage.getItem("currentJournalId"),
-                journalType: sessionStorage.getItem("currentJournalType")
-              }
-            }} 
-            passHref 
+              query: {
+                journalId:
+                  journalData?.journal_id ||
+                  sessionStorage.getItem("currentJournalId"),
+                journalType: sessionStorage.getItem("currentJournalType"),
+              },
+            }}
+            passHref
             legacyBehavior
           >
             <Button
               variant="contained"
               onClick={() => {
                 // Save to session storage as backup
-                sessionStorage.setItem("insightJournalId", journalData?.journal_id || sessionStorage.getItem("currentJournalId"));
-                sessionStorage.setItem("insightJournalType", sessionStorage.getItem("currentJournalType"));
+                sessionStorage.setItem(
+                  "insightJournalId",
+                  journalData?.journal_id ||
+                    sessionStorage.getItem("currentJournalId")
+                );
+                sessionStorage.setItem(
+                  "insightJournalType",
+                  sessionStorage.getItem("currentJournalType")
+                );
               }}
               sx={{
                 backgroundColor: "#4E2BBD",
@@ -275,9 +297,9 @@ export default function ViewJournal({ user }) {
                 padding: "0.95rem 3.5rem",
                 boxShadow: "none",
                 cursor: "pointer",
-                '&:hover': {
+                "&:hover": {
                   backgroundColor: "#3d2396",
-                }
+                },
               }}
             >
               <Typography

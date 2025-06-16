@@ -18,6 +18,7 @@ import FeatureCarousel from "@/components/layout/feature_carousel";
 import TestimonialCarousel from "@/components/layout/testimonial_carousel";
 import Footer from "@/components/layout/footer";
 import SupportFooter from "@/components/layout/support_footer";
+import Loading from "@/components/Loading";
 
 // Configure Poppins font
 const poppins = Poppins({
@@ -114,24 +115,11 @@ const myTestimonials = [
 ];
 
 export default function Home() {
-  const [status, setStatus] = useState("Checking...");
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    async function checkConnection() {
-      const { data, error } = await supabase
-        .from("user_table")
-        .select("*")
-        .limit(1);
-      if (error) {
-        console.error("Connection error:", error);
-        setStatus(`❌ Error: ${error.message}`);
-      } else {
-        console.log("Connection successful:", data);
-        setStatus("✅ Connected to Supabase!");
-      }
-    }
-    checkConnection();
-  }, []);
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -233,8 +221,8 @@ export default function Home() {
           sx={{
             display: "flex",
             flexDirection: "column",
-            px: { xs: 2, sm: 3, md: 4 }, // Better padding for mobile
-            pb: 8, // Add bottom padding
+            px: { xs: 2, sm: 3, md: 4 },
+            pb: 8,
           }}
         >
           {/* Features Section */}
@@ -247,8 +235,8 @@ export default function Home() {
               background: "linear-gradient(90deg, #563CA5 0%, #E25C59 30%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
-              textAlign: { xs: "center", md: "left" }, // Center on mobile
-              fontSize: { xs: "1.8rem", md: "2.125rem" }, // Responsive font size
+              textAlign: { xs: "center", md: "left" },
+              fontSize: { xs: "1.8rem", md: "2.125rem" },
             }}
           >
             What can it do?
@@ -267,8 +255,8 @@ export default function Home() {
               background: "linear-gradient(90deg, #563CA5 0%, #E25C59 50%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
-              textAlign: { xs: "center", md: "left" }, // Center on mobile
-              fontSize: { xs: "1.8rem", md: "2.125rem" }, // Responsive font size
+              textAlign: { xs: "center", md: "left" },
+              fontSize: { xs: "1.8rem", md: "2.125rem" },
             }}
           >
             What do our users say?
@@ -278,8 +266,8 @@ export default function Home() {
           <Box
             sx={{
               width: "100%",
-              overflow: "hidden", // Prevent horizontal scroll
-              mb: 6, // Add margin bottom
+              overflow: "hidden",
+              mb: 6,
             }}
           >
             <TestimonialCarousel testimonials={myTestimonials} />

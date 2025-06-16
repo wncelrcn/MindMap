@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Footer from "@/components/layout/footer";
 import SupportFooter from "@/components/layout/support_footer";
+import Loading from "@/components/Loading";
 import {
   Box,
   Container,
@@ -75,6 +76,7 @@ export default function Journals({ user }) {
   const [user_UID, setUser_UID] = useState(user.id);
   const [journalEntries, setJournalEntries] = useState([]);
   const [filteredEntries, setFilteredEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -99,10 +101,11 @@ export default function Journals({ user }) {
         if (data.entries) {
           setJournalEntries(data.entries);
           setFilteredEntries(data.entries);
-          console.log(data.entries);
         }
       } catch (error) {
         console.error("Error fetching journal entries:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -217,6 +220,10 @@ export default function Journals({ user }) {
     }
     return "Select Date";
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <>

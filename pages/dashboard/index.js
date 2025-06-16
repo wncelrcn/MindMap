@@ -1,15 +1,7 @@
 import Head from "next/head";
 import Footer from "@/components/layout/footer";
 import SupportFooter from "@/components/layout/support_footer";
-import {
-  Box,
-  Typography,
-  Container,
-  Grid,
-  Button,
-  Card,
-  CardContent,
-} from "@mui/material";
+import { Box, Typography, Container, Grid, Button, Card } from "@mui/material";
 import Link from "next/link";
 import Navbar from "@/components/layout/navbar";
 import { useEffect, useState } from "react";

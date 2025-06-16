@@ -16,6 +16,7 @@ import { useState, useEffect } from "react";
 import { Poppins, Raleway, Quicksand } from "next/font/google";
 import { createClient } from "@/utils/supabase/server-props";
 import Head from "next/head";
+import Loading from "@/components/Loading";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -138,22 +139,7 @@ export default function ViewEmotions({ user }) {
   };
 
   if (loading) {
-    return (
-      <>
-        <Navbar />
-        <Box sx={{ p: 4, textAlign: "center" }}>
-          <Typography
-            sx={{
-              fontFamily: poppins.style.fontFamily,
-              fontSize: "1.2rem",
-              color: "#2D1B6B",
-            }}
-          >
-            Loading emotions...
-          </Typography>
-        </Box>
-      </>
-    );
+    return <Loading />;
   }
 
   if (error) {

@@ -9,6 +9,7 @@ import Navbar from "@/components/layout/navbar";
 import Link from "next/link";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useRouter } from "next/router";
+import Loading from "@/components/Loading";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -78,7 +79,7 @@ export default function CategoryDetails({ user }) {
     fetchCategoryDetails();
   }, [theme, category]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loading />;
   if (error) return <div>Error: {error}</div>;
   if (!themeData || !categoryData) return <div>Category not found.</div>;
 
