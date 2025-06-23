@@ -28,6 +28,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/layout/navbar";
 import InsightSection from "@/components/InsightSection";
+import DisclaimerModal from "@/components/disclaimer/DisclaimerModal";
 import { useState, useEffect } from "react";
 import { Poppins, Raleway, Quicksand } from "next/font/google";
 import { createClient } from "@/utils/supabase/server-props";
@@ -347,105 +348,12 @@ export default function ViewInsights({ user }) {
       <Navbar />
 
       {/* Disclaimer Dialog */}
-      <Dialog
+      <DisclaimerModal
         open={disclaimerOpen}
-        onClose={() => {}} // Empty function to prevent closing on backdrop click
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: "20px",
-            border: "1px solid #e0e0e0",
-            fontFamily: poppins.style.fontFamily,
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-            pb: 1,
-            color: "#2D1B6B",
-            fontFamily: poppins.style.fontFamily,
-            fontWeight: 600,
-          }}
-        >
-          <InfoIcon sx={{ color: "#2D1B6B" }} />
-          Important Disclaimer
-        </DialogTitle>
-        <DialogContent sx={{ pt: 1 }}>
-          <Typography
-            sx={{
-              mb: 2,
-              lineHeight: 1.6,
-              color: "#333",
-              fontFamily: poppins.style.fontFamily,
-            }}
-          >
-            The insights provided by MindMap are generated using AI based on
-            your journal entry and are intended to support self-reflection and
-            emotional awareness.
-          </Typography>
-          <Typography
-            sx={{
-              mb: 3,
-              lineHeight: 1.6,
-              color: "#333",
-              fontFamily: poppins.style.fontFamily,
-            }}
-          >
-            These insights do not constitute psychological diagnosis,
-            professional advice, or therapy. If you are experiencing distress or
-            need mental health support, please contact a licensed mental health
-            professional.
-          </Typography>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={hideDisclaimer}
-                onChange={handleDisclaimerToggle}
-                sx={{
-                  "& .MuiSwitch-switchBase.Mui-checked": {
-                    color: "#2D1B6B",
-                  },
-                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                    backgroundColor: "#2D1B6B",
-                  },
-                }}
-              />
-            }
-            label="Don't show this again"
-            sx={{
-              color: "#666",
-              fontFamily: poppins.style.fontFamily,
-              "& .MuiFormControlLabel-label": {
-                fontSize: "0.9rem",
-              },
-            }}
-          />
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button
-            onClick={handleUnderstandClick}
-            variant="contained"
-            sx={{
-              backgroundColor: "#2D1B6B",
-              borderRadius: "12px",
-              textTransform: "none",
-              fontFamily: poppins.style.fontFamily,
-              fontWeight: 500,
-              px: 4,
-              py: 1,
-              "&:hover": {
-                backgroundColor: "#1a0f4d",
-              },
-            }}
-          >
-            I Understand
-          </Button>
-        </DialogActions>
-      </Dialog>
+        hideDisclaimer={hideDisclaimer}
+        onDisclaimerToggle={handleDisclaimerToggle}
+        onUnderstandClick={handleUnderstandClick}
+      />
 
       {/* Header with image */}
       <Box position="relative" width="100%" height={{ xs: "50px", md: "70px" }}>
@@ -553,38 +461,49 @@ export default function ViewInsights({ user }) {
               <IconButton
                 onClick={() => setDisclaimerOpen(true)}
                 sx={{
-                  width: 40,
                   height: 40,
-                  backgroundColor: "#f5f5f5",
-                  border: "1px solid #e0e0e0",
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #764ba2",
                   borderRadius: "12px",
                   color: "#2D1B6B",
+                  fontFamily: poppins.style.fontFamily,
+                  fontWeight: 500,
+                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                  width: { xs: 40, sm: "auto" },
+                  px: { xs: 0, sm: 2 },
                   "&:hover": {
-                    backgroundColor: "#e3f2fd",
                     transform: "translateY(-1px)",
-                    boxShadow: "0 4px 12px rgba(45, 27, 107, 0.15)",
+                    background: "white",
+                    border: "1px solid #764ba2",
                   },
                   transition: "all 0.3s ease",
                 }}
               >
                 <InfoIcon sx={{ fontSize: 18 }} />
+                <Typography
+                  sx={{
+                    display: { xs: "none", sm: "block" },
+                    fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                    fontWeight: 500,
+                    color: "#2D1B6B",
+                    ml: 1,
+                  }}
+                >
+                  Information
+                </Typography>
               </IconButton>
 
               {/* Refresh Button */}
               <Box
                 sx={{
-                  background: generating
-                    ? "linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%)"
-                    : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  borderRadius: "16px",
+                  borderRadius: "12px",
+                  border: "1px solid #764ba2",
                   padding: "1px",
                   cursor: generating ? "not-allowed" : "pointer",
                   transition: "all 0.3s ease",
+                  height: 40,
                   "&:hover": {
                     transform: generating ? "none" : "translateY(-2px)",
-                    boxShadow: generating
-                      ? "none"
-                      : "0 8px 25px rgba(102, 126, 234, 0.3)",
                   },
                 }}
               >
@@ -599,8 +518,8 @@ export default function ViewInsights({ user }) {
                     fontFamily: poppins.style.fontFamily,
                     fontWeight: 500,
                     fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                    px: { xs: 2, sm: 3 },
-                    py: { xs: 1, sm: 1.25 },
+                    px: { xs: 1, sm: 3 },
+                    height: "100%",
                     minWidth: "auto",
                     border: "none",
                     "&:hover": {
@@ -635,14 +554,24 @@ export default function ViewInsights({ user }) {
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        style={{ marginRight: "8px" }}
+                        sx={{ mr: { xs: 0, sm: 1 } }}
                       >
                         <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
                         <path d="M21 3v5h-5" />
                         <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
                         <path d="M3 21v-5h5" />
                       </svg>
-                      Refresh Insights
+                      <Typography
+                        sx={{
+                          display: { xs: "none", sm: "block" },
+                          fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                          fontWeight: 500,
+                          color: "#2D1B6B",
+                          ml: 1,
+                        }}
+                      >
+                        Refresh Insights
+                      </Typography>
                     </>
                   )}
                 </Button>

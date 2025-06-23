@@ -263,7 +263,12 @@ export default function DashboardPage({ user }) {
                     </Box>
                   </Box>
                   <Box mt={{ xs: 2, md: 18 }}>
-                    <Link href="/quiz" passHref>
+                    <Link
+                      href="https://www.purposeplus.com/survey/perma-profiler/"
+                      passHref
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <Button
                         variant="contained"
                         sx={{

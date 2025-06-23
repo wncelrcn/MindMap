@@ -7,10 +7,13 @@ import {
   LinearProgress,
   Paper,
   Avatar,
+  IconButton,
 } from "@mui/material";
 import Link from "next/link";
 import Navbar from "@/components/layout/navbar";
 import MoodDistributionChart from "@/components/MoodDistributionChart";
+import DisclaimerModal from "@/components/disclaimer/DisclaimerModal";
+import InfoIcon from "@mui/icons-material/Info";
 import { processEmotionData } from "@/utils/helper/emotion/emotionConfig";
 import { useState, useEffect } from "react";
 import { Poppins, Raleway, Quicksand } from "next/font/google";
@@ -63,6 +66,8 @@ export default function ViewEmotions({ user }) {
   const [journalData, setJournalData] = useState(null);
   const [emotionsData, setEmotionsData] = useState(null);
   const [error, setError] = useState(null);
+  const [disclaimerOpen, setDisclaimerOpen] = useState(false);
+  const [hideDisclaimer, setHideDisclaimer] = useState(false);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -133,6 +138,32 @@ export default function ViewEmotions({ user }) {
     fetchJournalAndEmotions();
   }, [user_UID]);
 
+  useEffect(() => {
+    // Check if user has chosen to hide disclaimer
+    const shouldHideDisclaimer =
+      localStorage.getItem("hideEmotionsDisclaimer") === "true";
+    setHideDisclaimer(shouldHideDisclaimer);
+
+    // Show disclaimer if user hasn't chosen to hide it
+    if (!shouldHideDisclaimer) {
+      setDisclaimerOpen(true);
+    }
+  }, []);
+
+  const handleDisclaimerToggle = (event) => {
+    setHideDisclaimer(event.target.checked);
+  };
+
+  const handleUnderstandClick = () => {
+    // Save preference to localStorage only if user has chosen to hide
+    if (hideDisclaimer) {
+      localStorage.setItem("hideEmotionsDisclaimer", "true");
+    } else {
+      localStorage.removeItem("hideEmotionsDisclaimer");
+    }
+    setDisclaimerOpen(false);
+  };
+
   const getEmotions = () => {
     // Use shared utility function for processing emotions
     return processEmotionData(emotionsData);
@@ -175,6 +206,14 @@ export default function ViewEmotions({ user }) {
 
       <Navbar />
 
+      {/* Disclaimer Dialog */}
+      <DisclaimerModal
+        open={disclaimerOpen}
+        hideDisclaimer={hideDisclaimer}
+        onDisclaimerToggle={handleDisclaimerToggle}
+        onUnderstandClick={handleUnderstandClick}
+      />
+
       {/* Header with image */}
       <Box position="relative" width="100%" height={{ xs: "50px", md: "70px" }}>
         <Box
@@ -209,55 +248,102 @@ export default function ViewEmotions({ user }) {
         }}
       >
         {/* Page Title */}
-        <Typography
+        <Box
           sx={{
-            fontSize: { xs: "0.9rem", md: "1rem" },
-            fontWeight: 400,
-            color: "#2D1B6B",
-            lineHeight: "normal",
-            fontFamily: poppins.style.fontFamily,
-            mb: 1,
-            letterSpacing: "0.5px",
-          }}
-        >
-          Journal
-        </Typography>
-
-        <Typography
-          sx={{
-            fontSize: { xs: "2.5rem", md: "3.5rem" },
-            fontWeight: 700,
-            color: "#2D1B6B",
-            lineHeight: "1.1",
-            fontFamily: poppins.style.fontFamily,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
             mb: 4,
           }}
         >
-          Emotions
-        </Typography>
-        <Typography
-          sx={{
-            fontSize: { xs: "1.1rem", md: "1.3rem" },
-            fontWeight: 400,
-            color: "#2D1B6B",
-            opacity: 1,
-            fontFamily: poppins.style.fontFamily,
-          }}
-        >
-          Mood Distribution Insights
-        </Typography>
-        <Typography
-          sx={{
-            fontSize: { xs: "0.9rem", md: "1rem" },
-            fontWeight: 300,
-            color: "#2D1B6B",
-            opacity: 1,
-            fontFamily: poppins.style.fontFamily,
-            mb: 3,
-          }}
-        >
-          How you felt
-        </Typography>
+          <Box>
+            <Typography
+              sx={{
+                fontSize: { xs: "0.9rem", md: "1rem" },
+                fontWeight: 400,
+                color: "#2D1B6B",
+                lineHeight: "normal",
+                fontFamily: poppins.style.fontFamily,
+                mb: 1,
+                letterSpacing: "0.5px",
+              }}
+            >
+              Journal
+            </Typography>
+
+            <Typography
+              sx={{
+                fontSize: { xs: "2.5rem", md: "3.5rem" },
+                fontWeight: 700,
+                color: "#2D1B6B",
+                lineHeight: "1.1",
+                fontFamily: poppins.style.fontFamily,
+                mb: 4,
+              }}
+            >
+              Emotions
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: { xs: "1.1rem", md: "1.3rem" },
+                fontWeight: 400,
+                color: "#2D1B6B",
+                opacity: 1,
+                fontFamily: poppins.style.fontFamily,
+              }}
+            >
+              Mood Distribution Insights
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: { xs: "0.9rem", md: "1rem" },
+                fontWeight: 300,
+                color: "#2D1B6B",
+                opacity: 1,
+                fontFamily: poppins.style.fontFamily,
+                mb: 3,
+              }}
+            >
+              How you felt
+            </Typography>
+          </Box>
+
+          {/* Info Icon Button */}
+          <IconButton
+            onClick={() => setDisclaimerOpen(true)}
+            sx={{
+              height: 40,
+              backgroundColor: "#ffffff",
+              border: "1px solid #764ba2",
+              borderRadius: "12px",
+              color: "#2D1B6B",
+              fontFamily: poppins.style.fontFamily,
+              fontWeight: 500,
+              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              width: { xs: 40, sm: "auto" },
+              px: { xs: 0, sm: 2 },
+              "&:hover": {
+                transform: "translateY(-1px)",
+                background: "white",
+                border: "1px solid #764ba2",
+              },
+              transition: "all 0.3s ease",
+            }}
+          >
+            <InfoIcon sx={{ fontSize: 18 }} />
+            <Typography
+              sx={{
+                display: { xs: "none", sm: "block" },
+                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                fontWeight: 500,
+                color: "#2D1B6B",
+                ml: 1,
+              }}
+            >
+              Information
+            </Typography>
+          </IconButton>
+        </Box>
 
         {/* Mood Distribution Chart */}
         <MoodDistributionChart emotions={emotionsData} />
