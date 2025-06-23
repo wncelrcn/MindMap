@@ -1,4 +1,3 @@
-// pages/view-insights/index.js - Updated with improved design consistency
 import {
   Box,
   Container,
@@ -399,190 +398,215 @@ export default function ViewInsights({ user }) {
           paddingBottom: { xs: "4rem", sm: "6rem", md: "8rem" },
           marginBottom: { xs: "2rem", sm: "3rem", md: "4rem" },
         }}
+      >        
+
+      {/* Page Title - Improved Responsive Design */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "column", md: "row" },
+          justifyContent: "space-between",
+          alignItems: { xs: "flex-start", md: "flex-start" },
+          gap: { xs: 3, sm: 3, md: 2 },
+          mb: 4,
+        }}
       >
-        {/* Page Title */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            mb: 4,
-          }}
-        >
-          <Box>
-            <Typography
-              sx={{
-                fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
-                fontWeight: 400,
-                color: "#2D1B6B",
-                lineHeight: "normal",
-                fontFamily: poppins.style.fontFamily,
-                mb: 1,
-                letterSpacing: "0.5px",
-              }}
-            >
-              Journal
-            </Typography>
+        {/* Title Section */}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography
+            sx={{
+              fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
+              fontWeight: 400,
+              color: "#2D1B6B",
+              lineHeight: "normal",
+              fontFamily: poppins.style.fontFamily,
+              mb: 1,
+              letterSpacing: "0.5px",
+            }}
+          >
+            Journal
+          </Typography>
 
-            <Typography
-              sx={{
-                fontSize: {
-                  xs: "2rem",
-                  sm: "2.5rem",
-                  md: "3rem",
-                  lg: "3.5rem",
-                },
-                fontWeight: 700,
-                color: "#2D1B6B",
-                lineHeight: "1.1",
-                fontFamily: poppins.style.fontFamily,
-                mb: { xs: 1, sm: 2 },
-              }}
-            >
-              Insights
-            </Typography>
-
-            {insights && (
-              <Typography
-                sx={{
-                  fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                  color: "#666",
-                  fontFamily: poppins.style.fontFamily,
-                }}
-              >
-                Generated on {formatDate(insights.created_at)}
-              </Typography>
-            )}
-          </Box>
+          <Typography
+            sx={{
+              fontSize: {
+                xs: "2rem",
+                sm: "2.5rem",
+                md: "3rem",
+                lg: "3.5rem",
+              },
+              fontWeight: 700,
+              color: "#2D1B6B",
+              lineHeight: "1.1",
+              fontFamily: poppins.style.fontFamily,
+              mb: { xs: 1, sm: 2 },
+              wordBreak: "break-word", // Prevent overflow on small screens
+            }}
+          >
+            Insights
+          </Typography>
 
           {insights && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              {/* Info Icon Button */}
-              <IconButton
-                onClick={() => setDisclaimerOpen(true)}
-                sx={{
-                  height: 40,
-                  backgroundColor: "#ffffff",
-                  border: "1px solid #764ba2",
-                  borderRadius: "12px",
-                  color: "#2D1B6B",
-                  fontFamily: poppins.style.fontFamily,
-                  fontWeight: 500,
-                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                  width: { xs: 40, sm: "auto" },
-                  px: { xs: 0, sm: 2 },
-                  "&:hover": {
-                    transform: "translateY(-1px)",
-                    background: "white",
-                    border: "1px solid #764ba2",
-                  },
-                  transition: "all 0.3s ease",
-                }}
-              >
-                <InfoIcon sx={{ fontSize: 18 }} />
-                <Typography
-                  sx={{
-                    display: { xs: "none", sm: "block" },
-                    fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                    fontWeight: 500,
-                    color: "#2D1B6B",
-                    ml: 1,
-                  }}
-                >
-                  Information
-                </Typography>
-              </IconButton>
-
-              {/* Refresh Button */}
-              <Box
-                sx={{
-                  borderRadius: "12px",
-                  border: "1px solid #764ba2",
-                  padding: "1px",
-                  cursor: generating ? "not-allowed" : "pointer",
-                  transition: "all 0.3s ease",
-                  height: 40,
-                  "&:hover": {
-                    transform: generating ? "none" : "translateY(-2px)",
-                  },
-                }}
-              >
-                <Button
-                  onClick={regenerateInsights}
-                  disabled={generating}
-                  sx={{
-                    background: "white",
-                    color: generating ? "#999" : "#2D1B6B",
-                    borderRadius: "15px",
-                    textTransform: "none",
-                    fontFamily: poppins.style.fontFamily,
-                    fontWeight: 500,
-                    fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                    px: { xs: 1, sm: 3 },
-                    height: "100%",
-                    minWidth: "auto",
-                    border: "none",
-                    "&:hover": {
-                      background: "white",
-                      border: "none",
-                    },
-                    "&:disabled": {
-                      background: "white",
-                      color: "#999",
-                    },
-                  }}
-                >
-                  {generating ? (
-                    <>
-                      <CircularProgress
-                        size={16}
-                        sx={{
-                          mr: 1,
-                          color: "#999",
-                        }}
-                      />
-                      Regenerating...
-                    </>
-                  ) : (
-                    <>
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        sx={{ mr: { xs: 0, sm: 1 } }}
-                      >
-                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-                        <path d="M21 3v5h-5" />
-                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-                        <path d="M3 21v-5h5" />
-                      </svg>
-                      <Typography
-                        sx={{
-                          display: { xs: "none", sm: "block" },
-                          fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                          fontWeight: 500,
-                          color: "#2D1B6B",
-                          ml: 1,
-                        }}
-                      >
-                        Refresh Insights
-                      </Typography>
-                    </>
-                  )}
-                </Button>
-              </Box>
-            </Box>
+            <Typography
+              sx={{
+                fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                color: "#666",
+                fontFamily: poppins.style.fontFamily,
+              }}
+            >
+              Generated on {formatDate(insights.created_at)}
+            </Typography>
           )}
         </Box>
 
+        {/* Buttons Section */}
         {insights && (
-          <>
-            {/* Insights Header Cards */}
+          <Box 
+            sx={{ 
+              display: "flex", 
+              alignItems: { xs: "flex-start", md: "center" },
+              gap: { xs: 1.5, sm: 2 },
+              flexShrink: 0,
+              width: { xs: "100%", md: "auto" },
+              justifyContent: { xs: "flex-start", md: "flex-end" },
+              flexWrap: { xs: "wrap", sm: "nowrap" },
+            }}
+          >
+            {/* Info Icon Button */}
+            <IconButton
+              onClick={() => setDisclaimerOpen(true)}
+              sx={{
+                height: { xs: 37, sm: 40 },
+                backgroundColor: "#ffffff",
+                border: "1px solid #764ba2",
+                borderRadius: "12px",
+                color: "#2D1B6B",
+                fontFamily: poppins.style.fontFamily,
+                fontWeight: 500,
+                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                px: { xs: 1.5, sm: 2, md: 2.5 },
+                minWidth: { xs: "auto", sm: "120px" },
+                "&:hover": {
+                  transform: "translateY(-1px)",
+                  background: "white",
+                  border: "1px solid #764ba2",
+                  boxShadow: "0 4px 12px rgba(118, 75, 162, 0.15)",
+                },
+                transition: "all 0.3s ease",
+              }}
+            >
+              <InfoIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
+              <Typography
+                sx={{
+                  display: { xs: "none", sm: "block" },
+                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                  fontWeight: 500,
+                  color: "#2D1B6B",
+                  ml: 1,
+                }}
+              >
+                Information
+              </Typography>
+            </IconButton>
+
+            {/* Refresh Button */}
+            <Box
+              sx={{
+                borderRadius: "12px",
+                border: "1px solid #764ba2",
+                padding: "1px",
+                cursor: generating ? "not-allowed" : "pointer",
+                transition: "all 0.3s ease",
+                height: { xs: 37, sm: 40 },
+                "&:hover": {
+                  transform: generating ? "none" : "translateY(-1px)",
+                  boxShadow: generating ? "none" : "0 4px 12px rgba(118, 75, 162, 0.15)",
+                },
+              }}
+            >
+              <Button
+                onClick={regenerateInsights}
+                disabled={generating}
+                sx={{
+                  background: "white",
+                  color: generating ? "#999" : "#2D1B6B",
+                  borderRadius: "11px",
+                  textTransform: "none",
+                  fontFamily: poppins.style.fontFamily,
+                  fontWeight: 500,
+                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                  px: { xs: 1.5, sm: 2, md: 3 },
+                  height: "100%",
+                  minWidth: { xs: "auto", sm: "160px" },
+                  border: "none",
+                  whiteSpace: "nowrap",
+                  "&:hover": {
+                    background: "white",
+                    border: "none",
+                  },
+                  "&:disabled": {
+                    background: "white",
+                    color: "#999",
+                  },
+                }}
+              >
+                {generating ? (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <CircularProgress
+                      size={16}
+                      sx={{
+                        color: "#999",
+                      }}
+                    />
+                    <Typography
+                      sx={{
+                        display: { xs: "none", sm: "block" },
+                        fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                        fontWeight: 500,
+                        color: "#999",
+                      }}
+                    >
+                      Regenerating...
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                      <path d="M21 3v5h-5" />
+                      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                      <path d="M3 21v-5h5" />
+                    </svg>
+                    <Typography
+                      sx={{
+                        display: { xs: "none", sm: "block" },
+                        fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                        fontWeight: 500,
+                        color: "#2D1B6B",
+                      }}
+                    >
+                      Refresh Insights
+                    </Typography>
+                  </Box>
+                )}
+              </Button>
+            </Box>
+          </Box>
+        )}
+      </Box>
+
+        {insights && (
+          <>            
+          {/* Insights Header Cards */}
             <Box sx={{ mb: { xs: 6, sm: 8, md: 10, lg: 12 } }}>
               {/* Top Row - 2 Cards */}
               <Box
@@ -598,7 +622,7 @@ export default function ViewInsights({ user }) {
                   sx={{
                     flex: { md: "0 0 75%" },
                     width: { xs: "100%", md: "75%" },
-                    height: { xs: 200, sm: 220, md: 260, lg: 280 },
+                    minHeight: { xs: 160, sm: 180, md: 260, lg: 280 },
                     border: "1px solid black",
                     borderRadius: { xs: "16px", sm: "18px", md: "20px" },
                     display: "flex",
@@ -619,13 +643,16 @@ export default function ViewInsights({ user }) {
                       padding: { xs: "1.5rem", sm: "1.75rem", md: "2rem" },
                       zIndex: 1,
                       width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
                     }}
                   >
                     <Typography
                       sx={{
                         fontSize: {
-                          xs: "0.95rem",
-                          sm: "1.05rem",
+                          xs: "0.9rem",
+                          sm: "1rem",
                           md: "1.2rem",
                           lg: "1.3rem",
                         },
@@ -635,6 +662,9 @@ export default function ViewInsights({ user }) {
                         lineHeight: "1.4",
                         fontFamily: poppins.style.fontFamily,
                         maxWidth: "100%",
+                        wordWrap: "break-word",
+                        overflowWrap: "break-word",
+                        hyphens: "auto",
                       }}
                     >
                       {insights.header_insights.resilience_insight}
@@ -642,21 +672,24 @@ export default function ViewInsights({ user }) {
                   </CardContent>
                 </Card>
 
-                {/* Card 2 - Top Right - Primary Motivation */}
+                {/* Card 2 - Top Right - Primary Motivation (GREEN) */}
                 <Card
                   sx={{
                     flex: { md: "0 0 25%" },
                     width: { xs: "100%", md: "25%" },
-                    height: { xs: 120, sm: 140, md: 260, lg: 280 },
+                    minHeight: { xs: 120, sm: 140, md: 260, lg: 280 },
                     border: "1px solid black",
                     borderRadius: { xs: "16px", sm: "18px", md: "20px" },
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    justifyContent: "flex-end",
+                    justifyContent: { xs: "center", md: "flex-end" },
                     position: "relative",
                     overflow: "hidden",
-                    backgroundImage: "url('/assets/insights/bg-topright.png')",
+                    backgroundImage: {
+                      xs: "url('/assets/insights/bg-topright-small.png')",
+                      md: "url('/assets/insights/bg-topright.png')"
+                    },
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     backgroundRepeat: "no-repeat",
@@ -672,19 +705,27 @@ export default function ViewInsights({ user }) {
                         md: "1rem 2rem 2rem 2rem",
                       },
                       zIndex: 1,
+                      height: { xs: "100%", md: "auto" },
+                      display: { xs: "flex", md: "block" },
+                      alignItems: { xs: "center", md: "normal" },
+                      justifyContent: { xs: "center", md: "normal" },
                     }}
                   >
                     <Typography
                       sx={{
                         fontSize: {
-                          xs: "1.2rem",
-                          sm: "1.3rem",
+                          xs: "1.4rem", // Increased from 1.1rem
+                          sm: "1.5rem", // Increased from 1.2rem
                           md: "1.4rem",
                           lg: "1.5rem",
                         },
                         fontWeight: 600,
                         color: "#2E7D32",
                         fontFamily: poppins.style.fontFamily,
+                        textAlign: "center",
+                        wordWrap: "break-word",
+                        overflowWrap: "break-word",
+                        hyphens: "auto",
                       }}
                     >
                       {insights.header_insights.primary_motivation}
@@ -701,22 +742,24 @@ export default function ViewInsights({ user }) {
                   flexDirection: { xs: "column", sm: "column", md: "row" },
                 }}
               >
-                {/* Card 3 - Bottom Left - Growth Indicator */}
+                {/* Card 3 - Bottom Left - Growth Indicator (ORANGE) */}
                 <Card
                   sx={{
                     flex: { md: "0 0 25%" },
                     width: { xs: "100%", md: "25%" },
-                    height: { xs: 120, sm: 140, md: 260, lg: 280 },
+                    minHeight: { xs: 120, sm: 140, md: 260, lg: 280 },
                     border: "1px solid black",
                     borderRadius: { xs: "16px", sm: "18px", md: "20px" },
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    justifyContent: "flex-end",
+                    justifyContent: { xs: "center", md: "flex-end" },
                     position: "relative",
                     overflow: "hidden",
-                    backgroundImage:
-                      "url('/assets/insights/bg-bottomleft.png')",
+                    backgroundImage: {
+                      xs: "url('/assets/insights/bg-bottomleft-small.png')",
+                      md: "url('/assets/insights/bg-bottomleft.png')"
+                    },
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     backgroundRepeat: "no-repeat",
@@ -732,19 +775,36 @@ export default function ViewInsights({ user }) {
                         md: "1rem 2rem 2rem 2rem",
                       },
                       zIndex: 1,
+                      height: { xs: "100%", md: "auto" },
+                      display: { xs: "flex", md: "block" },
+                      alignItems: { xs: "center", md: "normal" },
+                      justifyContent: { xs: "center", md: "normal" },
                     }}
                   >
                     <Typography
                       sx={{
-                        fontSize: {
-                          xs: "1.2rem",
-                          sm: "1.3rem",
-                          md: "1.4rem",
-                          lg: "1.5rem",
-                        },
+                        fontSize:
+                          insights.header_insights.growth_indicator.split(" ")
+                            .length > 1
+                            ? { 
+                                xs: "1.3rem", // Increased from 1rem
+                                sm: "1.4rem", // Increased from 1.1rem
+                                md: "1.2rem", 
+                                lg: "1.3rem" 
+                              }
+                            : { 
+                                xs: "1.4rem", // Increased from 1.1rem
+                                sm: "1.5rem", // Increased from 1.2rem
+                                md: "1.4rem", 
+                                lg: "1.5rem" 
+                              },
                         fontWeight: 600,
                         color: "#E65100",
                         fontFamily: poppins.style.fontFamily,
+                        textAlign: "center",
+                        wordWrap: "break-word",
+                        overflowWrap: "break-word",
+                        hyphens: "auto",
                       }}
                     >
                       {insights.header_insights.growth_indicator}
@@ -757,7 +817,7 @@ export default function ViewInsights({ user }) {
                   sx={{
                     flex: { md: "0 0 75%" },
                     width: { xs: "100%", md: "75%" },
-                    height: { xs: 200, sm: 220, md: 260, lg: 280 },
+                    minHeight: { xs: 160, sm: 180, md: 260, lg: 280 },
                     border: "1px solid black",
                     borderRadius: { xs: "16px", sm: "18px", md: "20px" },
                     display: "flex",
@@ -779,13 +839,17 @@ export default function ViewInsights({ user }) {
                       padding: { xs: "1.5rem", sm: "1.75rem", md: "2rem" },
                       zIndex: 1,
                       width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-end",
                     }}
                   >
                     <Typography
                       sx={{
                         fontSize: {
-                          xs: "0.95rem",
-                          sm: "1.05rem",
+                          xs: "0.9rem",
+                          sm: "1rem",
                           md: "1.2rem",
                           lg: "1.3rem",
                         },
@@ -795,6 +859,9 @@ export default function ViewInsights({ user }) {
                         fontFamily: poppins.style.fontFamily,
                         maxWidth: "100%",
                         textAlign: { xs: "left", md: "right" },
+                        wordWrap: "break-word",
+                        overflowWrap: "break-word",
+                        hyphens: "auto",
                       }}
                     >
                       {insights.header_insights.emotional_tone}
