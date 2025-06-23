@@ -280,7 +280,7 @@ export default function ViewEmotions({ user }) {
                 transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                 background: "rgba(255,255,255,0.95)",
                 backdropFilter: "blur(20px)",
-                height: { xs: "160px", md: "180px" },
+                minHeight: { xs: "160px", md: "180px" },
                 width: "100%",
                 "&:hover": {
                   transform: "translateY(-8px)",
@@ -362,11 +362,6 @@ export default function ViewEmotions({ user }) {
                       color: "#666",
                       lineHeight: 1.5,
                       fontFamily: poppins.style.fontFamily,
-                      display: "-webkit-box",
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
                     }}
                   >
                     {emotion.description}

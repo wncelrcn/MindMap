@@ -8,7 +8,31 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Check if request body is too large
+    const contentLength = req.headers["content-length"];
+    if (contentLength && parseInt(contentLength) > 10 * 1024 * 1024) {
+      // 10MB limit
+      return res.status(413).json({
+        error: "Request body too large",
+        message:
+          "Image file is too large. Please compress the image and try again.",
+      });
+    }
+
     const { user, aboutMe, profileImage } = req.body;
+
+    // Additional check for profileImage data size
+    if (profileImage && profileImage.data) {
+      const imageSize = profileImage.data.length;
+      // Base64 string should be under 1MB for safety
+      if (imageSize > 1024 * 1024) {
+        return res.status(413).json({
+          error: "Image data too large",
+          message:
+            "Compressed image is still too large. Please use a smaller or simpler image.",
+        });
+      }
+    }
 
     if (!user || !user.email) {
       return res.status(400).json({ error: "User email is required" });

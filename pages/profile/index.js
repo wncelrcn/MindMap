@@ -201,8 +201,8 @@ export default function Profile({ user }) {
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Image is too large. Please select an image under 5MB.");
+      if (file.size > 10 * 1024 * 1024) {
+        alert("Image is too large. Please select an image under 10MB.");
         return;
       }
       setSelectedFile(file);
@@ -211,26 +211,30 @@ export default function Profile({ user }) {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement("canvas");
-          const MAX_WIDTH = 300;
-          const MAX_HEIGHT = 300;
+          const MAX_SIZE = 400; // Increased slightly for better quality
           let width = img.width;
           let height = img.height;
+
+          // Calculate new dimensions maintaining aspect ratio
           if (width > height) {
-            if (width > MAX_WIDTH) {
-              height = Math.round((height * MAX_WIDTH) / width);
-              width = MAX_WIDTH;
+            if (width > MAX_SIZE) {
+              height = Math.round((height * MAX_SIZE) / width);
+              width = MAX_SIZE;
             }
           } else {
-            if (height > MAX_HEIGHT) {
-              width = Math.round((width * MAX_HEIGHT) / height);
-              height = MAX_HEIGHT;
+            if (height > MAX_SIZE) {
+              width = Math.round((width * MAX_SIZE) / height);
+              height = MAX_SIZE;
             }
           }
+
           canvas.width = width;
           canvas.height = height;
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, width, height);
-          setPreviewUrl(canvas.toDataURL("image/jpeg", 0.7));
+
+          // Use higher quality for preview but will compress more for upload
+          setPreviewUrl(canvas.toDataURL("image/jpeg", 0.8));
         };
         img.src = e.target.result;
       };
@@ -238,9 +242,67 @@ export default function Profile({ user }) {
     }
   };
 
+  const compressImage = (file, maxWidth = 300, quality = 0.6) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+
+          // Calculate new dimensions maintaining aspect ratio
+          let { width, height } = img;
+          if (width > height) {
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxWidth) {
+              width = Math.round((width * maxWidth) / height);
+              height = maxWidth;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+
+          // Set white background for better compression
+          ctx.fillStyle = "white";
+          ctx.fillRect(0, 0, width, height);
+
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Try different quality levels until we get under 800KB base64 string
+          let currentQuality = quality;
+          let base64String;
+
+          do {
+            base64String = canvas
+              .toDataURL("image/jpeg", currentQuality)
+              .split(",")[1];
+            // Base64 adds ~33% overhead, so 800KB base64 ≈ 600KB actual
+            if (base64String.length < 800000) break;
+            currentQuality -= 0.1;
+          } while (currentQuality > 0.1);
+
+          resolve({
+            data: base64String,
+            size: base64String.length,
+            quality: currentQuality,
+          });
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleUpdateProfile = async () => {
     if (!user || !user.email) return;
     setUpdating(true);
+
     try {
       const updateData = {
         user: {
@@ -250,54 +312,36 @@ export default function Profile({ user }) {
         },
         aboutMe: newAboutMe,
       };
+
       if (selectedFile) {
-        const reader = new FileReader();
-        reader.readAsDataURL(selectedFile);
-        reader.onload = async () => {
-          let base64String = reader.result.split(",")[1];
-          if (selectedFile.size > 1 * 1024 * 1024) {
-            const img = new Image();
-            img.onload = async () => {
-              const canvas = document.createElement("canvas");
-              const MAX_DIM = 500;
-              let width = img.width;
-              let height = img.height;
-              if (width > height) {
-                if (width > MAX_DIM) {
-                  height = Math.round((height * MAX_DIM) / width);
-                  width = MAX_DIM;
-                }
-              } else {
-                if (height > MAX_DIM) {
-                  width = Math.round((width * MAX_DIM) / height);
-                  height = MAX_DIM;
-                }
-              }
-              canvas.width = width;
-              canvas.height = height;
-              const ctx = canvas.getContext("2d");
-              ctx.drawImage(img, 0, 0, width, height);
-              base64String = canvas.toDataURL("image/jpeg", 0.8).split(",")[1];
-              updateData.profileImage = {
-                name: "profile_picture.jpg",
-                type: "image/jpeg",
-                data: base64String,
-              };
-              await postUpdate(updateData);
-            };
-            img.src = reader.result;
-          } else {
-            updateData.profileImage = {
-              name: selectedFile.name,
-              type: selectedFile.type,
-              data: base64String,
-            };
-            await postUpdate(updateData);
-          }
+        console.log("Original file size:", selectedFile.size);
+
+        // Compress the image regardless of original size
+        const compressed = await compressImage(selectedFile, 300, 0.7);
+        console.log(
+          "Compressed base64 size:",
+          compressed.size,
+          "Quality used:",
+          compressed.quality
+        );
+
+        if (compressed.size > 1000000) {
+          // If still > 1MB base64
+          alert(
+            "Image is too complex to compress adequately. Please try a simpler image or smaller file."
+          );
+          setUpdating(false);
+          return;
+        }
+
+        updateData.profileImage = {
+          name: "profile_picture.jpg",
+          type: "image/jpeg",
+          data: compressed.data,
         };
-      } else {
-        await postUpdate(updateData);
       }
+
+      await postUpdate(updateData);
     } catch (error) {
       console.error("Error updating profile:", error);
       alert("Failed to update profile. Please try again.");
@@ -316,7 +360,22 @@ export default function Profile({ user }) {
       }
     } catch (err) {
       console.error("API error:", err.response?.data || err.message);
-      alert("Failed to update profile. Please try again.");
+
+      // Handle specific error cases
+      if (err.response?.status === 413) {
+        const errorMessage =
+          err.response?.data?.message ||
+          "Image file is too large. Please try compressing the image or using a smaller file.";
+        alert(errorMessage);
+      } else if (err.response?.data?.error) {
+        alert(
+          `Error: ${err.response.data.error}\n${
+            err.response.data.message || ""
+          }`
+        );
+      } else {
+        alert("Failed to update profile. Please try again.");
+      }
     } finally {
       setUpdating(false);
     }
@@ -569,17 +628,37 @@ export default function Profile({ user }) {
           onClose={handleCloseEditDialog}
           maxWidth="sm"
           fullWidth
+          sx={{
+            "& .MuiDialog-paper": {
+              margin: { xs: 2, sm: 3 },
+              width: { xs: "calc(100% - 32px)", sm: "100%" },
+              maxHeight: { xs: "90vh", sm: "85vh" },
+              overflow: "hidden",
+            },
+          }}
         >
           <DialogTitle
             sx={{
               fontFamily: poppins.style.fontFamily,
               color: "#5C35C2",
               fontWeight: 600,
+              px: { xs: 2, sm: 3 },
+              py: { xs: 2, sm: 3 },
             }}
           >
             Edit Profile
           </DialogTitle>
-          <DialogContent sx={{ p: 3 }}>
+          <DialogContent
+            sx={{
+              p: { xs: 2, sm: 3 },
+              overflow: "visible",
+              "&::-webkit-scrollbar": {
+                display: "none",
+              },
+              msOverflowStyle: "none",
+              scrollbarWidth: "none",
+            }}
+          >
             <Stack spacing={3}>
               <Box
                 sx={{
@@ -676,7 +755,14 @@ export default function Profile({ user }) {
               />
             </Stack>
           </DialogContent>
-          <DialogActions sx={{ p: 3, pt: 0 }}>
+          <DialogActions
+            sx={{
+              p: { xs: 2, sm: 3 },
+              pt: 0,
+              flexWrap: "wrap",
+              gap: 1,
+            }}
+          >
             <Button
               onClick={handleCloseEditDialog}
               sx={{

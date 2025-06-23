@@ -22,10 +22,32 @@ export default async function handler(req, res) {
 
     const { data: journalData, dateRange, user_UID } = req.body;
 
-    if (!journalData || !dateRange || !user_UID) {
+    if (!dateRange || !user_UID) {
       return res.status(400).json({
-        message:
-          "Missing required data: journalData, dateRange, and user_UID are required",
+        message: "Missing required data: dateRange and user_UID are required",
+      });
+    }
+
+    // Handle case where no journals exist in the date range
+    if (
+      !journalData ||
+      journalData.length === 0 ||
+      (typeof journalData === "string" && journalData.trim() === "")
+    ) {
+      console.log("No journal entries found for the specified date range");
+      return res.status(200).json({
+        message: "No journal entries found for the specified date range",
+        dateRange: dateRange,
+        hasEntries: false,
+      });
+    }
+
+    // Validate API key exists
+    if (!process.env.OPENROUTER_API_KEY) {
+      console.error("OpenRouter API key not configured");
+      return res.status(500).json({
+        message: "AI analysis service not configured",
+        details: "Missing API key configuration",
       });
     }
 
@@ -64,33 +86,49 @@ Format your response as JSON with this exact structure:
 }
     `;
 
-    const openRouterResponse = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "deepseek/deepseek-chat-v3-0324:free",
-          messages: [{ role: "user", content: prompt }],
-        }),
-      }
-    );
+    let openRouterResponse;
+    let openRouterResult;
+    let openRouterContent;
 
-    if (!openRouterResponse.ok) {
-      const errorText = await openRouterResponse.text();
+    try {
+      openRouterResponse = await fetch(
+        "https://openrouter.ai/api/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: "deepseek/deepseek-chat-v3-0324:free",
+            messages: [{ role: "user", content: prompt }],
+          }),
+        }
+      );
+
+      if (!openRouterResponse.ok) {
+        const errorText = await openRouterResponse.text();
+        return res.status(500).json({
+          message: "OpenRouter API error",
+          status: openRouterResponse.status,
+          details: errorText,
+        });
+      }
+
+      openRouterResult = await openRouterResponse.json();
+      openRouterContent =
+        openRouterResult?.choices?.[0]?.message?.content?.trim();
+
+      if (!openRouterContent) {
+        throw new Error("No content received from OpenRouter API");
+      }
+    } catch (apiError) {
+      console.error("OpenRouter API request failed:", apiError);
       return res.status(500).json({
-        message: "OpenRouter API error",
-        status: openRouterResponse.status,
-        details: errorText,
+        message: "Failed to connect to AI analysis service",
+        details: apiError.message,
       });
     }
-
-    const openRouterResult = await openRouterResponse.json();
-    const openRouterContent =
-      openRouterResult?.choices?.[0]?.message?.content?.trim();
 
     console.log("AI Analysis Result:", openRouterContent);
 
@@ -120,19 +158,27 @@ Format your response as JSON with this exact structure:
 
     console.log(aiAnalysis);
 
-    const { data: existingCheck, error: checkError } = await supabase
-      .from("recap")
-      .select("id")
-      .eq("user_UID", user_UID)
-      .eq("date_range_start", dateRange.startDate)
-      .eq("date_range_end", dateRange.endDate)
-      .single();
+    // Check for existing recap with better error handling
+    let existingCheck;
+    try {
+      const { data, error: checkError } = await supabase
+        .from("recap")
+        .select("id")
+        .eq("user_UID", user_UID)
+        .eq("date_range_start", dateRange.startDate)
+        .eq("date_range_end", dateRange.endDate)
+        .single();
 
-    if (checkError && checkError.code !== "PGRST116") {
-      console.error("Error checking for existing recap:", checkError);
+      if (checkError && checkError.code !== "PGRST116") {
+        throw new Error(`Database check error: ${checkError.message}`);
+      }
+
+      existingCheck = data;
+    } catch (dbError) {
+      console.error("Error checking for existing recap:", dbError);
       return res.status(500).json({
         message: "Error checking for existing recap",
-        details: checkError.message,
+        details: dbError.message,
       });
     }
 
@@ -145,29 +191,37 @@ Format your response as JSON with this exact structure:
       });
     }
 
-    const { data: savedRecap, error: saveError } = await supabase
-      .from("recap")
-      .insert({
-        user_UID: user_UID,
-        weekly_summary: aiAnalysis.summary,
-        mood: aiAnalysis.mood,
-        date_range_start: dateRange.startDate,
-        date_range_end: dateRange.endDate,
-        created_at: new Date().toISOString(),
-        feeling: aiAnalysis["How You Have Been Feeling"],
-        contributing: aiAnalysis["What Might Be Contributing"],
-        moments: aiAnalysis["Moments That Stood Out"],
-        cope: aiAnalysis["What Helped You Cope"],
-        remember: aiAnalysis.Remember,
-      })
-      .select()
-      .single();
+    // Save the recap with better error handling
+    let savedRecap;
+    try {
+      const { data, error: saveError } = await supabase
+        .from("recap")
+        .insert({
+          user_UID: user_UID,
+          weekly_summary: aiAnalysis.summary,
+          mood: aiAnalysis.mood,
+          date_range_start: dateRange.startDate,
+          date_range_end: dateRange.endDate,
+          created_at: new Date().toISOString(),
+          feeling: aiAnalysis["How You Have Been Feeling"],
+          contributing: aiAnalysis["What Might Be Contributing"],
+          moments: aiAnalysis["Moments That Stood Out"],
+          cope: aiAnalysis["What Helped You Cope"],
+          remember: aiAnalysis.Remember,
+        })
+        .select()
+        .single();
 
-    if (saveError) {
-      console.error("Error saving recap:", saveError);
+      if (saveError) {
+        throw new Error(`Database save error: ${saveError.message}`);
+      }
+
+      savedRecap = data;
+    } catch (saveDbError) {
+      console.error("Error saving recap:", saveDbError);
       return res.status(500).json({
         message: "Error saving recap to database",
-        details: saveError.message,
+        details: saveDbError.message,
       });
     }
 
