@@ -29,6 +29,7 @@ const DisclaimerModal = ({
       onClose={() => {}}
       maxWidth="sm"
       fullWidth
+      disableScrollLock={true}
       PaperProps={{
         sx: {
           borderRadius: "20px",

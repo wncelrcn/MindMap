@@ -628,37 +628,32 @@ export default function Profile({ user }) {
           onClose={handleCloseEditDialog}
           maxWidth="sm"
           fullWidth
-          sx={{
-            "& .MuiDialog-paper": {
-              margin: { xs: 2, sm: 3 },
-              width: { xs: "calc(100% - 32px)", sm: "100%" },
-              maxHeight: { xs: "90vh", sm: "85vh" },
-              overflow: "hidden",
+          disableEscapeKeyDown={false}
+          keepMounted={false}
+          disableScrollLock={true}
+          PaperProps={{
+            sx: {
+              borderRadius: "20px",
+              border: "1px solid #e0e0e0",
+              fontFamily: poppins.style.fontFamily,
             },
           }}
         >
           <DialogTitle
             sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              pb: 1,
+              color: "#2D1B6B",
               fontFamily: poppins.style.fontFamily,
-              color: "#5C35C2",
               fontWeight: 600,
-              px: { xs: 2, sm: 3 },
-              py: { xs: 2, sm: 3 },
             }}
           >
+            <EditIcon sx={{ color: "#2D1B6B" }} />
             Edit Profile
           </DialogTitle>
-          <DialogContent
-            sx={{
-              p: { xs: 2, sm: 3 },
-              overflow: "visible",
-              "&::-webkit-scrollbar": {
-                display: "none",
-              },
-              msOverflowStyle: "none",
-              scrollbarWidth: "none",
-            }}
-          >
+          <DialogContent sx={{ pt: 1 }}>
             <Stack spacing={3}>
               <Box
                 sx={{
@@ -755,20 +750,14 @@ export default function Profile({ user }) {
               />
             </Stack>
           </DialogContent>
-          <DialogActions
-            sx={{
-              p: { xs: 2, sm: 3 },
-              pt: 0,
-              flexWrap: "wrap",
-              gap: 1,
-            }}
-          >
+          <DialogActions sx={{ px: 3, pb: 3 }}>
             <Button
               onClick={handleCloseEditDialog}
               sx={{
                 fontFamily: poppins.style.fontFamily,
                 color: "#888",
                 fontWeight: 500,
+                textTransform: "none",
               }}
             >
               Cancel
@@ -778,10 +767,16 @@ export default function Profile({ user }) {
               disabled={updating}
               variant="contained"
               sx={{
+                backgroundColor: "#2D1B6B",
+                borderRadius: "12px",
+                textTransform: "none",
                 fontFamily: poppins.style.fontFamily,
-                backgroundColor: "#5C35C2",
-                "&:hover": { backgroundColor: "#4527A0" },
+                fontWeight: 500,
                 px: 4,
+                py: 1,
+                "&:hover": {
+                  backgroundColor: "#1a0f4d",
+                },
               }}
             >
               {updating ? (

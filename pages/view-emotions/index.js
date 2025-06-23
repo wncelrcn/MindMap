@@ -337,6 +337,7 @@ export default function ViewEmotions({ user }) {
                 fontSize: { xs: "0.75rem", sm: "0.875rem" },
                 fontWeight: 500,
                 color: "#2D1B6B",
+                fontFamily: poppins.style.fontFamily,
                 ml: 1,
               }}
             >

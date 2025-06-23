@@ -155,7 +155,6 @@ const Badges = ({ badges, badgesLoading }) => {
                     leaveTouchDelay={2500}
                     enterDelay={{ xs: 0, sm: 500 }}
                     leaveDelay={{ xs: 0, sm: 200 }}
-                    disableHoverListener={{ xs: true, sm: false }}
                     disableFocusListener
                   >
                     <Box

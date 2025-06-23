@@ -1,7 +1,18 @@
 import Head from "next/head";
 import Footer from "@/components/layout/footer";
 import SupportFooter from "@/components/layout/support_footer";
-import { Box, Typography, Container, Grid, Button, Card } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Container,
+  Grid,
+  Button,
+  Card,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
 import Link from "next/link";
 import Navbar from "@/components/layout/navbar";
 import { useEffect, useState } from "react";
@@ -9,6 +20,7 @@ import { Raleway, Poppins, Quicksand } from "next/font/google";
 import RecentJournal from "@/components/cards/recent_journal";
 import { createClient } from "@/utils/supabase/server-props";
 import { useRouter } from "next/router";
+import InfoIcon from "@mui/icons-material/Info";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -54,9 +66,27 @@ export default function DashboardPage({ user }) {
   const [username, setUsername] = useState(user.user_metadata.name);
   const [user_UID, setUser_UID] = useState(user.id);
   const [recentJournals, setRecentJournals] = useState([]);
+  const [permaModalOpen, setPermaModalOpen] = useState(false);
 
   // Use recap context instead of local state
   const { recapData, recapLoading } = useRecap();
+
+  const handleOpenPermaModal = () => {
+    setPermaModalOpen(true);
+  };
+
+  const handleClosePermaModal = () => {
+    setPermaModalOpen(false);
+  };
+
+  const handleGoToQuiz = () => {
+    setPermaModalOpen(false);
+    window.open(
+      "https://www.purposeplus.com/survey/perma-profiler/",
+      "_blank",
+      "noopener,noreferrer"
+    );
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -263,31 +293,25 @@ export default function DashboardPage({ user }) {
                     </Box>
                   </Box>
                   <Box mt={{ xs: 2, md: 18 }}>
-                    <Link
-                      href="https://www.purposeplus.com/survey/perma-profiler/"
-                      passHref
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Button
+                      variant="contained"
+                      onClick={handleOpenPermaModal}
+                      sx={{
+                        backgroundColor: "#5A33B7",
+                        borderRadius: "9999px",
+                        textTransform: "none",
+                        fontFamily: poppins.style.fontFamily,
+                        width: "200px",
+                        px: 3,
+                        py: 1,
+                        fontSize: "0.875rem",
+                        "&:hover": {
+                          backgroundColor: "#45249C",
+                        },
+                      }}
                     >
-                      <Button
-                        variant="contained"
-                        sx={{
-                          backgroundColor: "#5A33B7",
-                          borderRadius: "9999px",
-                          textTransform: "none",
-                          fontFamily: poppins.style.fontFamily,
-                          width: "200px",
-                          px: 3,
-                          py: 1,
-                          fontSize: "0.875rem",
-                          "&:hover": {
-                            backgroundColor: "#45249C",
-                          },
-                        }}
-                      >
-                        Take a Quiz
-                      </Button>
-                    </Link>
+                      Take a Quiz
+                    </Button>
                   </Box>
                 </Card>
               </Box>
@@ -393,6 +417,115 @@ export default function DashboardPage({ user }) {
           <Footer />
         </Box>
       </Box>
+
+      {/* PERMA Profiler Modal */}
+      <Dialog
+        open={permaModalOpen}
+        onClose={handleClosePermaModal}
+        maxWidth="sm"
+        fullWidth
+        disableEscapeKeyDown={false}
+        keepMounted={false}
+        disableScrollLock={true}
+        PaperProps={{
+          sx: {
+            borderRadius: "20px",
+            border: "1px solid #e0e0e0",
+            fontFamily: poppins.style.fontFamily,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            pb: 1,
+            color: "#2D1B6B",
+            fontFamily: poppins.style.fontFamily,
+            fontWeight: 600,
+          }}
+        >
+          <InfoIcon sx={{ color: "#2D1B6B" }} />
+          Take the PERMA Profiler Quiz
+        </DialogTitle>
+        <DialogContent sx={{ pt: 1 }}>
+          <Typography
+            sx={{
+              mb: 2,
+              lineHeight: 1.6,
+              color: "#333",
+              fontFamily: poppins.style.fontFamily,
+            }}
+          >
+            This quiz will help you assess your overall well-being across five
+            core pillars: <strong>Positive Emotion</strong>,{" "}
+            <strong>Engagement</strong>, <strong>Relationships</strong>,{" "}
+            <strong>Meaning</strong>, and <strong>Accomplishment</strong>.
+          </Typography>
+          <Typography
+            sx={{
+              mb: 2,
+              lineHeight: 1.6,
+              color: "#333",
+              fontFamily: poppins.style.fontFamily,
+            }}
+          >
+            You'll be redirected to an external site to complete the quiz.
+          </Typography>
+          <Typography
+            sx={{
+              mb: 3,
+              lineHeight: 1.6,
+              color: "#333",
+              fontFamily: poppins.style.fontFamily,
+            }}
+          >
+            Your results can be used to personalize your wellness journey.
+          </Typography>
+          <Typography
+            sx={{
+              lineHeight: 1.6,
+              color: "#2D1B6B",
+              fontFamily: poppins.style.fontFamily,
+              fontWeight: 600,
+            }}
+          >
+            Ready to begin?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button
+            onClick={handleClosePermaModal}
+            sx={{
+              fontFamily: poppins.style.fontFamily,
+              color: "#888",
+              fontWeight: 500,
+              textTransform: "none",
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleGoToQuiz}
+            variant="contained"
+            sx={{
+              backgroundColor: "#2D1B6B",
+              borderRadius: "12px",
+              textTransform: "none",
+              fontFamily: poppins.style.fontFamily,
+              fontWeight: 500,
+              px: 4,
+              py: 1,
+              "&:hover": {
+                backgroundColor: "#1a0f4d",
+              },
+            }}
+          >
+            Go to Quiz
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

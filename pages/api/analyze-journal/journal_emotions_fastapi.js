@@ -48,7 +48,7 @@ export default async function handler(req, res) {
         headers: {
           "Content-Type": "application/json",
         },
-        timeout: 60000, // 60 seconds timeout for model inference
+        timeout: 180000, // 3 minutes timeout to handle Render free tier cold starts
       }
     );
 

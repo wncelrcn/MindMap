@@ -259,177 +259,177 @@ export default function Journals({ user }) {
               </Typography>
             </Box>
 
-            <Grid
-              container
-              spacing={2}
-              alignItems="stretch"
-              px={{ xs: 2, sm: 4, md: 1 }}
-              sx={{ mt: 4, mb: 4, flexWrap: "nowrap" }}
-            >
-              {/* Search Entry */}
-              <Grid
-                item
-                xs
+            <Box px={{ xs: 2, sm: 4, md: 1 }} sx={{ mt: 4, mb: 4 }}>
+              {/* Search and Filter Container */}
+              <Box
                 sx={{
-                  flexGrow: 1,
-                  minWidth: 0,
-                  maxWidth: "100%",
                   display: "flex",
-                  alignItems: "stretch",
-                }}
-              >
-                <TextField
-                  placeholder="Search Entry"
-                  variant="outlined"
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  fullWidth
-                  sx={{
-                    backgroundColor: "#f8f7fc",
-                    borderRadius: 2,
-                    width: "100%",
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "12px",
-                      backgroundColor: "#f8f7fe",
-                      "& fieldset": {
-                        borderColor: "#e0d8f8",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#5A33B7",
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "#5A33B7",
-                        borderWidth: "2px",
-                      },
-                    },
-                    "& .MuiInputBase-input": {
-                      fontFamily: poppins.style.fontFamily,
-                    },
-                  }}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SearchIcon sx={{ color: "#5A33B7" }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Grid>
-
-              {/* Button Container */}
-              <Grid
-                item
-                sx={{
-                  flexShrink: 0,
-                  display: "flex",
-                  alignItems: "stretch",
+                  flexDirection: { xs: "column", md: "row" },
                   gap: 2,
+                  alignItems: { xs: "stretch", md: "flex-start" },
+                  mb: 2,
                 }}
               >
-                {/* Apply Filter */}
-                <Button
-                  variant="outlined"
-                  startIcon={<FilterListIcon />}
-                  onClick={handleFilterClick}
-                  sx={{
-                    textTransform: "none",
-                    fontFamily: poppins.style.fontFamily,
-                    color: selectedJournalType ? "#fff" : "#5A33B7",
-                    borderColor: "#e0d8f8",
-                    backgroundColor: selectedJournalType
-                      ? "#5A33B7"
-                      : "#f8f7fc",
-                    borderRadius: 5,
-                    px: { xs: 1, sm: 3 },
-                    py: 1.5,
-                    height: "100%",
-                    "&:hover": {
-                      backgroundColor: selectedJournalType
-                        ? "#4a2a9a"
-                        : "#ece7fa",
-                      borderColor: "#d0c6f0",
-                    },
-                  }}
-                >
-                  {selectedJournalType === "freeform"
-                    ? "Free Journaling"
-                    : selectedJournalType === "guided"
-                    ? "Guided Journaling"
-                    : "Apply Filter"}
-                </Button>
-                <Menu
-                  anchorEl={filterMenuAnchor}
-                  open={Boolean(filterMenuAnchor)}
-                  onClose={handleFilterClose}
-                  PaperProps={{
-                    sx: {
-                      mt: 1,
+                {/* Search Entry */}
+                <Box sx={{ flex: { xs: "none", md: 1 } }}>
+                  <TextField
+                    placeholder="Search Entry"
+                    variant="outlined"
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    fullWidth
+                    sx={{
+                      backgroundColor: "#f8f7fc",
                       borderRadius: 2,
-                      minWidth: 180,
-                    },
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "12px",
+                        backgroundColor: "#f8f7fe",
+                        "& fieldset": {
+                          borderColor: "#e0d8f8",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "#5A33B7",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#5A33B7",
+                          borderWidth: "2px",
+                        },
+                      },
+                      "& .MuiInputBase-input": {
+                        fontFamily: poppins.style.fontFamily,
+                      },
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon sx={{ color: "#5A33B7" }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Box>
+
+                {/* Button Container */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    gap: 2,
+                    alignItems: "stretch",
+                    flex: { xs: "none", md: "0 0 auto" },
                   }}
                 >
-                  <MenuItem
-                    onClick={() => handleJournalTypeSelect("Free Journaling")}
+                  {/* Apply Filter */}
+                  <Button
+                    variant="outlined"
+                    startIcon={<FilterListIcon />}
+                    onClick={handleFilterClick}
                     sx={{
+                      textTransform: "none",
                       fontFamily: poppins.style.fontFamily,
-                      py: 1.5,
+                      color: selectedJournalType ? "#fff" : "#5A33B7",
+                      borderColor: "#e0d8f8",
+                      backgroundColor: selectedJournalType
+                        ? "#5A33B7"
+                        : "#f8f7fc",
+                      borderRadius: 5,
+                      px: { xs: 2, sm: 3 },
+                      py: { xs: 2, sm: 1.5 },
+                      minHeight: { xs: "48px", sm: "auto" },
+                      width: { xs: "100%", sm: "auto" },
+                      "&:hover": {
+                        backgroundColor: selectedJournalType
+                          ? "#4a2a9a"
+                          : "#ece7fa",
+                        borderColor: "#d0c6f0",
+                      },
                     }}
                   >
-                    Free Journaling
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => handleJournalTypeSelect("Guided Journaling")}
-                    sx={{
-                      fontFamily: poppins.style.fontFamily,
-                      py: 1.5,
+                    {selectedJournalType === "freeform"
+                      ? "Free Journaling"
+                      : selectedJournalType === "guided"
+                      ? "Guided Journaling"
+                      : "Apply Filter"}
+                  </Button>
+                  <Menu
+                    anchorEl={filterMenuAnchor}
+                    open={Boolean(filterMenuAnchor)}
+                    onClose={handleFilterClose}
+                    PaperProps={{
+                      sx: {
+                        mt: 1,
+                        borderRadius: 2,
+                        minWidth: 180,
+                      },
                     }}
                   >
-                    Guided Journaling
-                  </MenuItem>
-                  {selectedJournalType && (
                     <MenuItem
-                      onClick={clearFilters}
+                      onClick={() => handleJournalTypeSelect("Free Journaling")}
                       sx={{
                         fontFamily: poppins.style.fontFamily,
                         py: 1.5,
-                        color: "#666",
                       }}
                     >
-                      Clear Filter
+                      Free Journaling
                     </MenuItem>
-                  )}
-                </Menu>
-                {/* Select Date */}
-                <Button
-                  variant="outlined"
-                  startIcon={<CalendarTodayIcon />}
-                  onClick={handleDateDialogOpen}
-                  sx={{
-                    textTransform: "none",
-                    fontFamily: poppins.style.fontFamily,
-                    color:
-                      dateRange.start || dateRange.end ? "#fff" : "#5A33B7",
-                    borderColor: "#e0d8f8",
-                    backgroundColor:
-                      dateRange.start || dateRange.end ? "#5A33B7" : "#f8f7fc",
-                    borderRadius: 5,
-                    px: { xs: 1, sm: 3 },
-                    py: 1.5,
-                    height: "100%",
-                    "&:hover": {
+                    <MenuItem
+                      onClick={() =>
+                        handleJournalTypeSelect("Guided Journaling")
+                      }
+                      sx={{
+                        fontFamily: poppins.style.fontFamily,
+                        py: 1.5,
+                      }}
+                    >
+                      Guided Journaling
+                    </MenuItem>
+                    {selectedJournalType && (
+                      <MenuItem
+                        onClick={clearFilters}
+                        sx={{
+                          fontFamily: poppins.style.fontFamily,
+                          py: 1.5,
+                          color: "#666",
+                        }}
+                      >
+                        Clear Filter
+                      </MenuItem>
+                    )}
+                  </Menu>
+                  {/* Select Date */}
+                  <Button
+                    variant="outlined"
+                    startIcon={<CalendarTodayIcon />}
+                    onClick={handleDateDialogOpen}
+                    sx={{
+                      textTransform: "none",
+                      fontFamily: poppins.style.fontFamily,
+                      color:
+                        dateRange.start || dateRange.end ? "#fff" : "#5A33B7",
+                      borderColor: "#e0d8f8",
                       backgroundColor:
                         dateRange.start || dateRange.end
-                          ? "#4a2a9a"
-                          : "#ece7fa",
-                      borderColor: "#d0c6f0",
-                    },
-                  }}
-                >
-                  {formatDateRange()}
-                </Button>
-              </Grid>
-            </Grid>
+                          ? "#5A33B7"
+                          : "#f8f7fc",
+                      borderRadius: 5,
+                      px: { xs: 2, sm: 3 },
+                      py: { xs: 2, sm: 1.5 },
+                      minHeight: { xs: "48px", sm: "auto" },
+                      width: { xs: "100%", sm: "auto" },
+                      "&:hover": {
+                        backgroundColor:
+                          dateRange.start || dateRange.end
+                            ? "#4a2a9a"
+                            : "#ece7fa",
+                        borderColor: "#d0c6f0",
+                      },
+                    }}
+                  >
+                    {formatDateRange()}
+                  </Button>
+                </Box>
+              </Box>
+            </Box>
 
             {/* Active Filters Display */}
             {(searchQuery ||
