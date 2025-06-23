@@ -57,7 +57,7 @@ export default function TestimonialCarousel({ testimonials }) {
   }, [currentIndex]);
 
   return (
-    <Box sx={{ position: "relative", width: "100%", my: 4 }}>
+    <Box sx={{ position: "relative", width: "100%", my: { xs: 2, md: 4 } }}>
       <Box
         ref={carouselRef}
         sx={{
@@ -70,6 +70,8 @@ export default function TestimonialCarousel({ testimonials }) {
           "&::-webkit-scrollbar": {
             display: "none",
           },
+          // Add some padding on mobile to prevent edge clipping
+          px: { xs: 1, sm: 2 },
         }}
       >
         {displayTestimonials.map((testimonial, index) => (
@@ -77,70 +79,100 @@ export default function TestimonialCarousel({ testimonials }) {
             key={testimonial.id}
             sx={{
               display: "flex",
-              minWidth: "70%",
-              maxWidth: 450,
+              minWidth: { xs: "85%", sm: "75%", md: "70%" },
+              maxWidth: { xs: 350, sm: 400, md: 450 },
               flexShrink: 0,
               flexDirection: { xs: "column", md: "row" },
-              borderRadius: 4,
+              borderRadius: { xs: 3, md: 4 },
               overflow: "hidden",
               boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
               border: "1px solid rgba(0,0,0,0.05)",
               height: { xs: "auto", md: 400 },
-              margin: { xs: "0 auto", md: "0 50px" },
+              margin: { xs: "0 8px", sm: "0 20px", md: "0 50px" },
+              // Improved responsive design
+              minHeight: { xs: 380, sm: 420, md: 400 },
             }}
           >
-            <CardMedia
-              component="img"
+            <Box
               sx={{
                 width: { xs: "100%", md: "50%" },
-                height: { xs: 300, md: "100%" },
-                objectFit: "cover",
+                aspectRatio: { xs: "1.1/1", md: "auto" },
+                height: { xs: "auto", md: "100%" },
               }}
-              image={testimonial.image}
-              alt={`${testimonial.name} testimonial`}
-            />
+            >
+              <CardMedia
+                component="img"
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+                image={testimonial.image}
+                alt={`${testimonial.name} testimonial`}
+              />
+            </Box>
             <CardContent
               sx={{
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
-                p: 4,
+                p: { xs: 3, sm: 3.5, md: 4 },
                 width: { xs: "100%", md: "50%" },
                 position: "relative",
+                minHeight: { xs: 200, md: "auto" },
               }}
             >
               <Box
                 sx={{
                   position: "absolute",
-                  top: 20,
-                  left: 20,
+                  top: { xs: 12, md: 20 },
+                  left: { xs: 12, md: 20 },
                   color: "#673AB7",
                   opacity: 0.8,
                 }}
               >
-                <FormatQuoteIcon sx={{ fontSize: 60 }} />
+                <FormatQuoteIcon sx={{ fontSize: { xs: 40, md: 60 } }} />
               </Box>
               <Typography
                 variant="body1"
                 sx={{
                   color: "#555",
-                  fontSize: "1.1rem",
-                  lineHeight: 1.6,
-                  mt: 6,
-                  mb: 4,
+                  fontSize: { xs: "0.95rem", sm: "1rem", md: "1.1rem" },
+                  lineHeight: { xs: 1.5, md: 1.6 },
+                  mt: { xs: 4, md: 6 },
+                  mb: { xs: 3, md: 4 },
                   fontStyle: "italic",
+                  // Better text handling for mobile
+                  overflow: "hidden",
+                  display: "-webkit-box",
+                  WebkitLineClamp: { xs: 4, sm: 5, md: "none" },
+                  WebkitBoxOrient: "vertical",
                 }}
               >
                 {testimonial.quote}
               </Typography>
-              <Box>
+              <Box sx={{ mt: "auto" }}>
                 <Typography
                   variant="h6"
-                  sx={{ color: "#673AB7", fontWeight: 600 }}
+                  sx={{
+                    color: "#673AB7",
+                    fontWeight: 600,
+                    fontSize: { xs: "1.1rem", md: "1.25rem" },
+                  }}
                 >
                   {testimonial.name}
                 </Typography>
-                <Typography variant="subtitle2" sx={{ color: "#888" }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    color: "#888",
+                    fontSize: { xs: "0.8rem", md: "0.875rem" },
+                    whiteSpace: "normal",
+                    overflow: "visible",
+                    textOverflow: "unset",
+                    wordWrap: "break-word",
+                  }}
+                >
                   {testimonial.role}
                 </Typography>
               </Box>
@@ -149,12 +181,13 @@ export default function TestimonialCarousel({ testimonials }) {
         ))}
       </Box>
 
-      {/* Pagination dots */}
+      {/* Enhanced pagination dots */}
       <Box
         sx={{
           display: "flex",
           justifyContent: "center",
-          mt: 3,
+          mt: { xs: 2, md: 3 },
+          px: 2,
         }}
       >
         {displayTestimonials.map((_, index) => (
@@ -162,13 +195,22 @@ export default function TestimonialCarousel({ testimonials }) {
             key={index}
             onClick={() => setCurrentIndex(index)}
             sx={{
-              width: 10,
-              height: 10,
+              width: { xs: 8, md: 10 },
+              height: { xs: 8, md: 10 },
               borderRadius: "50%",
-              mx: 0.5,
+              mx: { xs: 0.3, md: 0.5 },
               cursor: "pointer",
               bgcolor: currentIndex === index ? "#673AB7" : "#D1C4E9",
               transition: "all 0.3s ease",
+              // Better touch target for mobile
+              padding: { xs: "6px", md: "4px" },
+              "&:hover": {
+                bgcolor: currentIndex === index ? "#5E35B1" : "#B39DDB",
+                transform: "scale(1.1)",
+              },
+              "&:active": {
+                transform: "scale(0.95)",
+              },
             }}
           />
         ))}

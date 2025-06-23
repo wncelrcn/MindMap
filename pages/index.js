@@ -109,7 +109,7 @@ const myTestimonials = [
     name: "Alex Smith",
     role: "Mapúa MCL Student",
     quote:
-      "I've tried many productivity apps, but this one stands out for its intuitive design and helpful features. It's become an essential part of my daily routine.",
+      "I've tried many journaling apps, but this one stands out for its intuitive design and helpful features. It's become an essential part of my daily routine.",
     image: "/assets/testimonials/1.png",
   },
 ];
