@@ -4,6 +4,10 @@ import Footer from "@/components/layout/footer";
 import SupportFooter from "@/components/layout/support_footer";
 import Navbar from "@/components/layout/navbar";
 import RecurringJournalTopics from "@/components/profile/RecurringJournalTopics";
+import JournalEntries from "@/components/profile/JournalEntries";
+import StreakScore from "@/components/profile/StreakScore";
+import Badges from "@/components/profile/Badges";
+import Personality from "@/components/profile/Personality";
 import {
   Box,
   Typography,
@@ -12,32 +16,19 @@ import {
   Button,
   useMediaQuery,
   useTheme,
-  IconButton,
   CircularProgress,
-  Modal,
   TextField,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Avatar,
-  Card,
-  CardContent,
-  Tooltip,
-  Chip,
-  Fade,
-  Zoom,
 } from "@mui/material";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/utils/supabase/server-props";
 import { supabase } from "@/lib/supabase";
-import FlipCameraAndroidIcon from "@mui/icons-material/FlipCameraAndroid";
 import EditIcon from "@mui/icons-material/Edit";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import axios from "axios";
 import Loading from "@/components/Loading";
 
@@ -78,74 +69,6 @@ export async function getServerSideProps(context) {
   };
 }
 
-// Badge color effects mapping
-const badgeEffects = {
-  "soft-green-glow": {
-    backgroundColor: "#4CAF50",
-    boxShadow: "0 0 20px rgba(76, 175, 80, 0.6)",
-  },
-  "warm-blue-ripple": {
-    backgroundColor: "#2196F3",
-    boxShadow: "0 0 20px rgba(33, 150, 243, 0.6)",
-  },
-  "vibrant-purple-sparkle": {
-    backgroundColor: "#9C27B0",
-    boxShadow: "0 0 20px rgba(156, 39, 176, 0.6)",
-  },
-  "light-yellow-fade": {
-    backgroundColor: "#FFEB3B",
-    boxShadow: "0 0 20px rgba(255, 235, 59, 0.6)",
-  },
-  "rich-orange-pulse": {
-    backgroundColor: "#FF9800",
-    boxShadow: "0 0 20px rgba(255, 152, 0, 0.6)",
-  },
-  "deep-gold-radiant": {
-    backgroundColor: "#FFD700",
-    boxShadow: "0 0 20px rgba(255, 215, 0, 0.8)",
-  },
-  "deep-indigo-starry": {
-    backgroundColor: "#3F51B5",
-    boxShadow: "0 0 20px rgba(63, 81, 181, 0.6)",
-  },
-  "golden-yellow-twinkle": {
-    backgroundColor: "#FFC107",
-    boxShadow: "0 0 20px rgba(255, 193, 7, 0.6)",
-  },
-  "soft-teal-swirl": {
-    backgroundColor: "#009688",
-    boxShadow: "0 0 20px rgba(0, 150, 136, 0.6)",
-  },
-  "emerald-green-glow": {
-    backgroundColor: "#4CAF50",
-    boxShadow: "0 0 20px rgba(76, 175, 80, 0.8)",
-  },
-  "soft-lavender-wave": {
-    backgroundColor: "#E1BEE7",
-    boxShadow: "0 0 20px rgba(225, 190, 231, 0.6)",
-  },
-  "bright-cyan-pulse": {
-    backgroundColor: "#00BCD4",
-    boxShadow: "0 0 20px rgba(0, 188, 212, 0.6)",
-  },
-  "fresh-green-bloom": {
-    backgroundColor: "#8BC34A",
-    boxShadow: "0 0 20px rgba(139, 195, 74, 0.6)",
-  },
-  "deep-silver-reflective": {
-    backgroundColor: "#9E9E9E",
-    boxShadow: "0 0 20px rgba(158, 158, 158, 0.6)",
-  },
-  "fiery-red-spark": {
-    backgroundColor: "#F44336",
-    boxShadow: "0 0 20px rgba(244, 67, 54, 0.6)",
-  },
-  "vivid-magenta-flame": {
-    backgroundColor: "#E91E63",
-    boxShadow: "0 0 20px rgba(233, 30, 99, 0.6)",
-  },
-};
-
 export default function Profile({ user }) {
   const [username, setUsername] = useState(user.user_metadata.name);
   const [user_UID, setUser_UID] = useState(user.id);
@@ -165,6 +88,12 @@ export default function Profile({ user }) {
   const [badges, setBadges] = useState([]);
   const [stats, setStats] = useState(null);
   const [badgesLoading, setBadgesLoading] = useState(true);
+  const [personalityTitle, setPersonalityTitle] = useState(
+    "Sample Personality Title"
+  );
+  const [personalityDescription, setPersonalityDescription] = useState(
+    "Sample Personality Description"
+  );
   const fileInputRef = useRef(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -579,139 +508,14 @@ export default function Profile({ user }) {
                     justifyContent: "flex-start",
                   }}
                 >
-                  {!isFlipped ? (
-                    <>
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          fontFamily: poppins.style.fontFamily,
-                          color: "#5C35C2",
-                          mb: 2,
-                          fontSize: "1rem",
-                        }}
-                      >
-                        Personality
-                      </Typography>
-                      <Box sx={{ mb: "auto" }}>
-                        <Typography
-                          variant="h4"
-                          sx={{
-                            fontFamily: poppins.style.fontFamily,
-                            color: "#4527A0",
-                            fontWeight: 700,
-                            mb: 0.5,
-                            fontSize: "1.75rem",
-                          }}
-                        >
-                          The
-                        </Typography>
-                        <Typography
-                          variant="h4"
-                          sx={{
-                            fontFamily: poppins.style.fontFamily,
-                            color: "#4527A0",
-                            fontWeight: 700,
-                            mb: 0.5,
-                            fontSize: "1.75rem",
-                          }}
-                        >
-                          Resilient
-                        </Typography>
-                        <Typography
-                          variant="h4"
-                          sx={{
-                            fontFamily: poppins.style.fontFamily,
-                            color: "#4527A0",
-                            fontWeight: 700,
-                            mb: 0.5,
-                            fontSize: "1.75rem",
-                          }}
-                        >
-                          Quick-
-                        </Typography>
-                        <Typography
-                          variant="h4"
-                          sx={{
-                            fontFamily: poppins.style.fontFamily,
-                            color: "#4527A0",
-                            fontWeight: 700,
-                            mb: 0.5,
-                            fontSize: "1.75rem",
-                          }}
-                        >
-                          Thinking
-                        </Typography>
-                        <Typography
-                          variant="h4"
-                          sx={{
-                            fontFamily: poppins.style.fontFamily,
-                            color: "#4527A0",
-                            fontWeight: 700,
-                            fontSize: "1.75rem",
-                          }}
-                        >
-                          Maverick
-                        </Typography>
-                      </Box>
-                      <Box sx={{ position: "absolute", top: 20, right: 20 }}>
-                        <svg
-                          width="30"
-                          height="30"
-                          viewBox="0 0 40 40"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M30 10L20 20L30 30L20 40"
-                            stroke="#5C35C2"
-                            strokeWidth="4"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </Box>
-                    </>
-                  ) : (
-                    <>
-                      <Typography
-                        variant="subtitle1"
-                        sx={{
-                          fontFamily: poppins.style.fontFamily,
-                          color: "white",
-                          mb: 2,
-                          fontSize: "1rem",
-                        }}
-                      >
-                        Personality
-                      </Typography>
-                      <Typography
-                        sx={{
-                          fontFamily: poppins.style.fontFamily,
-                          color: "white",
-                          lineHeight: 1.6,
-                          fontSize: "1.05rem",
-                        }}
-                      >
-                        You are a bold, independent thinker who thrives under
-                        pressure, quickly adapts to challenges, and fearlessly
-                        carves their own path, unafraid to challenge norms and
-                        take risks to achieve their vision.
-                      </Typography>
-                    </>
-                  )}
-                  <IconButton
-                    onClick={handleFlip}
-                    sx={{
-                      position: "absolute",
-                      bottom: 10,
-                      right: 10,
-                      color: isFlipped ? "white" : "#5C35C2",
-                      padding: "4px",
-                    }}
-                  >
-                    <FlipCameraAndroidIcon fontSize="medium" />
-                  </IconButton>
+                  <Personality
+                    isFlipped={isFlipped}
+                    handleFlip={handleFlip}
+                    personalityTitle={personalityTitle}
+                    personalityDescription={personalityDescription}
+                  />
                 </Box>
+                {/* Recurring Journal Topics */}
                 <Box
                   sx={{
                     flex: 1,
@@ -733,161 +537,9 @@ export default function Profile({ user }) {
                     }}
                   >
                     {/* Journal Entries */}
-                    <Box
-                      sx={{
-                        flex: 1,
-                        backgroundColor: "#5C35C2",
-                        borderRadius: 4,
-                        p: { xs: 1, sm: 1.5, md: 2 },
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        minHeight: { xs: "120px", sm: "auto" },
-                        maxWidth: { xs: "49%", sm: "none" },
-                        color: "white",
-                        flexDirection: "column",
-                        backgroundImage:
-                          "url('/assets/profile/entries-bg.png')",
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
-                        position: "relative",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          position: "relative",
-                          zIndex: 1,
-                          width: "100%",
-                          height: "100%",
-                          display: "flex",
-                          flexDirection: "column",
-                        }}
-                      >
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontFamily: poppins.style.fontFamily,
-                            fontWeight: 600,
-                            fontSize: { xs: "0.9rem", sm: "1rem" },
-                            textAlign: "center",
-                          }}
-                        >
-                          Journal Entries
-                        </Typography>
-                        <Box
-                          sx={{
-                            flex: 1,
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <Typography
-                            variant="h1"
-                            sx={{
-                              fontFamily: poppins.style.fontFamily,
-                              fontWeight: 700,
-                              fontSize: {
-                                xs: "3rem",
-                                sm: "4rem",
-                                md: "5rem",
-                                lg: "6rem",
-                              },
-                              lineHeight: 1,
-                              marginBottom: 2,
-                            }}
-                          >
-                            {stats?.total_entries || 0}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Box>
+                    <JournalEntries stats={stats} />
                     {/* Streak Score */}
-                    <Box
-                      sx={{
-                        flex: 1,
-                        backgroundColor: "#5C35C2",
-                        borderRadius: 4,
-                        p: { xs: 1, sm: 1.5, md: 2 },
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        minHeight: { xs: "120px", sm: "auto" },
-                        maxWidth: { xs: "49%", sm: "none" },
-                        color: "white",
-                        flexDirection: "column",
-                        backgroundImage: "url('/assets/profile/streak-bg.png')",
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
-                        position: "relative",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          position: "relative",
-                          zIndex: 1,
-                          width: "100%",
-                          height: "100%",
-                          display: "flex",
-                          flexDirection: "column",
-                        }}
-                      >
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontFamily: poppins.style.fontFamily,
-                            fontWeight: 600,
-                            fontSize: { xs: "0.9rem", sm: "1rem" },
-                            textAlign: "center",
-                          }}
-                        >
-                          Streak Score
-                        </Typography>
-                        <Box
-                          sx={{
-                            flex: 1,
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <Typography
-                            variant="h1"
-                            sx={{
-                              fontFamily: poppins.style.fontFamily,
-                              fontWeight: 700,
-                              fontSize: {
-                                xs: "3rem",
-                                sm: "4rem",
-                                md: "5rem",
-                              },
-                              lineHeight: 1,
-                            }}
-                          >
-                            {stats?.current_streak || 0}
-                          </Typography>
-                        </Box>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <LocalFireDepartmentIcon sx={{ mr: 1 }} />
-                          <Typography
-                            sx={{
-                              fontFamily: poppins.style.fontFamily,
-                              fontSize: { xs: "0.7rem", sm: "0.9rem" },
-                            }}
-                          >
-                            All Time High: {stats?.all_time_high_streak || 0}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Box>
+                    <StreakScore stats={stats} />
                   </Box>
                 </Box>
               </Box>
@@ -904,175 +556,7 @@ export default function Profile({ user }) {
               >
                 Badges
               </Typography>
-              {badgesLoading ? (
-                <Box sx={{ display: "flex", justifyContent: "center" }}>
-                  <CircularProgress sx={{ color: "#5C35C2" }} />
-                </Box>
-              ) : (
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: {
-                      xs: "repeat(1, 1fr)",
-                      sm: "repeat(2, 1fr)",
-                      md: "repeat(3, 1fr)",
-                    },
-                    gap: { xs: 2, sm: 3 },
-                    mt: 5,
-                  }}
-                >
-                  {badges.map((badge) => (
-                    <Fade in={true} key={badge.id}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          mb: { xs: 2, sm: 0 },
-                        }}
-                      >
-                        <Tooltip
-                          title={
-                            <Box>
-                              <Typography
-                                sx={{
-                                  fontFamily: poppins.style.fontFamily,
-                                  color: "white",
-                                  fontSize: "0.9rem",
-                                }}
-                              >
-                                {badge.badges.description}
-                              </Typography>
-                              <Typography
-                                sx={{
-                                  fontFamily: quicksand.style.fontFamily,
-                                  color: "#ccc",
-                                  fontSize: "0.8rem",
-                                  mt: 1,
-                                }}
-                              >
-                                Criteria: {badge.badges.criteria}
-                              </Typography>
-                            </Box>
-                          }
-                          placement="top"
-                        >
-                          <Box
-                            sx={{
-                              width: { xs: 70, sm: 80 },
-                              height: { xs: 70, sm: 80 },
-                              mr: 2,
-                              position: "relative",
-                              flexShrink: 0,
-                              borderRadius: "50%",
-                              ...badgeEffects[badge.badges.color_effect],
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              p: 1,
-                            }}
-                          >
-                            <NextImage
-                              src={
-                                badge.badges.image_url ||
-                                "/assets/Group 47671.png"
-                              }
-                              alt={badge.badges.name}
-                              fill
-                              style={{ objectFit: "contain" }}
-                            />
-                          </Box>
-                        </Tooltip>
-                        <Box>
-                          <Typography
-                            variant="subtitle1"
-                            sx={{
-                              fontFamily: poppins.style.fontFamily,
-                              color: "#5C35C2",
-                              fontWeight: 600,
-                              fontSize: { xs: "0.9rem", sm: "1rem" },
-                            }}
-                          >
-                            {badge.badges.name}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontFamily: quicksand.style.fontFamily,
-                              color: "#777",
-                              fontSize: { xs: "0.8rem", sm: "0.9rem" },
-                            }}
-                          >
-                            {new Date(badge.unlocked_at).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "long",
-                                year: "numeric",
-                              }
-                            )}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </Fade>
-                  ))}
-                  {badges.length < 6 &&
-                    [...Array(6 - badges.length)].map((_, index) => (
-                      <Box
-                        key={`placeholder-${index}`}
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          mb: { xs: 2, sm: 0 },
-                          opacity: 0.6,
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            width: { xs: 70, sm: 80 },
-                            height: { xs: 70, sm: 80 },
-                            mr: 2,
-                            position: "relative",
-                            flexShrink: 0,
-                            borderRadius: "50%",
-                            backgroundColor: "#e0e0e0",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <NextImage
-                            src="/assets/Group 47671.png"
-                            alt="Locked Badge"
-                            fill
-                            style={{ objectFit: "contain", opacity: 0.5 }}
-                          />
-                        </Box>
-                        <Box>
-                          <Typography
-                            variant="subtitle1"
-                            sx={{
-                              fontFamily: poppins.style.fontFamily,
-                              color: "#5C35C2",
-                              fontWeight: 600,
-                              fontSize: { xs: "0.9rem", sm: "1rem" },
-                            }}
-                          >
-                            Locked Badge
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              fontFamily: quicksand.style.fontFamily,
-                              color: "#777",
-                              fontSize: { xs: "0.8rem", sm: "0.9rem" },
-                            }}
-                          >
-                            Complete goals to unlock
-                          </Typography>
-                        </Box>
-                      </Box>
-                    ))}
-                </Box>
-              )}
+              <Badges badges={badges} badgesLoading={badgesLoading} />
             </Box>
           </Box>
         </Container>
