@@ -1,5 +1,6 @@
 // pages/api/analyze-journal/journal_insights.js
 import { createClient } from '@/utils/supabase/server-props';
+import axios from "axios";
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -86,7 +87,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'No journal content found' });
     }
 
-    // Generate insights using OpenRouter API
+    // Generate insights using OpenRouter API (now includes emotion detection)
     const insights = await generateInsights(journalContent, journalType, journalMetadata);
 
     // Store insights in database
@@ -159,7 +160,74 @@ export default async function handler(req, res) {
   }
 }
 
+// New function to detect emotions using the same method as journal_emotions.js
+async function detectEmotions(journalContent) {
+  try {
+    console.log("Detecting emotions for insights generation...");
+
+    // Process journal content the same way as journal_emotions.js
+    let journalString = "";
+    if (Array.isArray(journalContent)) {
+      journalContent.forEach((entry) => {
+        if (entry.question && entry.answer) {
+          journalString += `Q: ${entry.question}\nA: ${entry.answer}\n`;
+        }
+      });
+    } else {
+      journalString = String(journalContent);
+    }
+
+    // Step 1: Detect emotions using Hugging Face
+    const emotionResponse = await axios.post(
+      "https://router.huggingface.co/hf-inference/models/j-hartmann/emotion-english-distilroberta-base",
+      { inputs: journalString },
+      {
+        headers: {
+          Authorization: `Bearer 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`,
+        },
+      }
+    );
+
+    if (!emotionResponse.data || !Array.isArray(emotionResponse.data[0])) {
+      console.error("Invalid Hugging Face response:", emotionResponse.data);
+      throw new Error("Invalid response from emotion detection API");
+    }
+
+    const rawEmotions = emotionResponse.data[0];
+
+    // Step 2: Normalize the scores to percentages
+    const totalScore = rawEmotions.reduce(
+      (sum, emotion) => sum + emotion.score,
+      0
+    );
+    const normalizedEmotions = rawEmotions.map((emotion) => ({
+      label: emotion.label,
+      score: emotion.score / totalScore, // Normalize to sum to 1
+    }));
+
+    // Step 3: Sort by score (highest first) and take top 3 for insights
+    const topEmotions = normalizedEmotions
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
+
+    console.log(
+      "Top emotions detected for insights:",
+      topEmotions.map((e) => e.label).join(", ")
+    );
+
+    return topEmotions.map(emotion => emotion.label);
+
+  } catch (error) {
+    console.error('Error detecting emotions:', error);
+    // Return fallback emotions if detection fails
+    return ["reflective", "thoughtful", "hopeful"];
+  }
+}
+
 async function generateInsights(journalContent, journalType, metadata) {
+  // First, detect emotions using the same method as journal_emotions.js
+  const dominantEmotions = await detectEmotions(journalContent);
+
   const prompt = `You are a thoughtful and empathetic therapist assisting users with emotional reflection through AI-assisted journaling. Your task is to analyze journal entries and generate meaningful insights that encourage self-awareness, personal growth, and well-being.
 
 The journal is about ${journalType}.
@@ -171,6 +239,9 @@ Journal Type: ${journalType}
 Entry Date: ${metadata.created_at}
 ${journalType === 'freeform' ? `Mood: ${metadata.mood || 'Not specified'}` : `Session Type: ${metadata.session_type}`}
 
+**IMPORTANT: The detected dominant emotions for this entry are: ${dominantEmotions.join(", ")}**
+Use these specific emotions in the "dominant_emotions" field and base your insights on these detected emotions.
+
 Please analyze the journal entry and provide supportive insights based on the following focus areas:
 1. Emotional patterns and moments of resilience
 2. Signs of personal growth or values alignment
@@ -180,22 +251,32 @@ Please analyze the journal entry and provide supportive insights based on the fo
 
 If the journal entry is brief or lacks emotional detail, **still offer thoughtful insights** without labeling it as lacking. Instead, gently focus on possibilities, strengths, or questions to reflect on. Avoid judgmental or evaluative tone.
 
+**Special Handling for Sensitive Content:**
+If the journal contains **extreme negativity**, **suicidal thoughts**, **criminal ideation**, or **sarcastic reflections masking emotional pain**, respond with care and honesty — never glorify or validate these experiences as personal growth or empowerment. Do not frame these moments as "discoveries" or "bravery." Acknowledge the emotional weight sincerely while encouraging the user to seek support.
+
+If such content is detected:
+- Clearly and empathetically mention it in the **resilience_insight** or **emotional_tone** (whichever is appropriate).
+- Use language like: "This entry reflects a deeply distressing experience," or "There are signs of emotional struggle that may benefit from outside support."
+- Mention related emotions under **dominant_emotions** (e.g., despair, anger, numbness).
+- Avoid listing any of these experiences under **strengths**. Instead, list related adaptive qualities (e.g., "willingness to express emotion," "honesty in reflection").
+- DO NOT frame these thoughts as admirable, empowering, or growth-enabling.
+
 Maintain these important stylistic and ethical guidelines:
 - Use second-person point of view ("you", "your")
-- Begin with “The journal is about…” in your analysis
-- Do not use “the user”, “they”, “their”, “I”, “me”, “mine”, or similar terms
+- Begin with "The journal is about…" in your analysis
+- Do not use "the user", "they", "their", "I", "me", "mine", or similar terms
 - Make all insights sound empathetic, encouraging, and human-centered
 - Always provide helpful feedback, even when content is vague
-- Keep “growth_indicator” to just **1-2 meaningful words**
+- Keep "growth_indicator" to just **1-2 meaningful words**
 
 Now generate a complete response in the exact JSON format below:
 
 {
   "header_insights": {
-    "resilience_insight": "A personalized insight about your resilience or gratitude moments (100-150 words)",
+    "resilience_insight": "A personalized insight about your resilience or gratitude moments (100-150 words). If signs of distress are present, address them here thoughtfully.",
     "primary_motivation": "A single key motivational word or short phrase",
     "growth_indicator": "A short phrase or 1-2 words highlighting a personal growth theme",
-    "emotional_tone": "A personalized observation about your emotional patterns (100-150 words)"
+    "emotional_tone": "A personalized observation about your emotional patterns (100-150 words). If extreme negativity is present, describe it responsibly."
   },
   "wellbeing_insights": {
     "main_observation": "Main insight about your current emotional well-being (150-200 words)",
@@ -237,15 +318,14 @@ Now generate a complete response in the exact JSON format below:
     ]
   },
   "emotional_data": {
-    "dominant_emotions": ["emotion1", "emotion2", "emotion3"],
-    "emotional_intensity": "low/medium/high",
+    "dominant_emotions": ${JSON.stringify(dominantEmotions)},
+    "emotional_intensity": "Low/Medium/High",
     "growth_areas": ["area1", "area2"],
     "strengths": ["strength1", "strength2"]
   }
 }
 
 Ensure that the response is empathetic, self-reflective, and empowering. Do not be overly clinical. Support emotional exploration and personal insight in a caring and accessible tone.`;
-
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -307,11 +387,11 @@ Ensure that the response is empathetic, self-reflective, and empowering. Do not 
 
   } catch (error) {
     console.error('Error in insights generation:', error);
-    return getFallbackInsights();
+    return getFallbackInsights(dominantEmotions);
   }
 }
 
-function getFallbackInsights() {
+function getFallbackInsights(dominantEmotions = ["reflective", "thoughtful", "hopeful"]) {
   return {
     header_insights: {
       resilience_insight: "Your journal entries show a thoughtful approach to processing experiences and emotions, demonstrating your commitment to personal growth and self-reflection.",
@@ -359,7 +439,7 @@ function getFallbackInsights() {
       ]
     },
     emotional_data: {
-      dominant_emotions: ["reflective", "hopeful", "thoughtful"],
+      dominant_emotions: dominantEmotions,
       emotional_intensity: "medium",
       growth_areas: ["self-compassion", "stress management"],
       strengths: ["self-awareness", "commitment to growth"]
