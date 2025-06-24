@@ -398,215 +398,218 @@ export default function ViewInsights({ user }) {
           paddingBottom: { xs: "4rem", sm: "6rem", md: "8rem" },
           marginBottom: { xs: "2rem", sm: "3rem", md: "4rem" },
         }}
-      >        
-
-      {/* Page Title - Improved Responsive Design */}
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", sm: "column", md: "row" },
-          justifyContent: "space-between",
-          alignItems: { xs: "flex-start", md: "flex-start" },
-          gap: { xs: 3, sm: 3, md: 2 },
-          mb: 4,
-        }}
       >
-        {/* Title Section */}
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography
-            sx={{
-              fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
-              fontWeight: 400,
-              color: "#2D1B6B",
-              lineHeight: "normal",
-              fontFamily: poppins.style.fontFamily,
-              mb: 1,
-              letterSpacing: "0.5px",
-            }}
-          >
-            Journal
-          </Typography>
-
-          <Typography
-            sx={{
-              fontSize: {
-                xs: "2rem",
-                sm: "2.5rem",
-                md: "3rem",
-                lg: "3.5rem",
-              },
-              fontWeight: 700,
-              color: "#2D1B6B",
-              lineHeight: "1.1",
-              fontFamily: poppins.style.fontFamily,
-              mb: { xs: 1, sm: 2 },
-              wordBreak: "break-word", // Prevent overflow on small screens
-            }}
-          >
-            Insights
-          </Typography>
-
-          {insights && (
+        {/* Page Title - Improved Responsive Design */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "column", md: "row" },
+            justifyContent: "space-between",
+            alignItems: { xs: "flex-start", md: "flex-start" },
+            gap: { xs: 3, sm: 3, md: 2 },
+            mb: 4,
+          }}
+        >
+          {/* Title Section */}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography
               sx={{
-                fontSize: { xs: "0.75rem", sm: "0.85rem" },
-                color: "#666",
-                fontFamily: poppins.style.fontFamily,
-              }}
-            >
-              Generated on {formatDate(insights.created_at)}
-            </Typography>
-          )}
-        </Box>
-
-        {/* Buttons Section */}
-        {insights && (
-          <Box 
-            sx={{ 
-              display: "flex", 
-              alignItems: { xs: "flex-start", md: "center" },
-              gap: { xs: 1.5, sm: 2 },
-              flexShrink: 0,
-              width: { xs: "100%", md: "auto" },
-              justifyContent: { xs: "flex-start", md: "flex-end" },
-              flexWrap: { xs: "wrap", sm: "nowrap" },
-            }}
-          >
-            {/* Info Icon Button */}
-            <IconButton
-              onClick={() => setDisclaimerOpen(true)}
-              sx={{
-                height: { xs: 37, sm: 40 },
-                backgroundColor: "#ffffff",
-                border: "1px solid #764ba2",
-                borderRadius: "12px",
+                fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
+                fontWeight: 400,
                 color: "#2D1B6B",
+                lineHeight: "normal",
                 fontFamily: poppins.style.fontFamily,
-                fontWeight: 500,
-                fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                px: { xs: 1.5, sm: 2, md: 2.5 },
-                minWidth: { xs: "auto", sm: "120px" },
-                "&:hover": {
-                  transform: "translateY(-1px)",
-                  background: "white",
-                  border: "1px solid #764ba2",
-                  boxShadow: "0 4px 12px rgba(118, 75, 162, 0.15)",
-                },
-                transition: "all 0.3s ease",
+                mb: 1,
+                letterSpacing: "0.5px",
               }}
             >
-              <InfoIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
+              Journal
+            </Typography>
+
+            <Typography
+              sx={{
+                fontSize: {
+                  xs: "2rem",
+                  sm: "2.5rem",
+                  md: "3rem",
+                  lg: "3.5rem",
+                },
+                fontWeight: 700,
+                color: "#2D1B6B",
+                lineHeight: "1.1",
+                fontFamily: poppins.style.fontFamily,
+                mb: { xs: 1, sm: 2 },
+                wordBreak: "break-word", // Prevent overflow on small screens
+              }}
+            >
+              Insights
+            </Typography>
+
+            {insights && (
               <Typography
                 sx={{
-                  display: { xs: "none", sm: "block" },
-                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                  fontWeight: 500,
-                  color: "#2D1B6B",
-                  ml: 1,
+                  fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                  color: "#666",
+                  fontFamily: poppins.style.fontFamily,
                 }}
               >
-                Information
+                Generated on {formatDate(insights.created_at)}
               </Typography>
-            </IconButton>
+            )}
+          </Box>
 
-            {/* Refresh Button */}
+          {/* Buttons Section */}
+          {insights && (
             <Box
               sx={{
-                borderRadius: "12px",
-                border: "1px solid #764ba2",
-                padding: "1px",
-                cursor: generating ? "not-allowed" : "pointer",
-                transition: "all 0.3s ease",
-                height: { xs: 37, sm: 40 },
-                "&:hover": {
-                  transform: generating ? "none" : "translateY(-1px)",
-                  boxShadow: generating ? "none" : "0 4px 12px rgba(118, 75, 162, 0.15)",
-                },
+                display: "flex",
+                alignItems: { xs: "flex-start", md: "center" },
+                gap: { xs: 1.5, sm: 2 },
+                flexShrink: 0,
+                width: { xs: "100%", md: "auto" },
+                justifyContent: { xs: "flex-start", md: "flex-end" },
+                flexWrap: { xs: "wrap", sm: "nowrap" },
               }}
             >
-              <Button
-                onClick={regenerateInsights}
-                disabled={generating}
+              {/* Info Icon Button */}
+              <IconButton
+                onClick={() => setDisclaimerOpen(true)}
                 sx={{
-                  background: "white",
-                  color: generating ? "#999" : "#2D1B6B",
-                  borderRadius: "11px",
-                  textTransform: "none",
+                  height: { xs: 37, sm: 40 },
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #764ba2",
+                  borderRadius: "12px",
+                  color: "#2D1B6B",
                   fontFamily: poppins.style.fontFamily,
                   fontWeight: 500,
                   fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                  px: { xs: 1.5, sm: 2, md: 3 },
-                  height: "100%",
-                  minWidth: { xs: "auto", sm: "160px" },
-                  border: "none",
-                  whiteSpace: "nowrap",
+                  px: { xs: 1.5, sm: 2, md: 2.5 },
+                  minWidth: { xs: "auto", sm: "120px" },
                   "&:hover": {
+                    transform: "translateY(-1px)",
                     background: "white",
-                    border: "none",
+                    border: "1px solid #764ba2",
+                    boxShadow: "0 4px 12px rgba(118, 75, 162, 0.15)",
                   },
-                  "&:disabled": {
-                    background: "white",
-                    color: "#999",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                <InfoIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
+                <Typography
+                  sx={{
+                    display: { xs: "none", sm: "block" },
+                    fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                    fontWeight: 500,
+                    color: "#2D1B6B",
+                    ml: 1,
+                    fontFamily: poppins.style.fontFamily,
+                  }}
+                >
+                  Information
+                </Typography>
+              </IconButton>
+
+              {/* Refresh Button */}
+              <Box
+                sx={{
+                  borderRadius: "12px",
+                  border: "1px solid #764ba2",
+                  padding: "1px",
+                  cursor: generating ? "not-allowed" : "pointer",
+                  transition: "all 0.3s ease",
+                  height: { xs: 37, sm: 40 },
+                  "&:hover": {
+                    transform: generating ? "none" : "translateY(-1px)",
+                    boxShadow: generating
+                      ? "none"
+                      : "0 4px 12px rgba(118, 75, 162, 0.15)",
                   },
                 }}
               >
-                {generating ? (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <CircularProgress
-                      size={16}
-                      sx={{
-                        color: "#999",
-                      }}
-                    />
-                    <Typography
-                      sx={{
-                        display: { xs: "none", sm: "block" },
-                        fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                        fontWeight: 500,
-                        color: "#999",
-                      }}
-                    >
-                      Regenerating...
-                    </Typography>
-                  </Box>
-                ) : (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-                      <path d="M21 3v5h-5" />
-                      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-                      <path d="M3 21v-5h5" />
-                    </svg>
-                    <Typography
-                      sx={{
-                        display: { xs: "none", sm: "block" },
-                        fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                        fontWeight: 500,
-                        color: "#2D1B6B",
-                      }}
-                    >
-                      Refresh Insights
-                    </Typography>
-                  </Box>
-                )}
-              </Button>
+                <Button
+                  onClick={regenerateInsights}
+                  disabled={generating}
+                  sx={{
+                    background: "white",
+                    color: generating ? "#999" : "#2D1B6B",
+                    borderRadius: "11px",
+                    textTransform: "none",
+                    fontFamily: poppins.style.fontFamily,
+                    fontWeight: 500,
+                    fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                    px: { xs: 1.5, sm: 2, md: 3 },
+                    height: "100%",
+                    minWidth: { xs: "auto", sm: "160px" },
+                    border: "none",
+                    whiteSpace: "nowrap",
+                    "&:hover": {
+                      background: "white",
+                      border: "none",
+                    },
+                    "&:disabled": {
+                      background: "white",
+                      color: "#999",
+                    },
+                  }}
+                >
+                  {generating ? (
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <CircularProgress
+                        size={16}
+                        sx={{
+                          color: "#999",
+                        }}
+                      />
+                      <Typography
+                        sx={{
+                          display: { xs: "none", sm: "block" },
+                          fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                          fontWeight: 500,
+                          color: "#999",
+                        }}
+                      >
+                        Regenerating...
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                        <path d="M21 3v5h-5" />
+                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                        <path d="M3 21v-5h5" />
+                      </svg>
+                      <Typography
+                        sx={{
+                          display: { xs: "none", sm: "block" },
+                          fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                          fontWeight: 500,
+                          color: "#2D1B6B",
+                          fontFamily: poppins.style.fontFamily,
+                        }}
+                      >
+                        Refresh Insights
+                      </Typography>
+                    </Box>
+                  )}
+                </Button>
+              </Box>
             </Box>
-          </Box>
-        )}
-      </Box>
+          )}
+        </Box>
 
         {insights && (
-          <>            
-          {/* Insights Header Cards */}
+          <>
+            {/* Insights Header Cards */}
             <Box sx={{ mb: { xs: 6, sm: 8, md: 10, lg: 12 } }}>
               {/* Top Row - 2 Cards */}
               <Box
@@ -688,7 +691,7 @@ export default function ViewInsights({ user }) {
                     overflow: "hidden",
                     backgroundImage: {
                       xs: "url('/assets/insights/bg-topright-small.png')",
-                      md: "url('/assets/insights/bg-topright.png')"
+                      md: "url('/assets/insights/bg-topright.png')",
                     },
                     backgroundSize: "cover",
                     backgroundPosition: "center",
@@ -758,7 +761,7 @@ export default function ViewInsights({ user }) {
                     overflow: "hidden",
                     backgroundImage: {
                       xs: "url('/assets/insights/bg-bottomleft-small.png')",
-                      md: "url('/assets/insights/bg-bottomleft.png')"
+                      md: "url('/assets/insights/bg-bottomleft.png')",
                     },
                     backgroundSize: "cover",
                     backgroundPosition: "center",
@@ -786,17 +789,17 @@ export default function ViewInsights({ user }) {
                         fontSize:
                           insights.header_insights.growth_indicator.split(" ")
                             .length > 1
-                            ? { 
+                            ? {
                                 xs: "1.3rem", // Increased from 1rem
                                 sm: "1.4rem", // Increased from 1.1rem
-                                md: "1.2rem", 
-                                lg: "1.3rem" 
+                                md: "1.2rem",
+                                lg: "1.3rem",
                               }
-                            : { 
+                            : {
                                 xs: "1.4rem", // Increased from 1.1rem
                                 sm: "1.5rem", // Increased from 1.2rem
-                                md: "1.4rem", 
-                                lg: "1.5rem" 
+                                md: "1.4rem",
+                                lg: "1.5rem",
                               },
                         fontWeight: 600,
                         color: "#E65100",
@@ -871,36 +874,6 @@ export default function ViewInsights({ user }) {
               </Box>
             </Box>
 
-            {/* Insights Content */}
-            <InsightSection
-              title="Your Personalized Well-being"
-              subtitle="Actionable advice based on dominant emotions and trends."
-              imageSrc="/assets/people/person-7.png"
-              mainText={insights.wellbeing_insights.main_observation}
-              imagePosition="left"
-              additionalContent={insights.wellbeing_insights.actionable_advice}
-            />
-
-            <InsightSection
-              title="Coping Strategies"
-              subtitle="Tailored strategies to manage specific emotions."
-              imageSrc="/assets/people/person-9.png"
-              mainText={insights.coping_strategies.main_observation}
-              imagePosition="right"
-              additionalContent={
-                insights.coping_strategies.recommended_strategies
-              }
-            />
-
-            <InsightSection
-              title="Goal Setting"
-              subtitle="Personalized goals to improve emotional well-being."
-              imageSrc="/assets/people/person-8.png"
-              mainText={insights.goals.main_observation}
-              imagePosition="left"
-              additionalContent={insights.goals.suggested_goals}
-            />
-
             {/* Emotional Data Summary - Redesigned */}
             <Box sx={{ mt: 8, mb: 4 }}>
               <Card
@@ -971,7 +944,7 @@ export default function ViewInsights({ user }) {
                         <Typography
                           variant="subtitle1"
                           sx={{
-                            mb: 2,
+                            mb: 1,
                             color: "#2D1B6B",
                             fontFamily: poppins.style.fontFamily,
                             fontWeight: 600,
@@ -979,6 +952,18 @@ export default function ViewInsights({ user }) {
                           }}
                         >
                           Dominant Emotions
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            mb: 2,
+                            color: "#666",
+                            fontFamily: poppins.style.fontFamily,
+                            fontSize: "0.85rem",
+                            lineHeight: 1.4,
+                          }}
+                        >
+                          The primary emotions identified in your journal entry
                         </Typography>
                         {insights.emotional_data.dominant_emotions &&
                         insights.emotional_data.dominant_emotions.length > 0 ? (
@@ -1034,7 +1019,7 @@ export default function ViewInsights({ user }) {
                         <Typography
                           variant="subtitle1"
                           sx={{
-                            mb: 2,
+                            mb: 1,
                             color: "#2D1B6B",
                             fontFamily: poppins.style.fontFamily,
                             fontWeight: 600,
@@ -1042,6 +1027,19 @@ export default function ViewInsights({ user }) {
                           }}
                         >
                           Personal Strengths
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            mb: 2,
+                            color: "#666",
+                            fontFamily: poppins.style.fontFamily,
+                            fontSize: "0.85rem",
+                            lineHeight: 1.4,
+                          }}
+                        >
+                          Positive qualities and abilities reflected in your
+                          writing
                         </Typography>
                         {insights.emotional_data.strengths &&
                         insights.emotional_data.strengths.length > 0 ? (
@@ -1097,7 +1095,7 @@ export default function ViewInsights({ user }) {
                     <Typography
                       variant="subtitle1"
                       sx={{
-                        mb: 2,
+                        mb: 1,
                         color: "#2D1B6B",
                         fontFamily: poppins.style.fontFamily,
                         fontWeight: 600,
@@ -1105,6 +1103,18 @@ export default function ViewInsights({ user }) {
                       }}
                     >
                       Emotional Intensity
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mb: 2,
+                        color: "#666",
+                        fontFamily: poppins.style.fontFamily,
+                        fontSize: "0.85rem",
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      How strongly you're experiencing emotions in this entry
                     </Typography>
                     <Box
                       sx={{
@@ -1124,14 +1134,48 @@ export default function ViewInsights({ user }) {
                           fontWeight: 500,
                         }}
                       >
-                        {insights.emotional_data.emotional_intensity ||
-                          getEmptyStateMessage("emotional_intensity")}
+                        {insights.emotional_data.emotional_intensity
+                          ? insights.emotional_data.emotional_intensity
+                              .charAt(0)
+                              .toUpperCase() +
+                            insights.emotional_data.emotional_intensity.slice(1)
+                          : getEmptyStateMessage("emotional_intensity")}
                       </Typography>
                     </Box>
                   </Box>
                 </CardContent>
               </Card>
             </Box>
+
+            {/* Insights Content */}
+            <InsightSection
+              title="Your Personalized Well-being"
+              subtitle="Actionable advice based on dominant emotions and trends."
+              imageSrc="/assets/people/person-7.png"
+              mainText={insights.wellbeing_insights.main_observation}
+              imagePosition="left"
+              additionalContent={insights.wellbeing_insights.actionable_advice}
+            />
+
+            <InsightSection
+              title="Coping Strategies"
+              subtitle="Tailored strategies to manage specific emotions."
+              imageSrc="/assets/people/person-9.png"
+              mainText={insights.coping_strategies.main_observation}
+              imagePosition="right"
+              additionalContent={
+                insights.coping_strategies.recommended_strategies
+              }
+            />
+
+            <InsightSection
+              title="Goal Setting"
+              subtitle="Personalized goals to improve emotional well-being."
+              imageSrc="/assets/people/person-8.png"
+              mainText={insights.goals.main_observation}
+              imagePosition="left"
+              additionalContent={insights.goals.suggested_goals}
+            />
           </>
         )}
       </Box>
