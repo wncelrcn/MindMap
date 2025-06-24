@@ -88,12 +88,8 @@ export default function Profile({ user }) {
   const [badges, setBadges] = useState([]);
   const [stats, setStats] = useState(null);
   const [badgesLoading, setBadgesLoading] = useState(true);
-  const [personalityTitle, setPersonalityTitle] = useState(
-    "Sample Personality Title"
-  );
-  const [personalityDescription, setPersonalityDescription] = useState(
-    "Sample Personality Description"
-  );
+  const [personalityTitle, setPersonalityTitle] = useState();
+  const [personalityDescription, setPersonalityDescription] = useState();
   const fileInputRef = useRef(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -171,11 +167,42 @@ export default function Profile({ user }) {
       }
     };
 
+    const fetchPersonality = async () => {
+      try {
+        const response = await fetch("/api/profile/personality", {
+          method: "GET",
+          credentials: "include",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.personality) {
+            setPersonalityTitle(data.personality.title);
+            setPersonalityDescription(data.personality.description);
+          }
+        } else {
+          console.error("Failed to fetch personality:", response.statusText);
+          // Set default values if API fails
+          setPersonalityTitle("Neutral Explorer");
+          setPersonalityDescription(
+            "Welcome! Since we're starting fresh, I've set you up with a Neutral Explorer personality. This is a balanced, curious, and adaptable persona designed to help you dive into any topic with an open mind."
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching personality:", error);
+        // Set default values if API fails
+        setPersonalityTitle("Neutral Explorer");
+        setPersonalityDescription(
+          "Welcome! Since we're starting fresh, I've set you up with a Neutral Explorer personality. This is a balanced, curious, and adaptable persona designed to help you dive into any topic with an open mind."
+        );
+      }
+    };
+
     const initialize = async () => {
       await Promise.all([
         fetchUserData(),
         fetchTopThemes(),
         fetchBadgesAndStats(),
+        fetchPersonality(),
       ]);
       setLoading(false);
     };

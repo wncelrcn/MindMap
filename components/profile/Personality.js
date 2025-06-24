@@ -11,14 +11,20 @@ const poppins = Poppins({
 const Personality = ({
   isFlipped,
   handleFlip,
-  personalityTitle = "The Resilient Quick-Thinking Maverick",
-  personalityDescription = "You are a bold, independent thinker who thrives under pressure, quickly adapts to challenges, and fearlessly carves their own path, unafraid to challenge norms and take risks to achieve their vision.",
+  personalityTitle = "Neutral Explorer",
+  personalityDescription = "Welcome! Since we’re starting fresh, I’ve set you up with a Neutral Explorer personality. This is a balanced, curious, and adaptable persona designed to help you dive into any topic with an open mind.",
 }) => {
-  // Split the title into words for individual styling
   const titleWords = personalityTitle.split(" ");
 
   return (
-    <>
+    <Box
+      sx={{
+        height: "350px",
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {!isFlipped ? (
         <>
           <Typography
@@ -28,11 +34,20 @@ const Personality = ({
               color: "#5C35C2",
               mb: 2,
               fontSize: "1rem",
+              flexShrink: 0, // Prevent shrinking
             }}
           >
             Personality
           </Typography>
-          <Box sx={{ mb: "auto" }}>
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex-start",
+              mt: 3,
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
             {titleWords.map((word, index) => (
               <Typography
                 key={index}
@@ -49,7 +64,7 @@ const Personality = ({
               </Typography>
             ))}
           </Box>
-          <Box sx={{ position: "absolute", top: 20, right: 20 }}>
+          <Box sx={{ position: "absolute", top: 0, right: 20 }}>
             <svg
               width="30"
               height="30"
@@ -76,20 +91,44 @@ const Personality = ({
               color: "white",
               mb: 2,
               fontSize: "1rem",
+              flexShrink: 0,
             }}
           >
             Personality
           </Typography>
-          <Typography
+          <Box
             sx={{
-              fontFamily: poppins.style.fontFamily,
-              color: "white",
-              lineHeight: 1.6,
-              fontSize: "1.05rem",
+              flex: 1,
+              overflowY: "auto",
+              paddingRight: "8px",
+              marginBottom: "40px",
+              "&::-webkit-scrollbar": {
+                width: "4px",
+              },
+              "&::-webkit-scrollbar-track": {
+                background: "rgba(255, 255, 255, 0.1)",
+                borderRadius: "2px",
+              },
+              "&::-webkit-scrollbar-thumb": {
+                background: "rgba(255, 255, 255, 0.3)",
+                borderRadius: "2px",
+                "&:hover": {
+                  background: "rgba(255, 255, 255, 0.5)",
+                },
+              },
             }}
           >
-            {personalityDescription}
-          </Typography>
+            <Typography
+              sx={{
+                fontFamily: poppins.style.fontFamily,
+                color: "white",
+                lineHeight: 1.6,
+                fontSize: "1.05rem",
+              }}
+            >
+              {personalityDescription}
+            </Typography>
+          </Box>
         </>
       )}
       <IconButton
@@ -104,7 +143,7 @@ const Personality = ({
       >
         <FlipCameraAndroidIcon fontSize="medium" />
       </IconButton>
-    </>
+    </Box>
   );
 };
 
