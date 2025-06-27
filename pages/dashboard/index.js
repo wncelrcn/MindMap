@@ -354,59 +354,82 @@ export default function DashboardPage({ user }) {
               </Box>
 
               {/* Journal Cards */}
-              <Grid
-                container
-                spacing={3}
-                sx={{
-                  mb: 20,
-                  display: "flex",
-                  justifyContent: {
-                    xs: "center",
-                    sm: "center",
-                    md: "flex-start",
-                  },
-                  alignItems: "center",
-                  maxWidth: "100%",
-                  mx: "auto",
-                  px: { xs: 2, sm: 3, md: 1 },
-                }}
-              >
-                {recentJournals.map((entry) => {
-                  let contentPreview = "";
-                  if (Array.isArray(entry.journal_entry)) {
-                    contentPreview = entry.journal_entry[0]?.answer || "";
-                  } else if (
-                    entry.journal_entry &&
-                    typeof entry.journal_entry === "object"
-                  ) {
-                    contentPreview =
-                      entry.journal_entry.default ||
-                      Object.values(entry.journal_entry)[0] ||
-                      "";
-                  } else if (typeof entry.journal_entry === "string") {
-                    contentPreview = entry.journal_entry;
-                  }
+              {recentJournals.length > 0 ? (
+                <Grid
+                  container
+                  spacing={3}
+                  sx={{
+                    mb: 20,
+                    display: "flex",
+                    justifyContent: {
+                      xs: "center",
+                      sm: "center",
+                      md: "flex-start",
+                    },
+                    alignItems: "center",
+                    maxWidth: "100%",
+                    mx: "auto",
+                    px: { xs: 2, sm: 3, md: 1 },
+                  }}
+                >
+                  {recentJournals.map((entry) => {
+                    let contentPreview = "";
+                    if (Array.isArray(entry.journal_entry)) {
+                      contentPreview = entry.journal_entry[0]?.answer || "";
+                    } else if (
+                      entry.journal_entry &&
+                      typeof entry.journal_entry === "object"
+                    ) {
+                      contentPreview =
+                        entry.journal_entry.default ||
+                        Object.values(entry.journal_entry)[0] ||
+                        "";
+                    } else if (typeof entry.journal_entry === "string") {
+                      contentPreview = entry.journal_entry;
+                    }
 
-                  return (
-                    <Grid
-                      item
-                      xs={12}
-                      sm={6}
-                      lg={3}
-                      key={entry.journal_id || entry.id}
-                    >
-                      <RecentJournal
-                        journalID={entry.journal_id}
-                        title={entry.title}
-                        content={contentPreview}
-                        date={entry.date_created}
-                        time={entry.time_created}
-                        journalType={entry.journal_type}
-                      />
-                    </Grid>
-                  );
-                })}
-              </Grid>
+                    return (
+                      <Grid
+                        item
+                        xs={12}
+                        sm={6}
+                        lg={3}
+                        key={entry.journal_id || entry.id}
+                      >
+                        <RecentJournal
+                          journalID={entry.journal_id}
+                          title={entry.title}
+                          content={contentPreview}
+                          date={entry.date_created}
+                          time={entry.time_created}
+                          journalType={entry.journal_type}
+                        />
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              ) : (
+                <Box
+                  sx={{
+                    textAlign: "center",
+                    py: 8,
+                    mb: 20,
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      color: "#2D1B6B",
+                      fontFamily: poppins.style.fontFamily,
+                      fontWeight: 400,
+                      fontSize: "18px",
+                    }}
+                    className={`${poppins.className}`}
+                  >
+                    No journals found. Start writing your first entry!
+                  </Typography>
+                </Box>
+              )}
             </Box>
           </Container>
         </Box>

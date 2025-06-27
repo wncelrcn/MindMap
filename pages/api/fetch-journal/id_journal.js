@@ -1,4 +1,5 @@
 import createClient from "@/utils/supabase/api";
+import { decryptJournalEntry } from "@/lib/encryption";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -74,9 +75,12 @@ export default async function handler(req, res) {
         .json({ message: "Unauthorized: Journal doesn't belong to user" });
     }
 
+    // Decrypt the journal entry before sending
+    const decryptedEntry = decryptJournalEntry(data);
+
     res.status(200).json({
       message: "Journal entry fetched successfully",
-      entry: data,
+      entry: decryptedEntry,
     });
   } catch (error) {
     console.error("Unexpected error:", error);

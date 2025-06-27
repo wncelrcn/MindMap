@@ -1,4 +1,5 @@
 import createClient from "@/utils/supabase/api";
+import { encryptJournalEntry } from "@/lib/encryption";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -55,20 +56,26 @@ export default async function handler(req, res) {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Create the journal entry object
+    const journalEntryData = {
+      user_UID,
+      theme_id,
+      category_id,
+      title,
+      question_set_id,
+      journal_entry,
+      journal_summary,
+      date_created: new Date().toISOString().split("T")[0],
+      time_created: new Date().toTimeString().split(" ")[0],
+    };
+
+    // Encrypt sensitive fields before saving to database
+    const encryptedJournalEntry = encryptJournalEntry(journalEntryData);
+
     // Insert into guided_journaling_table
     const { data, error } = await supabase
       .from("guided_journaling_table")
-      .insert({
-        user_UID,
-        theme_id,
-        category_id,
-        title,
-        question_set_id,
-        journal_entry,
-        journal_summary,
-        date_created: new Date().toISOString().split("T")[0],
-        time_created: new Date().toTimeString().split(" ")[0],
-      })
+      .insert(encryptedJournalEntry)
       .select();
 
     if (error) {

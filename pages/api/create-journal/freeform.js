@@ -1,4 +1,5 @@
 import createClient from "@/utils/supabase/api";
+import { encryptJournalEntry } from "@/lib/encryption";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -37,16 +38,23 @@ export default async function handler(req, res) {
 
     console.log("user_UID backend", user_UID);
     const now = new Date();
+
+    // Create the journal entry object
+    const journalEntryData = {
+      user_UID: user_UID,
+      journal_entry: journal_entry,
+      title: title,
+      date_created: now.toISOString(),
+      time_created: now.toTimeString().split(" ")[0],
+      journal_summary: journal_summary,
+    };
+
+    // Encrypt sensitive fields before saving to database
+    const encryptedJournalEntry = encryptJournalEntry(journalEntryData);
+
     const { data, error } = await supabase
       .from("freeform_journaling_table")
-      .insert({
-        user_UID: user_UID,
-        journal_entry: journal_entry,
-        title: title,
-        date_created: now.toISOString(),
-        time_created: now.toTimeString().split(" ")[0],
-        journal_summary: journal_summary,
-      })
+      .insert(encryptedJournalEntry)
       .select();
 
     if (error) {

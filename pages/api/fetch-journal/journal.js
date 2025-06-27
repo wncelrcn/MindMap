@@ -1,4 +1,5 @@
 import createClient from "@/utils/supabase/api";
+import { decryptJournalEntry } from "@/lib/encryption";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -61,17 +62,17 @@ export default async function handler(req, res) {
         .json({ message: "Error fetching guided journals" });
     }
 
-    // Normalize and combine data
-    const combinedEntries = [
-      ...freeformData.map((entry) => ({
-        ...entry,
-        journal_type: "freeform",
-      })),
-      ...guidedData.map((entry) => ({
-        ...entry,
-        journal_type: "guided",
-      })),
-    ];
+    // Decrypt and normalize data
+    const decryptedFreeformData = freeformData.map((entry) =>
+      decryptJournalEntry({ ...entry, journal_type: "freeform" })
+    );
+
+    const decryptedGuidedData = guidedData.map((entry) =>
+      decryptJournalEntry({ ...entry, journal_type: "guided" })
+    );
+
+    // Combine data
+    const combinedEntries = [...decryptedFreeformData, ...decryptedGuidedData];
 
     combinedEntries.sort((a, b) => {
       const aDateTime = new Date(`${a.date_created}T${a.time_created}`);
