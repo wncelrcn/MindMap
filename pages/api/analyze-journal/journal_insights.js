@@ -1,17 +1,22 @@
 // pages/api/analyze-journal/journal_insights.js
-import { createClient } from '@/utils/supabase/server-props';
+import { createClient } from "@/utils/supabase/server-props";
 import axios from "axios";
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
-    const { userId, journalId, journalType, forceRegenerate = false } = req.body;
+    const {
+      userId,
+      journalId,
+      journalType,
+      forceRegenerate = false,
+    } = req.body;
 
     if (!userId || !journalId || !journalType) {
-      return res.status(400).json({ error: 'Missing required parameters' });
+      return res.status(400).json({ error: "Missing required parameters" });
     }
 
     // Create Supabase client
@@ -19,76 +24,81 @@ export default async function handler(req, res) {
 
     // First, check if insights already exist
     const { data: existingInsights, error: fetchError } = await supabase
-      .from('insights')
-      .select('*')  // Select all fields instead of just insight_id
-      .eq('journal_id', journalId)
-      .eq('journal_type', journalType)
+      .from("insights")
+      .select("*") // Select all fields instead of just insight_id
+      .eq("journal_id", journalId)
+      .eq("journal_type", journalType)
       .single();
 
     // If insights exist and we're not forcing regeneration, return them
     if (existingInsights && !forceRegenerate) {
-      console.log('Found existing insights, returning...');
+      console.log("Found existing insights, returning...");
       return res.status(200).json({ insights: existingInsights });
     }
 
     // If we get here, either there are no existing insights or we're forcing regeneration
     // Fetch journal entry content
-    let journalContent = '';
+    let journalContent = "";
     let journalMetadata = {};
 
-    if (journalType === 'freeform') {
+    if (journalType === "freeform") {
       const { data: freeformEntry, error: freeformError } = await supabase
-          .from('freeform_journaling_table')
-          .select('*')
-          .eq('journal_id', journalId)
-          .single();
+        .from("freeform_journaling_table")
+        .select("*")
+        .eq("journal_id", journalId)
+        .single();
 
       if (freeformError) {
-          console.error('Error fetching freeform journal:', freeformError);
-          return res.status(500).json({ error: 'Failed to fetch journal entry' });
+        console.error("Error fetching freeform journal:", freeformError);
+        return res.status(500).json({ error: "Failed to fetch journal entry" });
       }
 
       // Update this part to match your database structure
-      journalContent = freeformEntry.journal_entry?.default || freeformEntry.journal_entry;
+      journalContent =
+        freeformEntry.journal_entry?.default || freeformEntry.journal_entry;
       journalMetadata = {
-          created_at: freeformEntry.date_created,
-          mood: freeformEntry.mood,
-          tags: freeformEntry.tags || []
+        created_at: freeformEntry.date_created,
+        mood: freeformEntry.mood,
+        tags: freeformEntry.tags || [],
       };
-      } else if (journalType === 'guided') {
+    } else if (journalType === "guided") {
       const { data: guidedEntry, error: guidedError } = await supabase
-          .from('guided_journaling_table')
-          .select('*')
-          .eq('journal_id', journalId)
-          .single();
+        .from("guided_journaling_table")
+        .select("*")
+        .eq("journal_id", journalId)
+        .single();
 
       if (guidedError) {
-          console.error('Error fetching guided journal:', guidedError);
-          return res.status(500).json({ error: 'Failed to fetch journal entry' });
+        console.error("Error fetching guided journal:", guidedError);
+        return res.status(500).json({ error: "Failed to fetch journal entry" });
       }
 
       // Update guided journal content extraction
-      const entries = Array.isArray(guidedEntry.journal_entry) 
-          ? guidedEntry.journal_entry 
-          : [];
-          
+      const entries = Array.isArray(guidedEntry.journal_entry)
+        ? guidedEntry.journal_entry
+        : [];
+
       journalContent = entries
-          .map(entry => `${entry.question}\n${entry.answer}`)
-          .join('\n\n');
-      
+        .map((entry) => `${entry.question}\n${entry.answer}`)
+        .join("\n\n");
+
       journalMetadata = {
-          created_at: guidedEntry.date_created,
-          prompts_answered: entries.length,
-          session_type: 'guided'
+        created_at: guidedEntry.date_created,
+        prompts_answered: entries.length,
+        session_type: "guided",
       };
-      }
+    }
 
     if (!journalContent) {
-      return res.status(400).json({ error: 'No journal content found' });
+      return res.status(400).json({ error: "No journal content found" });
     }
 
     // Generate insights using OpenRouter API (now includes emotion detection)
-    const insights = await generateInsights(journalContent, journalType, journalMetadata);
+    const insights = await generateInsights(
+      journalContent,
+      journalType,
+      journalMetadata
+    );
 
     // Store insights in database
     const insightsData = {
@@ -100,7 +110,7 @@ export default async function handler(req, res) {
       coping_strategies: insights.coping_strategies,
       goals: insights.goals,
       emotional_data: insights.emotional_data,
-      journal_metadata: journalMetadata
+      journal_metadata: journalMetadata,
     };
 
     let result;
@@ -108,10 +118,10 @@ export default async function handler(req, res) {
       if (existingInsights) {
         // Update existing record
         const { data, error: updateError } = await supabase
-          .from('insights')
+          .from("insights")
           .update(insightsData)
-          .eq('journal_id', journalId)
-          .eq('journal_type', journalType)
+          .eq("journal_id", journalId)
+          .eq("journal_type", journalType)
           .select()
           .single();
 
@@ -120,21 +130,21 @@ export default async function handler(req, res) {
       } else {
         // Insert new record
         const { data, error: insertError } = await supabase
-          .from('insights')
+          .from("insights")
           .insert(insightsData)
           .select()
           .single();
 
         if (insertError) {
           // If insert fails due to concurrent insert, try fetching existing record
-          if (insertError.code === '23505') {
+          if (insertError.code === "23505") {
             const { data: existingData } = await supabase
-              .from('insights')
-              .select('*')
-              .eq('journal_id', journalId)
-              .eq('journal_type', journalType)
+              .from("insights")
+              .select("*")
+              .eq("journal_id", journalId)
+              .eq("journal_type", journalType)
               .single();
-            
+
             result = existingData;
           } else {
             throw insertError;
@@ -145,17 +155,15 @@ export default async function handler(req, res) {
       }
 
       return res.status(200).json({ insights: result });
-
     } catch (dbError) {
-      console.error('Database operation error:', dbError);
-      throw new Error('Failed to save or retrieve insights');
+      console.error("Database operation error:", dbError);
+      throw new Error("Failed to save or retrieve insights");
     }
-
   } catch (error) {
-    console.error('Error in journal insights API:', error);
-    return res.status(500).json({ 
-      error: error.message || 'Internal server error',
-      details: error.details || null
+    console.error("Error in journal insights API:", error);
+    return res.status(500).json({
+      error: error.message || "Internal server error",
+      details: error.details || null,
     });
   }
 }
@@ -215,10 +223,9 @@ async function detectEmotions(journalContent) {
       topEmotions.map((e) => e.label).join(", ")
     );
 
-    return topEmotions.map(emotion => emotion.label);
-
+    return topEmotions.map((emotion) => emotion.label);
   } catch (error) {
-    console.error('Error detecting emotions:', error);
+    console.error("Error detecting emotions:", error);
     // Return fallback emotions if detection fails
     return ["reflective", "thoughtful", "hopeful"];
   }
@@ -237,9 +244,15 @@ ${journalContent}
 
 Journal Type: ${journalType}
 Entry Date: ${metadata.created_at}
-${journalType === 'freeform' ? `Mood: ${metadata.mood || 'Not specified'}` : `Session Type: ${metadata.session_type}`}
+${
+  journalType === "freeform"
+    ? `Mood: ${metadata.mood || "Not specified"}`
+    : `Session Type: ${metadata.session_type}`
+}
 
-**IMPORTANT: The detected dominant emotions for this entry are: ${dominantEmotions.join(", ")}**
+**IMPORTANT: The detected dominant emotions for this entry are: ${dominantEmotions.join(
+    ", "
+  )}**
 Use these specific emotions in the "dominant_emotions" field and base your insights on these detected emotions.
 
 Please analyze the journal entry and provide supportive insights based on the following focus areas:
@@ -328,25 +341,28 @@ Now generate a complete response in the exact JSON format below:
 Ensure that the response is empathetic, self-reflective, and empowering. Do not be overly clinical. Support emotional exploration and personal insight in a caring and accessible tone.`;
 
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'X-Title': 'Journal Insights App'
-      },
-      body: JSON.stringify({
-        model: "meta-llama/llama-3.3-8b-instruct:free",
-        messages: [
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 2000
-      })
-    });
+    const response = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json",
+          "X-Title": "Journal Insights App",
+        },
+        body: JSON.stringify({
+          model: "nvidia/llama-3.3-nemotron-super-49b-v1:free",
+          messages: [
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          temperature: 0.7,
+          max_tokens: 2000,
+        }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`OpenRouter API error: ${response.status}`);
@@ -360,19 +376,21 @@ Ensure that the response is empathetic, self-reflective, and empowering. Do not 
       // First attempt: direct parse
       const cleanedText = insightsText.trim();
       const parsedInsights = JSON.parse(cleanedText);
-      
-      // Validate the required structure
-      if (!parsedInsights.header_insights || !parsedInsights.wellbeing_insights) {
-        console.error('Invalid insights structure:', parsedInsights);
-        throw new Error('Invalid insights structure');
-      }
-      
-      return parsedInsights;
 
+      // Validate the required structure
+      if (
+        !parsedInsights.header_insights ||
+        !parsedInsights.wellbeing_insights
+      ) {
+        console.error("Invalid insights structure:", parsedInsights);
+        throw new Error("Invalid insights structure");
+      }
+
+      return parsedInsights;
     } catch (parseError) {
-      console.error('Initial parse error:', parseError);
-      console.log('Raw insights text:', insightsText);
-      
+      console.error("Initial parse error:", parseError);
+      console.log("Raw insights text:", insightsText);
+
       // Second attempt: try to extract JSON if wrapped in other text
       const jsonMatch = insightsText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
@@ -381,68 +399,80 @@ Ensure that the response is empathetic, self-reflective, and empowering. Do not 
           return extractedJson;
         }
       }
-      
+
       throw parseError;
     }
-
   } catch (error) {
-    console.error('Error in insights generation:', error);
+    console.error("Error in insights generation:", error);
     return getFallbackInsights(dominantEmotions);
   }
 }
 
-function getFallbackInsights(dominantEmotions = ["reflective", "thoughtful", "hopeful"]) {
+function getFallbackInsights(
+  dominantEmotions = ["reflective", "thoughtful", "hopeful"]
+) {
   return {
     header_insights: {
-      resilience_insight: "Your journal entries show a thoughtful approach to processing experiences and emotions, demonstrating your commitment to personal growth and self-reflection.",
+      resilience_insight:
+        "Your journal entries show a thoughtful approach to processing experiences and emotions, demonstrating your commitment to personal growth and self-reflection.",
       primary_motivation: "self-improvement",
       growth_indicator: "mindful reflection",
-      emotional_tone: "Your writing reveals a balanced emotional perspective, with awareness of both challenges and positive moments in your daily life."
+      emotional_tone:
+        "Your writing reveals a balanced emotional perspective, with awareness of both challenges and positive moments in your daily life.",
     },
     wellbeing_insights: {
-      main_observation: "Based on your journal entry, you demonstrate good emotional awareness and a proactive approach to managing your daily experiences. This mindful approach to journaling itself shows a commitment to your mental well-being.",
+      main_observation:
+        "Based on your journal entry, you demonstrate good emotional awareness and a proactive approach to managing your daily experiences. This mindful approach to journaling itself shows a commitment to your mental well-being.",
       actionable_advice: [
         {
           title: "Continue Regular Reflection",
-          description: "Your practice of regular journaling is valuable for emotional processing. Consider setting aside a specific time each day for this reflective practice to maintain consistency."
+          description:
+            "Your practice of regular journaling is valuable for emotional processing. Consider setting aside a specific time each day for this reflective practice to maintain consistency.",
         },
         {
           title: "Celebrate Small Wins",
-          description: "Make sure to acknowledge and celebrate small positive moments and achievements in your daily life, as these contribute significantly to overall well-being."
-        }
-      ]
+          description:
+            "Make sure to acknowledge and celebrate small positive moments and achievements in your daily life, as these contribute significantly to overall well-being.",
+        },
+      ],
     },
     coping_strategies: {
-      main_observation: "Your journal writing demonstrates that you're actively working through your experiences and emotions, which is a healthy coping mechanism in itself.",
+      main_observation:
+        "Your journal writing demonstrates that you're actively working through your experiences and emotions, which is a healthy coping mechanism in itself.",
       recommended_strategies: [
         {
           title: "Mindful Breathing",
-          description: "When facing challenging moments, try incorporating brief mindful breathing exercises to help center yourself and gain clarity before responding to situations."
+          description:
+            "When facing challenging moments, try incorporating brief mindful breathing exercises to help center yourself and gain clarity before responding to situations.",
         },
         {
           title: "Gratitude Practice",
-          description: "Consider ending each journal entry with three things you're grateful for, no matter how small, to help maintain a balanced perspective during difficult times."
-        }
-      ]
+          description:
+            "Consider ending each journal entry with three things you're grateful for, no matter how small, to help maintain a balanced perspective during difficult times.",
+        },
+      ],
     },
     goals: {
-      main_observation: "Your commitment to journaling shows a desire for personal growth and self-understanding, which forms a strong foundation for setting and achieving meaningful goals.",
+      main_observation:
+        "Your commitment to journaling shows a desire for personal growth and self-understanding, which forms a strong foundation for setting and achieving meaningful goals.",
       suggested_goals: [
         {
           title: "Emotional Awareness",
-          description: "Continue developing your ability to identify and name your emotions as they arise, which will help you respond more thoughtfully to various situations."
+          description:
+            "Continue developing your ability to identify and name your emotions as they arise, which will help you respond more thoughtfully to various situations.",
         },
         {
           title: "Consistent Self-Care",
-          description: "Establish a regular self-care routine that includes activities that bring you joy and help you recharge, making this as important as other daily responsibilities."
-        }
-      ]
+          description:
+            "Establish a regular self-care routine that includes activities that bring you joy and help you recharge, making this as important as other daily responsibilities.",
+        },
+      ],
     },
     emotional_data: {
       dominant_emotions: dominantEmotions,
       emotional_intensity: "medium",
       growth_areas: ["self-compassion", "stress management"],
-      strengths: ["self-awareness", "commitment to growth"]
-    }
+      strengths: ["self-awareness", "commitment to growth"],
+    },
   };
 }

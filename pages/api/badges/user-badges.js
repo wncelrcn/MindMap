@@ -1,39 +1,52 @@
-import { createClient } from '@/utils/supabase/server-props';
+import { createClient } from "@/utils/supabase/server-props";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
     const supabase = createClient({ req, res });
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    // Ensure we have a valid session with authenticated role
+    if (!user.role || user.role !== "authenticated") {
+      console.error("User role invalid:", user.role);
+      return res
+        .status(403)
+        .json({ error: "Access denied - authenticated users only" });
     }
 
     const userUID = user.id;
-    console.log('=== USER BADGES DEBUG START ===');
-    console.log('Fetching badges for user:', userUID);
+    console.log("=== USER BADGES DEBUG START ===");
+    console.log("Fetching badges for user:", userUID);
 
     // Check if user exists in user_table
     const { data: userTableData, error: userTableError } = await supabase
-      .from('user_table')
-      .select('user_UID, email')
-      .eq('user_UID', userUID)
+      .from("user_table")
+      .select("user_UID, email")
+      .eq("user_UID", userUID)
       .single();
 
     if (userTableError) {
-      console.log('User not found in user_table:', userTableError);
+      console.log("User not found in user_table:", userTableError);
     } else {
-      console.log('User found in user_table:', userTableData);
+      console.log("User found in user_table:", userTableData);
     }
 
     // Get user's unlocked badges with badge details
     const { data: userBadges, error: badgesError } = await supabase
-      .from('user_badges')
-      .select(`
+      .from("user_badges")
+      .select(
+        `
         *,
         badges (
           name,
@@ -42,37 +55,43 @@ export default async function handler(req, res) {
           color_effect,
           image_url
         )
-      `)
-      .eq('user_UID', userUID)
-      .order('unlocked_at', { ascending: false });
+      `
+      )
+      .eq("user_UID", userUID)
+      .order("unlocked_at", { ascending: false });
 
     if (badgesError) {
-      console.error('Error fetching user badges:', badgesError);
-      return res.status(500).json({ error: 'Failed to fetch user badges' });
+      console.error("Error fetching user badges:", badgesError);
+      return res.status(500).json({ error: "Failed to fetch user badges" });
     }
 
-    console.log('User badges found:', userBadges?.length || 0);
+    console.log("User badges found:", userBadges?.length || 0);
     if (userBadges) {
-      userBadges.forEach(badge => {
-        console.log(`- Badge: ${badge.badges?.name || 'Unknown'} (Unlocked: ${badge.unlocked_at})`);
+      userBadges.forEach((badge) => {
+        console.log(
+          `- Badge: ${badge.badges?.name || "Unknown"} (Unlocked: ${
+            badge.unlocked_at
+          })`
+        );
       });
     }
 
-    // Get user stats
-    const { data: userStats, error: statsError } = await supabase
-      .from('user_stats')
-      .select('*')
-      .eq('user_UID', userUID)
+    // Get user stats (using admin client to bypass RLS)
+    let userStats;
+    const { data: statsData, error: statsError } = await supabaseAdmin
+      .from("user_stats")
+      .select("*")
+      .eq("user_UID", userUID)
       .single();
 
     if (statsError) {
-      console.error('Error fetching user stats:', statsError);
-      
+      console.error("Error fetching user stats:", statsError);
+
       // If no stats exist, create them
-      if (statsError.code === 'PGRST116') {
-        console.log('Creating initial user stats...');
-        const { error: createError } = await supabase
-          .from('user_stats')
+      if (statsError.code === "PGRST116") {
+        console.log("Creating initial user stats...");
+        const { error: createError } = await supabaseAdmin
+          .from("user_stats")
           .insert({
             user_UID: userUID,
             freeform_entries: 0,
@@ -82,53 +101,54 @@ export default async function handler(req, res) {
             all_time_high_streak: 0,
             theme_counts: {},
             category_counts: {},
-            longest_entry_words: 0
+            longest_entry_words: 0,
           });
 
         if (createError) {
-          console.error('Error creating user stats:', createError);
-          return res.status(500).json({ error: 'Failed to create user stats' });
+          console.error("Error creating user stats:", createError);
+          return res.status(500).json({ error: "Failed to create user stats" });
         }
 
         // Fetch the newly created stats
-        const { data: newStats } = await supabase
-          .from('user_stats')
-          .select('*')
-          .eq('user_UID', userUID)
+        const { data: newStats } = await supabaseAdmin
+          .from("user_stats")
+          .select("*")
+          .eq("user_UID", userUID)
           .single();
-        
-        console.log('Created new user stats:', newStats);
+
+        console.log("Created new user stats:", newStats);
         userStats = newStats;
       } else {
-        return res.status(500).json({ error: 'Failed to fetch user stats' });
+        return res.status(500).json({ error: "Failed to fetch user stats" });
       }
     } else {
-      console.log('User stats:', userStats);
+      console.log("User stats:", statsData);
+      userStats = statsData;
     }
 
     // Additional debugging: Check journal entries
     const { data: freeformEntries, error: freeformError } = await supabase
-      .from('freeform_journaling_table')
-      .select('id, date_created, journal_entry')
-      .eq('user_UID', userUID);
+      .from("freeform_journaling_table")
+      .select("id, date_created, journal_entry")
+      .eq("user_UID", userUID);
 
     const { data: guidedEntries, error: guidedError } = await supabase
-      .from('guided_journaling_table')
-      .select('id, date_created, theme_id')
-      .eq('user_UID', userUID);
+      .from("guided_journaling_table")
+      .select("id, date_created, theme_id")
+      .eq("user_UID", userUID);
 
-    console.log('Freeform entries:', freeformEntries?.length || 0);
-    console.log('Guided entries:', guidedEntries?.length || 0);
+    console.log("Freeform entries:", freeformEntries?.length || 0);
+    console.log("Guided entries:", guidedEntries?.length || 0);
 
-    // Check all available badges
-    const { data: allBadges, error: allBadgesError } = await supabase
-      .from('badges')
-      .select('*')
-      .order('badge_id');
+    // Check all available badges (using admin client to bypass RLS)
+    const { data: allBadges, error: allBadgesError } = await supabaseAdmin
+      .from("badges")
+      .select("*")
+      .order("badge_id");
 
-    console.log('Total available badges:', allBadges?.length || 0);
+    console.log("Total available badges:", allBadges?.length || 0);
 
-    console.log('=== USER BADGES DEBUG END ===');
+    console.log("=== USER BADGES DEBUG END ===");
 
     res.status(200).json({
       success: true,
@@ -140,16 +160,15 @@ export default async function handler(req, res) {
         freeformEntriesCount: freeformEntries?.length || 0,
         guidedEntriesCount: guidedEntries?.length || 0,
         totalAvailableBadges: allBadges?.length || 0,
-        userBadgesCount: userBadges?.length || 0
-      }
+        userBadgesCount: userBadges?.length || 0,
+      },
     });
-
   } catch (error) {
-    console.error('Error fetching user badges:', error);
-    res.status(500).json({ 
-      error: 'Internal server error',
+    console.error("Error fetching user badges:", error);
+    res.status(500).json({
+      error: "Internal server error",
       details: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
   }
 }

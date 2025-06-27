@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import createClient from "@/utils/supabase/api";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -6,6 +6,22 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Create authenticated Supabase client
+    const supabase = createClient(req, res);
+
+    // Get the authenticated user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return res.status(401).json({
+        message: "User not authenticated",
+        details: authError?.message,
+      });
+    }
+
     const { journal_id, journal_type } = req.body;
 
     if (!journal_id || !journal_type) {
@@ -39,6 +55,13 @@ export default async function handler(req, res) {
       return res.status(500).json({
         message: "Error fetching emotions data",
         details: error.message,
+      });
+    }
+
+    // Verify that the emotions data belongs to the authenticated user
+    if (data.user_UID !== user.id) {
+      return res.status(403).json({
+        message: "Unauthorized: Emotions data doesn't belong to user",
       });
     }
 

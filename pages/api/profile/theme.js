@@ -33,10 +33,7 @@ export default async function handler(req, res) {
 
     if (freeformError) {
       console.error("Error fetching freeform themes:", freeformError);
-      return res.status(500).json({
-        message: "Error fetching freeform themes",
-        details: freeformError.message,
-      });
+      // Don't return error immediately, continue with guided themes
     }
 
     // Query guided emotions table for themes
@@ -48,9 +45,14 @@ export default async function handler(req, res) {
 
     if (guidedError) {
       console.error("Error fetching guided themes:", guidedError);
+      // Don't return error immediately, use what we have
+    }
+
+    // If both queries failed, return an error
+    if (freeformError && guidedError) {
       return res.status(500).json({
-        message: "Error fetching guided themes",
-        details: guidedError.message,
+        message: "Error fetching themes from both tables",
+        details: `Freeform: ${freeformError.message}, Guided: ${guidedError.message}`,
       });
     }
 

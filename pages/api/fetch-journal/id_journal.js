@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import createClient from "@/utils/supabase/api";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -6,6 +6,22 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Create authenticated Supabase client
+    const supabase = createClient(req, res);
+
+    // Get the authenticated user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return res.status(401).json({
+        message: "User not authenticated",
+        details: authError?.message,
+      });
+    }
+
     const { id, type } = req.body;
 
     if (!id) {
@@ -49,6 +65,13 @@ export default async function handler(req, res) {
       return res
         .status(404)
         .json({ message: "Journal entry not found in both tables" });
+    }
+
+    // Verify that the journal belongs to the authenticated user
+    if (data.user_UID !== user.id) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized: Journal doesn't belong to user" });
     }
 
     res.status(200).json({

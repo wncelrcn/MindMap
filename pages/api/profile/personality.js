@@ -1,4 +1,5 @@
 import createClient from "@/utils/supabase/api";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -16,23 +17,97 @@ export default async function handler(req, res) {
     // Create authenticated Supabase client
     const supabase = createClient(req, res);
 
-    // Get the current authenticated user
+    // Get the current authenticated user with enhanced checks
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser();
 
-    if (authError || !user) {
+    // Strict authentication check
+    if (authError) {
+      console.error("Auth error:", authError);
       return res.status(401).json({
-        message: "User not authenticated",
+        message: "Authentication failed",
         details: authError?.message,
       });
     }
 
-    const user_UID = user.id;
+    if (!user || !user.id) {
+      return res.status(401).json({
+        message:
+          "User not authenticated - please log in to access personality analysis",
+      });
+    }
 
-    // Check user_stats table for existing personality data and updated_personality_at
-    const { data: userStats, error: statsError } = await supabase
+    // Verify user has authenticated role
+    if (!user.role || user.role !== "authenticated") {
+      return res.status(403).json({
+        message: "Access denied - authenticated users only",
+      });
+    }
+
+    const user_UID = user.id;
+    console.log("Personality API - Authenticated User UID:", user_UID);
+
+    // Helper function to safely update user stats with RLS compliance
+    const updateUserStats = async (personalityData) => {
+      try {
+        // First check if user_stats record exists (using admin client to bypass RLS)
+        const { data: existingStats, error: checkError } = await supabaseAdmin
+          .from("user_stats")
+          .select("user_UID")
+          .eq("user_UID", user_UID)
+          .single();
+
+        const currentTimestamp = new Date().toISOString();
+
+        if (checkError && checkError.code === "PGRST116") {
+          // Record doesn't exist, insert new one (using admin client to bypass RLS)
+          const { error: insertError } = await supabaseAdmin
+            .from("user_stats")
+            .insert({
+              user_UID: user_UID,
+              user_personality_title: personalityData.title,
+              user_personality_desc: personalityData.description,
+              updated_personality_at: currentTimestamp,
+              freeform_entries: 0,
+              guided_entries: 0,
+              total_entries: 0,
+              current_streak: 0,
+              all_time_high_streak: 0,
+              theme_counts: {},
+              category_counts: {},
+              longest_entry_words: 0,
+            });
+
+          if (insertError) {
+            console.error("Error inserting user stats:", insertError);
+          }
+        } else if (!checkError) {
+          // Record exists, update it (using admin client to bypass RLS)
+          const { error: updateError } = await supabaseAdmin
+            .from("user_stats")
+            .update({
+              user_personality_title: personalityData.title,
+              user_personality_desc: personalityData.description,
+              updated_personality_at: currentTimestamp,
+            })
+            .eq("user_UID", user_UID);
+
+          if (updateError) {
+            console.error("Error updating user stats:", updateError);
+          }
+        }
+
+        return currentTimestamp;
+      } catch (error) {
+        console.error("Error in updateUserStats:", error);
+        return new Date().toISOString();
+      }
+    };
+
+    // Check user_stats table for existing personality data and updated_personality_at (using admin client to bypass RLS)
+    const { data: userStats, error: statsError } = await supabaseAdmin
       .from("user_stats")
       .select(
         "user_personality_title, user_personality_desc, updated_personality_at"
@@ -229,7 +304,7 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
             Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           },
           body: JSON.stringify({
-            model: "meta-llama/llama-3.3-8b-instruct:free",
+            model: "nvidia/llama-3.3-nemotron-super-49b-v1:free",
             messages: [
               {
                 role: "system",
@@ -257,23 +332,11 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
         const fallbackTitle = "Reflective Journaler";
         const fallbackDescription =
           "You demonstrate a commitment to self-reflection and personal growth through your consistent journaling practice. Your willingness to explore your thoughts and emotions shows emotional intelligence and self-awareness.";
-        const currentTimestamp = new Date().toISOString();
 
-        const { error: updateError } = await supabase
-          .from("user_stats")
-          .upsert({
-            user_UID: user_UID,
-            user_personality_title: fallbackTitle,
-            user_personality_desc: fallbackDescription,
-            updated_personality_at: currentTimestamp,
-          });
-
-        if (updateError) {
-          console.error(
-            "Error updating user stats with fallback personality data:",
-            updateError
-          );
-        }
+        const currentTimestamp = await updateUserStats({
+          title: fallbackTitle,
+          description: fallbackDescription,
+        });
 
         // Return fallback personality analysis
         return res.status(200).json({
@@ -320,23 +383,10 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
           }
 
           // Save personality data to user_stats table
-          const currentTimestamp = new Date().toISOString();
-          const { error: updateError } = await supabase
-            .from("user_stats")
-            .upsert({
-              user_UID: user_UID,
-              user_personality_title: personalityResult.title,
-              user_personality_desc: personalityResult.description,
-              updated_personality_at: currentTimestamp,
-            });
-
-          if (updateError) {
-            console.error(
-              "Error updating user stats with personality data:",
-              updateError
-            );
-            // Continue without failing the request
-          }
+          const currentTimestamp = await updateUserStats({
+            title: personalityResult.title,
+            description: personalityResult.description,
+          });
 
           res.status(200).json({
             message: "Personality analysis completed successfully",
@@ -360,23 +410,11 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
           const parseTitle = "Introspective Writer";
           const parseDescription =
             "Your journal entries reveal a thoughtful and introspective nature. You take time to process your experiences and emotions, showing a deep commitment to personal understanding and growth.";
-          const currentTimestamp = new Date().toISOString();
 
-          const { error: updateError } = await supabase
-            .from("user_stats")
-            .upsert({
-              user_UID: user_UID,
-              user_personality_title: parseTitle,
-              user_personality_desc: parseDescription,
-              updated_personality_at: currentTimestamp,
-            });
-
-          if (updateError) {
-            console.error(
-              "Error updating user stats with parse fallback personality data:",
-              updateError
-            );
-          }
+          const currentTimestamp = await updateUserStats({
+            title: parseTitle,
+            description: parseDescription,
+          });
 
           // Return fallback if parsing fails
           res.status(200).json({
@@ -399,23 +437,11 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
         const noContentTitle = "Dedicated Reflector";
         const noContentDescription =
           "Your consistent journaling practice demonstrates dedication to self-improvement and emotional awareness. You value personal growth and aren't afraid to examine your thoughts and feelings honestly.";
-        const currentTimestamp = new Date().toISOString();
 
-        const { error: updateError } = await supabase
-          .from("user_stats")
-          .upsert({
-            user_UID: user_UID,
-            user_personality_title: noContentTitle,
-            user_personality_desc: noContentDescription,
-            updated_personality_at: currentTimestamp,
-          });
-
-        if (updateError) {
-          console.error(
-            "Error updating user stats with no content fallback personality data:",
-            updateError
-          );
-        }
+        const currentTimestamp = await updateUserStats({
+          title: noContentTitle,
+          description: noContentDescription,
+        });
 
         // If no content from OpenRouter
         res.status(200).json({
@@ -440,21 +466,11 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
       const apiErrorTitle = "Thoughtful Individual";
       const apiErrorDescription =
         "Based on your recent journaling activity, you show a strong inclination toward self-reflection and personal development. Your commitment to regular journaling suggests mindfulness and emotional intelligence.";
-      const currentTimestamp = new Date().toISOString();
 
-      const { error: updateError } = await supabase.from("user_stats").upsert({
-        user_UID: user_UID,
-        user_personality_title: apiErrorTitle,
-        user_personality_desc: apiErrorDescription,
-        updated_personality_at: currentTimestamp,
+      const currentTimestamp = await updateUserStats({
+        title: apiErrorTitle,
+        description: apiErrorDescription,
       });
-
-      if (updateError) {
-        console.error(
-          "Error updating user stats with API error fallback personality data:",
-          updateError
-        );
-      }
 
       // Return fallback personality analysis
       res.status(200).json({

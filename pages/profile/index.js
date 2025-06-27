@@ -162,6 +162,21 @@ export default function Profile({ user }) {
         }
       } catch (error) {
         console.error("Error fetching badges and stats:", error);
+        // Set empty defaults on error to prevent complete failure
+        setBadges([]);
+        setStats(null);
+
+        // Check if it's an authentication error
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          console.error(
+            "Authentication error in badges - user may need to re-login"
+          );
+        } else if (error.response?.status === 500) {
+          console.error(
+            "Server error in badges - may be RLS policy issue:",
+            error.response?.data
+          );
+        }
       } finally {
         setBadgesLoading(false);
       }

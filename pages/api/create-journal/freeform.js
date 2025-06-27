@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import createClient from "@/utils/supabase/api";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -6,12 +6,36 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Create authenticated Supabase client
+    const supabase = createClient(req, res);
+
+    // Get the authenticated user
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return res.status(401).json({
+        message: "User not authenticated",
+        details: authError?.message,
+      });
+    }
+
     const { user_UID, journal_entry, title, journal_summary } = req.body;
 
     if (!user_UID || !journal_entry || !title || !journal_summary) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    // Verify that the user_UID matches the authenticated user
+    if (user_UID !== user.id) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized: User ID mismatch" });
+    }
+
+    console.log("user_UID backend", user_UID);
     const now = new Date();
     const { data, error } = await supabase
       .from("freeform_journaling_table")
