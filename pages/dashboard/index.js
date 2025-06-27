@@ -71,7 +71,7 @@ export default function DashboardPage({ user }) {
   const [user_UID, setUser_UID] = useState(user.id);
   const [recentJournals, setRecentJournals] = useState([]);
   const [permaModalOpen, setPermaModalOpen] = useState(false);
-  
+
   // Badge modal state
   const [badgeQueue, setBadgeQueue] = useState([]);
   const [currentBadge, setCurrentBadge] = useState(null);
@@ -101,60 +101,74 @@ export default function DashboardPage({ user }) {
   }, []);
 
   // Badge checking function with improved error handling
-  const checkNewBadges = useCallback(async (retryCount = 0) => {
-    if (isCheckingBadges) return; // Prevent concurrent badge checks
-    
-    setIsCheckingBadges(true);
-    
-    try {
-      console.log("Checking for new badges...");
-      const response = await axios.post("/api/badges/check-unlock", {}, {
-        timeout: 10000, // 10 second timeout
-      });
+  const checkNewBadges = useCallback(
+    async (retryCount = 0) => {
+      if (isCheckingBadges) return; // Prevent concurrent badge checks
 
-      if (response.data.success) {
-        // Fix: Use 'newlyUnlocked' instead of 'newBadges'
-        const newBadges = response.data.newlyUnlocked || [];
-        console.log("New badges found:", newBadges);
+      setIsCheckingBadges(true);
 
-        if (newBadges.length > 0) {
-          const shownBadges = getShownBadges();
-          
-          // Fix: Use 'badge_id' instead of 'id'
-          const unseenBadges = newBadges.filter(
-            (badge) => !shownBadges.includes(badge.badge_id)
-          );
+      try {
+        console.log("Checking for new badges...");
+        const response = await axios.post(
+          "/api/badges/check-unlock",
+          {},
+          {
+            timeout: 10000, // 10 second timeout
+            withCredentials: true, // Include cookies for authentication
+          }
+        );
 
-          if (unseenBadges.length > 0) {
-            console.log("Unseen badges:", unseenBadges);
-            
-            // Add all unseen badges to queue
-            setBadgeQueue(prev => [...prev, ...unseenBadges]);
-            
-            // Mark all badges as shown to prevent duplicates
-            const newShownBadges = [...shownBadges, ...unseenBadges.map(b => b.badge_id)];
-            setShownBadges(newShownBadges);
+        if (response.data.success) {
+          // Fix: Use 'newlyUnlocked' instead of 'newBadges'
+          const newBadges = response.data.newlyUnlocked || [];
+          console.log("New badges found:", newBadges);
+
+          if (newBadges.length > 0) {
+            const shownBadges = getShownBadges();
+
+            // Fix: Use 'badge_id' instead of 'id'
+            const unseenBadges = newBadges.filter(
+              (badge) => !shownBadges.includes(badge.badge_id)
+            );
+
+            if (unseenBadges.length > 0) {
+              console.log("Unseen badges:", unseenBadges);
+
+              // Add all unseen badges to queue
+              setBadgeQueue((prev) => [...prev, ...unseenBadges]);
+
+              // Mark all badges as shown to prevent duplicates
+              const newShownBadges = [
+                ...shownBadges,
+                ...unseenBadges.map((b) => b.badge_id),
+              ];
+              setShownBadges(newShownBadges);
+            }
           }
         }
+      } catch (error) {
+        console.error("Error checking badges:", error);
+
+        // Retry logic for network failures
+        if (
+          retryCount < 2 &&
+          (error.code === "ECONNABORTED" || error.response?.status >= 500)
+        ) {
+          console.log(`Retrying badge check (attempt ${retryCount + 1})...`);
+          setTimeout(() => checkNewBadges(retryCount + 1), 2000);
+        }
+      } finally {
+        setIsCheckingBadges(false);
       }
-    } catch (error) {
-      console.error("Error checking badges:", error);
-      
-      // Retry logic for network failures
-      if (retryCount < 2 && (error.code === 'ECONNABORTED' || error.response?.status >= 500)) {
-        console.log(`Retrying badge check (attempt ${retryCount + 1})...`);
-        setTimeout(() => checkNewBadges(retryCount + 1), 2000);
-      }
-    } finally {
-      setIsCheckingBadges(false);
-    }
-  }, [isCheckingBadges, getShownBadges, setShownBadges]);
+    },
+    [isCheckingBadges, getShownBadges, setShownBadges]
+  );
 
   // Process badge queue - show one badge at a time
   useEffect(() => {
     if (badgeQueue.length > 0 && !showBadgeModal) {
       const nextBadge = badgeQueue[0];
-      setBadgeQueue(prev => prev.slice(1));
+      setBadgeQueue((prev) => prev.slice(1));
       setCurrentBadge(nextBadge);
       setShowBadgeModal(true);
     }
@@ -176,10 +190,10 @@ export default function DashboardPage({ user }) {
       checkNewBadges();
     };
 
-    window.addEventListener('badgeUnlocked', handleBadgeUnlock);
-    
+    window.addEventListener("badgeUnlocked", handleBadgeUnlock);
+
     return () => {
-      window.removeEventListener('badgeUnlocked', handleBadgeUnlock);
+      window.removeEventListener("badgeUnlocked", handleBadgeUnlock);
     };
   }, [checkNewBadges]);
 

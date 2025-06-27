@@ -8,6 +8,7 @@ import { createClient } from "@/utils/supabase/component";
 import { Poppins } from "next/font/google";
 import Head from "next/head";
 import Loading from "@/components/Loading";
+import FeedbackModal from "@/components/FeedbackModal";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -25,6 +26,13 @@ export default function ViewRecap() {
   const [username, setUsername] = useState("User");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  // Modal states
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalStep, setModalStep] = useState("question"); // 'question', 'positive', 'negative', 'thankYou'
+  const [currentCardIndex, setCurrentCardIndex] = useState(null);
+  const [feedbackText, setFeedbackText] = useState("");
+  const [interactedCards, setInteractedCards] = useState(new Set());
 
   const variants = {
     incoming: (direction) => ({
@@ -195,6 +203,42 @@ export default function ViewRecap() {
       return { xs: "0.9rem", md: "1rem" };
     }
     return { xs: "1rem", md: "1.1rem" };
+  };
+
+  // Modal handlers
+  const handleEditIconClick = (cardIndex) => {
+    setCurrentCardIndex(cardIndex);
+    setModalOpen(true);
+    setModalStep("question");
+    setFeedbackText("");
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+    setModalStep("question");
+    setFeedbackText("");
+    setCurrentCardIndex(null);
+  };
+
+  const handleYesClick = () => {
+    setModalStep("positive");
+  };
+
+  const handleNoClick = () => {
+    setModalStep("negative");
+  };
+
+  const handleFeedbackSubmit = () => {
+    if (feedbackText.trim()) {
+      setModalStep("thankYou");
+    }
+  };
+
+  const handleContinueReading = () => {
+    const newInteractedCards = new Set(interactedCards);
+    newInteractedCards.add(currentCardIndex);
+    setInteractedCards(newInteractedCards);
+    handleModalClose();
   };
 
   if (loading) {
@@ -395,14 +439,24 @@ export default function ViewRecap() {
                     {/* Content Cards */}
                     {/* Edit Icon (top right) */}
                     {currentCard.type === "content" &&
-                      currentCard.title !== "Remember This" && (
+                      currentCard.title !== "Remember This" &&
+                      !interactedCards.has(index) && (
                         <Box
+                          onClick={() => handleEditIconClick(index)}
                           sx={{
                             position: "absolute",
                             top: { xs: 16, md: 24 },
                             right: { xs: 16, md: 24 },
                             color: "#5A33B7",
                             fontSize: "1.5rem",
+                            cursor: "pointer",
+                            p: 1,
+                            borderRadius: "50%",
+                            transition: "all 0.2s ease",
+                            "&:hover": {
+                              backgroundColor: "rgba(90, 51, 183, 0.1)",
+                              transform: "scale(1.05)",
+                            },
                           }}
                         >
                           <svg
@@ -513,6 +567,19 @@ export default function ViewRecap() {
           </div>
         </Box>
       </Box>
+
+      <FeedbackModal
+        open={modalOpen}
+        onClose={handleModalClose}
+        modalStep={modalStep}
+        currentCard={cardContents[currentCardIndex]}
+        feedbackText={feedbackText}
+        setFeedbackText={setFeedbackText}
+        onYesClick={handleYesClick}
+        onNoClick={handleNoClick}
+        onFeedbackSubmit={handleFeedbackSubmit}
+        onContinueReading={handleContinueReading}
+      />
     </>
   );
 }

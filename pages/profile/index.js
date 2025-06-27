@@ -151,10 +151,18 @@ export default function Profile({ user }) {
     const fetchBadgesAndStats = async () => {
       try {
         // Check for new badge unlocks
-        const checkResponse = await axios.post("/api/badges/check-unlock");
+        const checkResponse = await axios.post(
+          "/api/badges/check-unlock",
+          {},
+          {
+            withCredentials: true,
+          }
+        );
         if (checkResponse.data.success) {
           // Fetch updated badges and stats
-          const badgesResponse = await axios.get("/api/badges/user-badges");
+          const badgesResponse = await axios.get("/api/badges/user-badges", {
+            withCredentials: true,
+          });
           if (badgesResponse.data.success) {
             setBadges(badgesResponse.data.badges || []);
             setStats(badgesResponse.data.stats);
