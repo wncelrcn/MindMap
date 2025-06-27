@@ -33,10 +33,21 @@ export default async function handler(req, res) {
       .eq("journal_type", journalType)
       .single();
 
-    // If insights exist and we're not forcing regeneration, return them
+    // Check if existing insights are null or empty and handle appropriately
     if (existingInsights && !forceRegenerate) {
-      console.log("Found existing insights, returning...");
-      return res.status(200).json({ insights: existingInsights });
+      // Check if the insights data is actually populated
+      const hasValidInsights = existingInsights.header_insights && 
+        existingInsights.wellbeing_insights && 
+        Object.keys(existingInsights.header_insights).length > 0 &&
+        Object.keys(existingInsights.wellbeing_insights).length > 0;
+
+      if (hasValidInsights) {
+        console.log("Found existing insights, returning...");
+        return res.status(200).json({ insights: existingInsights });
+      } else {
+        console.log("Found existing record but insights are empty/null, regenerating...");
+        // Continue to regenerate insights
+      }
     }
 
     // If we get here, either there are no existing insights or we're forcing regeneration
@@ -112,6 +123,14 @@ export default async function handler(req, res) {
       journalMetadata,
       detectedEmotions
     );
+
+    // Check if insights generation returned null or empty
+    if (!insights || Object.keys(insights).length === 0) {
+      return res.status(200).json({ 
+        insights: getRetryPromptResponse(),
+        needsRetry: true 
+      });
+    }
 
     // Store insights in database
     const insightsData = {
@@ -436,9 +455,9 @@ Ensure that the response is empathetic, self-reflective, and empowering. Do not 
 
       if (isTruncated) {
         console.warn(
-          "Response appears to be truncated - using fallback insights"
+          "Response appears to be truncated - returning null for retry"
         );
-        throw new Error("Response truncated, using fallback");
+        return null;
       }
 
       // Second attempt: try to extract JSON from markdown code blocks
@@ -473,80 +492,67 @@ Ensure that the response is empathetic, self-reflective, and empowering. Do not 
         }
       }
 
-      console.warn("All parsing attempts failed - using fallback insights");
-      throw parseError;
+      console.warn("All parsing attempts failed - returning null for retry");
+      return null;
     }
   } catch (error) {
     console.error("Error in insights generation:", error);
-    return getFallbackInsights(dominantEmotions);
+    return null;
   }
 }
 
-function getFallbackInsights(
-  dominantEmotions = ["reflective", "hopeful", "thoughtful"]
-) {
+function getRetryPromptResponse() {
   return {
     header_insights: {
-      resilience_insight:
-        "Your journal entries show a thoughtful approach to processing experiences and emotions, demonstrating your commitment to personal growth and self-reflection.",
-      primary_motivation: "self-improvement",
-      growth_indicator: "mindful reflection",
-      emotional_tone:
-        "Your writing reveals a balanced emotional perspective, with awareness of both challenges and positive moments in your daily life.",
+      resilience_insight: "We're having trouble processing your journal entry right now. This sometimes happens when we want to make sure we give you the most thoughtful and appropriate response possible.",
+      primary_motivation: "understanding",
+      growth_indicator: "gentle patience",
+      emotional_tone: "Your journal entry is important to us, and we want to provide you with meaningful insights that truly reflect your experience."
     },
     wellbeing_insights: {
-      main_observation:
-        "Based on your journal entry, you demonstrate good emotional awareness and a proactive approach to managing your daily experiences. This mindful approach to journaling itself shows a commitment to your mental well-being.",
+      main_observation: "We encountered an issue while analyzing your journal entry. This could be due to various technical reasons, and we want to ensure you receive insights that are both helpful and appropriate for your specific situation.",
       actionable_advice: [
         {
-          title: "Continue Regular Reflection",
-          description:
-            "Your practice of regular journaling is valuable for emotional processing. Consider setting aside a specific time each day for this reflective practice to maintain consistency.",
+          title: "Try Again",
+          description: "Please try generating your insights again. Sometimes a fresh attempt helps our system provide better, more personalized responses to your journal entry."
         },
         {
-          title: "Celebrate Small Wins",
-          description:
-            "Make sure to acknowledge and celebrate small positive moments and achievements in your daily life, as these contribute significantly to overall well-being.",
-        },
-      ],
+          title: "Take a Moment",
+          description: "If you're comfortable, you might also take a moment to reflect on your entry yourself while we work on providing you with AI-generated insights."
+        }
+      ]
     },
     coping_strategies: {
-      main_observation:
-        "Your journal writing demonstrates that you're actively working through your experiences and emotions, which is a healthy coping mechanism in itself.",
+      main_observation: "While we work on generating your personalized insights, remember that the act of journaling itself is a valuable coping strategy that shows your commitment to self-reflection and emotional wellbeing.",
       recommended_strategies: [
         {
-          title: "Mindful Breathing",
-          description:
-            "When facing challenging moments, try incorporating brief mindful breathing exercises to help center yourself and gain clarity before responding to situations.",
+          title: "Continue Journaling",
+          description: "Keep writing in your journal as you feel comfortable. The process of putting thoughts and feelings into words is beneficial regardless of the AI insights."
         },
         {
-          title: "Gratitude Practice",
-          description:
-            "Consider ending each journal entry with three things you're grateful for, no matter how small, to help maintain a balanced perspective during difficult times.",
-        },
-      ],
+          title: "Patience with Technology",
+          description: "Technical hiccups happen sometimes. Being gentle with yourself during these moments is a form of self-compassion that's worth practicing."
+        }
+      ]
     },
     goals: {
-      main_observation:
-        "Your commitment to journaling shows a desire for personal growth and self-understanding, which forms a strong foundation for setting and achieving meaningful goals.",
+      main_observation: "Your goal of seeking insights from your journal shows a desire for growth and self-understanding. This intention itself is meaningful, even when technology doesn't cooperate perfectly.",
       suggested_goals: [
         {
-          title: "Emotional Awareness",
-          description:
-            "Continue developing your ability to identify and name your emotions as they arise, which will help you respond more thoughtfully to various situations.",
+          title: "Retry When Ready",
+          description: "When you feel ready, try generating insights again. There's no rush - your journal and your reflections will be here when you're ready to revisit them."
         },
         {
-          title: "Consistent Self-Care",
-          description:
-            "Establish a regular self-care routine that includes activities that bring you joy and help you recharge, making this as important as other daily responsibilities.",
-        },
-      ],
+          title: "Self-Reflection",
+          description: "Consider what insights you might draw from your journal entry on your own. Sometimes our own reflections can be just as valuable as AI-generated ones."
+        }
+      ]
     },
     emotional_data: {
-      dominant_emotions: dominantEmotions,
-      emotional_intensity: "medium",
-      growth_areas: ["self-compassion", "stress management"],
-      strengths: ["self-awareness", "commitment to growth"],
-    },
+      dominant_emotions: ["curious", "patient", "hopeful"],
+      emotional_intensity: "Medium",
+      growth_areas: ["patience", "self-compassion"],
+      strengths: ["persistence", "self-reflection"]
+    }
   };
 }
