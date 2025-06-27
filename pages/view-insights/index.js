@@ -885,276 +885,196 @@ export default function ViewInsights({ user }) {
             </Box>
 
             {/* Emotional Data Summary - Redesigned */}
-            <Box sx={{ mt: 8, mb: 4 }}>
-              <Card
+            <Box sx={{ mt: 8, mb: 8 }}>
+              {/* Section Title */}
+              <Typography
                 sx={{
-                  borderRadius: "20px",
-                  border: "1px solid #e0e0e0",
-                  background: "linear-gradient(135deg, #f8f9ff 0%, #fff 100%)",
-                  boxShadow: "0 4px 20px rgba(45, 27, 107, 0.08)",
-                  overflow: "hidden",
-                  position: "relative",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: "4px",
-                    background:
-                      "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
-                  },
+                  fontSize: { xs: "1.4rem", sm: "1.6rem", md: "2rem" },
+                  fontWeight: 500,
+                  color: "#2D1B6B",
+                  fontFamily: poppins.style.fontFamily,
+                  mb: { xs: 0.5, sm: 0.8, md: 1 },
+                  textAlign: "center",
                 }}
               >
-                <CardContent sx={{ p: { xs: 3, sm: 4, md: 5 } }}>
-                  <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
-                    <Box
-                      sx={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: "12px",
-                        background:
-                          "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        mr: 2,
-                      }}
-                    >
-                      <svg
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="white"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                      </svg>
+                Emotional Overview
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" },
+                  fontWeight: 400,
+                  color: "#2D1B6B",
+                  fontFamily: poppins.style.fontFamily,
+                  mb: { xs: 1.5, sm: 2, md: 2 },
+                  textAlign: "center",
+                }}
+              >
+                A comprehensive analysis of your emotional patterns and strengths.
+              </Typography>
+
+              {/* Dominant Emotions Section */}
+              <Box
+                sx={{
+                  mt: { xs: 1.5, sm: 2, md: 2 },
+                  mb: { xs: 2, sm: 2.5, md: 3 },
+                  border: "1px solid black",
+                  borderRadius: { xs: "8px", sm: "10px" },
+                  padding: { xs: "1rem", sm: "1.5rem", md: "2rem" },
+                  backgroundColor: "rgba(213, 212, 244, 0.3)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: { xs: 1.5, sm: 2, md: 3 },
+                  minHeight: { xs: "120px", sm: "160px", md: "180px" },
+                  flexDirection: { xs: "column", sm: "row" },
+                }}
+              >
+                <Box
+                  sx={{
+                    textAlign: "center",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontSize: { xs: "0.9rem", sm: "1.1rem", md: "1.4rem" },
+                      fontWeight: 300,
+                      color: "#2D1B6B",
+                      fontFamily: poppins.style.fontFamily,
+                      lineHeight: { xs: "1.4", sm: "1.5" },
+                      mb: 2,
+                    }}
+                  >
+                    Your emotional landscape reveals the core feelings that shaped this journal entry, 
+                    providing insight into your current state of mind.
+                  </Typography>
+                  
+                  {/* Dominant Emotions Display */}
+                  {insights.emotional_data.dominant_emotions &&
+                  insights.emotional_data.dominant_emotions.length > 0 ? (
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, justifyContent: "center" }}>
+                      {insights.emotional_data.dominant_emotions.map((emotion, index) => (
+                        <Chip
+                          key={index}
+                          label={emotion.charAt(0).toUpperCase() + emotion.slice(1)} // Capitalize first letter
+                          sx={{
+                            background: "linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)",
+                            color: "#1565c0",
+                            fontFamily: poppins.style.fontFamily,
+                            fontWeight: 500,
+                            borderRadius: "12px",
+                            px: 1.5,
+                            py: 0.8,
+                            border: "1px solid #90caf9",
+                            fontSize: { xs: "0.85rem", sm: "0.9rem" },
+                            "&:hover": {
+                              background: "linear-gradient(135deg, #bbdefb 0%, #90caf9 100%)",
+                            },
+                          }}
+                        />
+                      ))}
                     </Box>
+                  ) : (
                     <Typography
-                      variant="h5"
                       sx={{
-                        fontFamily: poppins.style.fontFamily,
-                        color: "#2D1B6B",
-                        fontWeight: 600,
-                        fontSize: { xs: "1.25rem", sm: "1.5rem" },
-                      }}
-                    >
-                      Emotional Overview
-                    </Typography>
-                  </Box>
-
-                  <Grid container spacing={4}>
-                    {/* Dominant Emotions */}
-                    <Grid item xs={12} md={6}>
-                      <Box sx={{ mb: 3 }}>
-                        <Typography
-                          variant="subtitle1"
-                          sx={{
-                            mb: 1,
-                            color: "#2D1B6B",
-                            fontFamily: poppins.style.fontFamily,
-                            fontWeight: 600,
-                            fontSize: "1.1rem",
-                          }}
-                        >
-                          Dominant Emotions
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            mb: 2,
-                            color: "#666",
-                            fontFamily: poppins.style.fontFamily,
-                            fontSize: "0.85rem",
-                            lineHeight: 1.4,
-                          }}
-                        >
-                          The primary emotions identified in your journal entry
-                        </Typography>
-                        {insights.emotional_data.dominant_emotions &&
-                        insights.emotional_data.dominant_emotions.length > 0 ? (
-                          <Box
-                            sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}
-                          >
-                            {insights.emotional_data.dominant_emotions.map(
-                              (emotion, index) => (
-                                <Chip
-                                  key={index}
-                                  label={emotion}
-                                  sx={{
-                                    background:
-                                      "linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)",
-                                    color: "#1565c0",
-                                    fontFamily: poppins.style.fontFamily,
-                                    fontWeight: 500,
-                                    borderRadius: "12px",
-                                    px: 1,
-                                    py: 0.5,
-                                    border: "1px solid #90caf9",
-                                    "&:hover": {
-                                      background:
-                                        "linear-gradient(135deg, #bbdefb 0%, #90caf9 100%)",
-                                    },
-                                  }}
-                                />
-                              )
-                            )}
-                          </Box>
-                        ) : (
-                          <Typography
-                            sx={{
-                              color: "#666",
-                              fontStyle: "italic",
-                              fontFamily: poppins.style.fontFamily,
-                              lineHeight: 1.6,
-                              p: 2,
-                              backgroundColor: "#f8f9fa",
-                              borderRadius: "12px",
-                              border: "1px dashed #ddd",
-                            }}
-                          >
-                            {getEmptyStateMessage("dominant_emotions")}
-                          </Typography>
-                        )}
-                      </Box>
-                    </Grid>
-
-                    {/* Strengths */}
-                    <Grid item xs={12} md={6}>
-                      <Box sx={{ mb: 3 }}>
-                        <Typography
-                          variant="subtitle1"
-                          sx={{
-                            mb: 1,
-                            color: "#2D1B6B",
-                            fontFamily: poppins.style.fontFamily,
-                            fontWeight: 600,
-                            fontSize: "1.1rem",
-                          }}
-                        >
-                          Personal Strengths
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            mb: 2,
-                            color: "#666",
-                            fontFamily: poppins.style.fontFamily,
-                            fontSize: "0.85rem",
-                            lineHeight: 1.4,
-                          }}
-                        >
-                          Positive qualities and abilities reflected in your
-                          writing
-                        </Typography>
-                        {insights.emotional_data.strengths &&
-                        insights.emotional_data.strengths.length > 0 ? (
-                          <Box
-                            sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}
-                          >
-                            {insights.emotional_data.strengths.map(
-                              (strength, index) => (
-                                <Chip
-                                  key={index}
-                                  label={strength}
-                                  sx={{
-                                    background:
-                                      "linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)",
-                                    color: "#2e7d32",
-                                    fontFamily: poppins.style.fontFamily,
-                                    fontWeight: 500,
-                                    borderRadius: "12px",
-                                    px: 1,
-                                    py: 0.5,
-                                    border: "1px solid #a5d6a7",
-                                    "&:hover": {
-                                      background:
-                                        "linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%)",
-                                    },
-                                  }}
-                                />
-                              )
-                            )}
-                          </Box>
-                        ) : (
-                          <Typography
-                            sx={{
-                              color: "#666",
-                              fontStyle: "italic",
-                              fontFamily: poppins.style.fontFamily,
-                              lineHeight: 1.6,
-                              p: 2,
-                              backgroundColor: "#f8f9fa",
-                              borderRadius: "12px",
-                              border: "1px dashed #ddd",
-                            }}
-                          >
-                            {getEmptyStateMessage("strengths")}
-                          </Typography>
-                        )}
-                      </Box>
-                    </Grid>
-                  </Grid>
-
-                  {/* Emotional Intensity */}
-                  <Box sx={{ mt: 4, pt: 4, borderTop: "1px solid #f0f0f0" }}>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{
-                        mb: 1,
-                        color: "#2D1B6B",
-                        fontFamily: poppins.style.fontFamily,
-                        fontWeight: 600,
-                        fontSize: "1.1rem",
-                      }}
-                    >
-                      Emotional Intensity
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        mb: 2,
                         color: "#666",
+                        fontStyle: "italic",
                         fontFamily: poppins.style.fontFamily,
-                        fontSize: "0.85rem",
-                        lineHeight: 1.4,
+                        lineHeight: 1.6,
+                        p: 2,
+                        backgroundColor: "#f8f9fa",
+                        borderRadius: "12px",
+                        border: "1px dashed #ddd",
+                        fontSize: { xs: "0.9rem", sm: "1rem" },
                       }}
                     >
-                      How strongly you're experiencing emotions in this entry
+                      {getEmptyStateMessage("dominant_emotions")}
                     </Typography>
-                    <Box
-                      sx={{
-                        p: 3,
-                        borderRadius: "16px",
-                        background:
-                          "linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)",
-                        border: "1px solid #ffcc02",
-                      }}
-                    >
-                      <Typography
-                        sx={{
-                          color: "#ef6c00",
-                          fontFamily: poppins.style.fontFamily,
-                          lineHeight: 1.6,
-                          fontSize: "1rem",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {insights.emotional_data.emotional_intensity
-                          ? insights.emotional_data.emotional_intensity
-                              .charAt(0)
-                              .toUpperCase() +
-                            insights.emotional_data.emotional_intensity.slice(1)
-                          : getEmptyStateMessage("emotional_intensity")}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
+                  )}
+                </Box>
+              </Box>
+
+              {/* Personal Strengths */}
+              <Box sx={{ mt: { xs: 2, sm: 2.5, md: 3 }, mb: { xs: 2, sm: 2.5, md: 3 }, textAlign: "center" }}>
+                <Typography
+                  sx={{
+                    fontSize: { xs: "1rem", sm: "1.1rem", md: "20px" },
+                    fontWeight: 400,
+                    color: "#2D1B6B",
+                    mb: { xs: 0.5, sm: 0.8, md: 1 },
+                    backgroundColor: "rgba(213, 212, 244, 0.3)",
+                    fontFamily: poppins.style.fontFamily,
+                    padding: { xs: "0.5rem", sm: "0.6rem", md: "0.8rem" },
+                    borderRadius: { xs: "4px", sm: "6px" },
+                  }}
+                >
+                  Personal Strengths
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: { xs: "0.9rem", sm: "1rem", md: "20px" },
+                    fontWeight: 300,
+                    color: "#2D1B6B",
+                    fontFamily: poppins.style.fontFamily,
+                    lineHeight: { xs: "1.5", sm: "1.6" },
+                    padding: { xs: "0.5rem 0", sm: "0.6rem 0" },
+                  }}
+                >
+                  {insights.emotional_data.strengths && insights.emotional_data.strengths.length > 0 ? (
+                    <>
+                      You're showing the following strengths based on this entry:&nbsp;
+                      <strong>
+                        {insights.emotional_data.strengths
+                          .map(strength => strength.charAt(0).toUpperCase() + strength.slice(1))
+                          .join(", ")}
+                      </strong>
+                      . These strengths reflect the qualities that are helping you face what you're going through.
+                    </>
+                  ) : (
+                    "Your personal strengths could not be determined clearly from this entry. You may try regenerating insights for a more tailored reflection."
+                  )}
+                </Typography>
+              </Box>
+
+              {/* Emotional Intensity */}
+              <Box sx={{ mt: { xs: 2, sm: 2.5, md: 3 }, mb: { xs: 2, sm: 2.5, md: 3 }, textAlign: "center" }}>
+                <Typography
+                  sx={{
+                    fontSize: { xs: "1rem", sm: "1.1rem", md: "20px" },
+                    fontWeight: 400,
+                    color: "#2D1B6B",
+                    mb: { xs: 0.5, sm: 0.8, md: 1 },
+                    backgroundColor: "rgba(213, 212, 244, 0.3)",
+                    fontFamily: poppins.style.fontFamily,
+                    padding: { xs: "0.5rem", sm: "0.6rem", md: "0.8rem" },
+                    borderRadius: { xs: "4px", sm: "6px" },
+                  }}
+                >
+                  Emotional Intensity
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: { xs: "0.9rem", sm: "1rem", md: "20px" },
+                    fontWeight: 300,
+                    color: "#2D1B6B",
+                    fontFamily: poppins.style.fontFamily,
+                    lineHeight: { xs: "1.5", sm: "1.6" },
+                    padding: { xs: "0.5rem 0", sm: "0.6rem 0" },
+                  }}
+                >
+                  {insights.emotional_data.emotional_intensity ? (
+                    <>
+                      Your emotional intensity for this entry is:&nbsp;
+                      <strong>
+                        {insights.emotional_data.emotional_intensity.charAt(0).toUpperCase() +
+                          insights.emotional_data.emotional_intensity.slice(1)}
+                      </strong>
+                      . This reflects how strongly you're experiencing your emotions in this moment.
+                    </>
+                  ) : (
+                    "Your emotional intensity level could not be determined for this entry. Please try regenerating the insights to receive a clearer reflection."
+                  )}
+                </Typography>
+              </Box>
             </Box>
 
             {/* Insights Content */}
