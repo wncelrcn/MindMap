@@ -15,12 +15,14 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import Navbar from "@/components/layout/navbar";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import RecentJournal from "@/components/cards/recent_journal";
 import { createClient } from "@/utils/supabase/server-props";
 import { useRouter } from "next/router";
 import InfoIcon from "@mui/icons-material/Info";
+import axios from "axios";
+import BadgeUnlockModal from "@/components/BadgeUnlockModal";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -33,6 +35,7 @@ const raleway = Raleway({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   variable: "--font-raleway",
 });
+
 const quicksand = Quicksand({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
@@ -59,6 +62,7 @@ export async function getServerSideProps(context) {
     },
   };
 }
+
 import { useRecap } from "@/contexts/RecapContext";
 
 export default function DashboardPage({ user }) {
@@ -67,10 +71,119 @@ export default function DashboardPage({ user }) {
   const [user_UID, setUser_UID] = useState(user.id);
   const [recentJournals, setRecentJournals] = useState([]);
   const [permaModalOpen, setPermaModalOpen] = useState(false);
+  
+  // Badge modal state
+  const [badgeQueue, setBadgeQueue] = useState([]);
+  const [currentBadge, setCurrentBadge] = useState(null);
+  const [showBadgeModal, setShowBadgeModal] = useState(false);
+  const [isCheckingBadges, setIsCheckingBadges] = useState(false);
 
   // Use recap context instead of local state
   const { recapData, recapLoading } = useRecap();
 
+  // Session storage helpers with error handling
+  const getShownBadges = useCallback(() => {
+    try {
+      const stored = sessionStorage.getItem("shownBadges");
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.warn("Error reading shown badges from session storage:", error);
+      return [];
+    }
+  }, []);
+
+  const setShownBadges = useCallback((badges) => {
+    try {
+      sessionStorage.setItem("shownBadges", JSON.stringify(badges));
+    } catch (error) {
+      console.warn("Error saving shown badges to session storage:", error);
+    }
+  }, []);
+
+  // Badge checking function with improved error handling
+  const checkNewBadges = useCallback(async (retryCount = 0) => {
+    if (isCheckingBadges) return; // Prevent concurrent badge checks
+    
+    setIsCheckingBadges(true);
+    
+    try {
+      console.log("Checking for new badges...");
+      const response = await axios.post("/api/badges/check-unlock", {}, {
+        timeout: 10000, // 10 second timeout
+      });
+
+      if (response.data.success) {
+        // Fix: Use 'newlyUnlocked' instead of 'newBadges'
+        const newBadges = response.data.newlyUnlocked || [];
+        console.log("New badges found:", newBadges);
+
+        if (newBadges.length > 0) {
+          const shownBadges = getShownBadges();
+          
+          // Fix: Use 'badge_id' instead of 'id'
+          const unseenBadges = newBadges.filter(
+            (badge) => !shownBadges.includes(badge.badge_id)
+          );
+
+          if (unseenBadges.length > 0) {
+            console.log("Unseen badges:", unseenBadges);
+            
+            // Add all unseen badges to queue
+            setBadgeQueue(prev => [...prev, ...unseenBadges]);
+            
+            // Mark all badges as shown to prevent duplicates
+            const newShownBadges = [...shownBadges, ...unseenBadges.map(b => b.badge_id)];
+            setShownBadges(newShownBadges);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error checking badges:", error);
+      
+      // Retry logic for network failures
+      if (retryCount < 2 && (error.code === 'ECONNABORTED' || error.response?.status >= 500)) {
+        console.log(`Retrying badge check (attempt ${retryCount + 1})...`);
+        setTimeout(() => checkNewBadges(retryCount + 1), 2000);
+      }
+    } finally {
+      setIsCheckingBadges(false);
+    }
+  }, [isCheckingBadges, getShownBadges, setShownBadges]);
+
+  // Process badge queue - show one badge at a time
+  useEffect(() => {
+    if (badgeQueue.length > 0 && !showBadgeModal) {
+      const nextBadge = badgeQueue[0];
+      setBadgeQueue(prev => prev.slice(1));
+      setCurrentBadge(nextBadge);
+      setShowBadgeModal(true);
+    }
+  }, [badgeQueue, showBadgeModal]);
+
+  // Check for badges on page load
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      checkNewBadges();
+    }, 1000); // Small delay to ensure page is loaded
+
+    return () => clearTimeout(timeoutId);
+  }, [checkNewBadges]);
+
+  // Listen for badge unlock events from other parts of the app
+  useEffect(() => {
+    const handleBadgeUnlock = (event) => {
+      console.log("Badge unlock event received:", event.detail);
+      checkNewBadges();
+    };
+
+    window.addEventListener('badgeUnlocked', handleBadgeUnlock);
+    
+    return () => {
+      window.removeEventListener('badgeUnlocked', handleBadgeUnlock);
+    };
+  }, [checkNewBadges]);
+
+  // PERMA Modal handlers
   const handleOpenPermaModal = () => {
     setPermaModalOpen(true);
   };
@@ -88,10 +201,22 @@ export default function DashboardPage({ user }) {
     );
   };
 
+  // Badge modal handlers
+  const handleCloseBadgeModal = () => {
+    setShowBadgeModal(false);
+    setCurrentBadge(null);
+  };
+
+  const handleViewBadges = () => {
+    setShowBadgeModal(false);
+    setCurrentBadge(null);
+    router.push("/profile#badges");
+  };
+
+  // Fetch recent journals
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch recent journals
         const res = await fetch("/api/fetch-journal/recent_journal", {
           method: "POST",
           headers: {
@@ -549,6 +674,14 @@ export default function DashboardPage({ user }) {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Badge Unlock Modal */}
+      <BadgeUnlockModal
+        open={showBadgeModal}
+        badge={currentBadge}
+        onClose={handleCloseBadgeModal}
+        onViewBadges={handleViewBadges}
+      />
     </>
   );
 }
