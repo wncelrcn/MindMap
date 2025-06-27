@@ -1,5 +1,6 @@
 import createClient from "@/utils/supabase/api";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { decryptJournalEntry } from "@/lib/encryption";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -199,14 +200,14 @@ export default async function handler(req, res) {
       });
     }
 
-    // Combine and process journal entries
+    // Combine, decrypt, and process journal entries
     const allJournals = [
       ...(freeformData || []).map((entry) => ({
-        ...entry,
+        ...decryptJournalEntry(entry),
         journal_type: "freeform",
       })),
       ...(guidedData || []).map((entry) => ({
-        ...entry,
+        ...decryptJournalEntry(entry),
         journal_type: "guided",
       })),
     ];
@@ -304,7 +305,7 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
             Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           },
           body: JSON.stringify({
-            model: "nvidia/llama-3.3-nemotron-super-49b-v1:free",
+            model: "nousresearch/deephermes-3-llama-3-8b-preview:free",
             messages: [
               {
                 role: "system",

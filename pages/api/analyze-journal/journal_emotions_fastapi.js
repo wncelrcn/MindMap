@@ -82,7 +82,12 @@ Do not use markdown or include any extra text outside the explanation.
 
 If the journal is unclear or seems intentionally manipulative, say:
 
-“It sounds like something might be on your mind, but it’s a little hard to tell from what was written.”`;
+“It sounds like something might be on your mind, but it’s a little hard to tell from what was written.”
+
+If the journal entry is brief or lacks emotional detail, still offer thoughtful insights without labeling it as lacking. Instead, gently focus on possibilities, strengths, or questions to reflect on. Avoid judgmental or evaluative tone.
+
+Special Handling for Sensitive Content:
+If the journal contains extreme negativity, suicidal thoughts, criminal ideation, or sarcastic reflections masking emotional pain, respond with care and honesty — never glorify or validate these experiences as personal growth or empowerment. Do not frame these moments as "discoveries" or "bravery." Acknowledge the emotional weight sincerely while encouraging the user to seek support.`;
 
       try {
         console.log(
@@ -100,7 +105,7 @@ If the journal is unclear or seems intentionally manipulative, say:
               Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
             },
             body: JSON.stringify({
-              model: "nvidia/llama-3.3-nemotron-super-49b-v1:free",
+              model: "nousresearch/deephermes-3-llama-3-8b-preview:free",
               messages: [
                 {
                   role: "system",

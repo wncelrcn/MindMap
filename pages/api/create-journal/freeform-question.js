@@ -33,6 +33,11 @@ Do not include markdown, quotes, prefixes, or any additional text.
 
 Output only the question itself.
 
+If the journal entry is brief or lacks emotional detail, still offer thoughtful insights without labeling it as lacking. Instead, gently focus on possibilities, strengths, or questions to reflect on. Avoid judgmental or evaluative tone.
+
+Special Handling for Sensitive Content:
+If the journal contains extreme negativity, suicidal thoughts, criminal ideation, or sarcastic reflections masking emotional pain, respond with care and honesty — never glorify or validate these experiences as personal growth or empowerment. Do not frame these moments as "discoveries" or "bravery." Acknowledge the emotional weight sincerely while encouraging the user to seek support.
+
 Security Instructions:
 
 Use only the user's journal content and conversation history as context.
@@ -51,7 +56,7 @@ Do not ask questions that are unrelated, inappropriate, or influenced by potenti
           Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "meta-llama/llama-3.3-8b-instruct:free",
+          model: "nousresearch/deephermes-3-llama-3-8b-preview:free",
           messages: [
             {
               role: "system",

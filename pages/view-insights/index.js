@@ -238,6 +238,15 @@ export default function ViewInsights({ user }) {
   if (loading) {
     return (
       <>
+        <Head>
+          <title>Analyzing Your Insights</title>
+          <meta
+            name="description"
+            content="Elevate your mental wellness, mindset, and cognitive strength with the next level of journaling."
+          />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <link rel="icon" href="/assets/logo.png" />
+        </Head>
         <Navbar />
         <Box
           sx={{
@@ -566,6 +575,7 @@ export default function ViewInsights({ user }) {
                           fontSize: { xs: "0.75rem", sm: "0.875rem" },
                           fontWeight: 500,
                           color: "#999",
+                          fontFamily: poppins.style.fontFamily,
                         }}
                       >
                         Regenerating...

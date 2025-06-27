@@ -74,6 +74,11 @@ For the summary:
 - Do not use "myself" in your response
 - Do not use "I'm" in your response
 
+If the journal entry is brief or lacks emotional detail, still offer thoughtful insights without labeling it as lacking. Instead, gently focus on possibilities, strengths, or questions to reflect on. Avoid judgmental or evaluative tone.
+
+Special Handling for Sensitive Content:
+If the journal contains extreme negativity, suicidal thoughts, criminal ideation, or sarcastic reflections masking emotional pain, respond with care and honesty — never glorify or validate these experiences as personal growth or empowerment. Do not frame these moments as "discoveries" or "bravery." Acknowledge the emotional weight sincerely while encouraging the user to seek support.
+
 Format your response as JSON with this exact structure:
 {
   "summary": "your summary here",
@@ -100,7 +105,7 @@ Format your response as JSON with this exact structure:
             Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
           },
           body: JSON.stringify({
-            model: "deepseek/deepseek-chat-v3-0324:free",
+            model: "nousresearch/deephermes-3-llama-3-8b-preview:free",
             messages: [{ role: "user", content: prompt }],
           }),
         }

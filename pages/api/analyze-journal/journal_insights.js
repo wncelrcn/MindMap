@@ -1,5 +1,6 @@
 // pages/api/analyze-journal/journal_insights.js
 import { createClient } from "@/utils/supabase/server-props";
+import { decryptJournalEntry } from "@/lib/encryption";
 import axios from "axios";
 
 const FASTAPI_BASE_URL = process.env.NEXT_PUBLIC_FASTAPI_BASE_URL;
@@ -55,13 +56,16 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: "Failed to fetch journal entry" });
       }
 
+      // Decrypt the journal entry before processing
+      const decryptedEntry = decryptJournalEntry(freeformEntry);
+
       // Update this part to match your database structure
       journalContent =
-        freeformEntry.journal_entry?.default || freeformEntry.journal_entry;
+        decryptedEntry.journal_entry?.default || decryptedEntry.journal_entry;
       journalMetadata = {
-        created_at: freeformEntry.date_created,
-        mood: freeformEntry.mood,
-        tags: freeformEntry.tags || [],
+        created_at: decryptedEntry.date_created,
+        mood: decryptedEntry.mood,
+        tags: decryptedEntry.tags || [],
       };
     } else if (journalType === "guided") {
       const { data: guidedEntry, error: guidedError } = await supabase
@@ -75,9 +79,12 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: "Failed to fetch journal entry" });
       }
 
+      // Decrypt the journal entry before processing
+      const decryptedGuidedEntry = decryptJournalEntry(guidedEntry);
+
       // Update guided journal content extraction
-      const entries = Array.isArray(guidedEntry.journal_entry)
-        ? guidedEntry.journal_entry
+      const entries = Array.isArray(decryptedGuidedEntry.journal_entry)
+        ? decryptedGuidedEntry.journal_entry
         : [];
 
       journalContent = entries
@@ -85,7 +92,7 @@ export default async function handler(req, res) {
         .join("\n\n");
 
       journalMetadata = {
-        created_at: guidedEntry.date_created,
+        created_at: decryptedGuidedEntry.date_created,
         prompts_answered: entries.length,
         session_type: "guided",
       };
@@ -178,7 +185,7 @@ export default async function handler(req, res) {
 async function detectEmotionsWithFastAPI(journalContent) {
   try {
     console.log("Analyzing emotions using FastAPI backend...");
-    
+
     // Process journal text the same way as the original
     let journalString = "";
     if (Array.isArray(journalContent)) {
@@ -204,14 +211,16 @@ async function detectEmotionsWithFastAPI(journalContent) {
         headers: {
           "Content-Type": "application/json",
         },
-        timeout: 120000, // 2 minutes timeout for insights generation
+        timeout: 300000, // 5 minutes timeout for insights generation
       }
     );
 
     const { emotions, success } = emotionResponse.data;
 
     if (!success || !Array.isArray(emotions)) {
-      console.log("Invalid response from FastAPI backend for emotion detection");
+      console.log(
+        "Invalid response from FastAPI backend for emotion detection"
+      );
       return [];
     }
 
@@ -221,15 +230,19 @@ async function detectEmotionsWithFastAPI(journalContent) {
     // Enhanced console logging with journal content
     console.log("=== EMOTION DETECTION RESULTS ===");
     console.log("Journal Content:");
-    console.log(journalString.substring(0, 200) + (journalString.length > 200 ? "..." : ""));
+    console.log(
+      journalString.substring(0, 200) +
+        (journalString.length > 200 ? "..." : "")
+    );
     console.log("\nTop emotions detected:");
     topEmotions.forEach((emotion, index) => {
-      console.log(`${index + 1}. ${emotion.label}: ${Math.round(emotion.score * 100)}%`);
+      console.log(
+        `${index + 1}. ${emotion.label}: ${Math.round(emotion.score * 100)}%`
+      );
     });
     console.log("================================");
 
-    return topEmotions.map(emotion => emotion.label);
-
+    return topEmotions.map((emotion) => emotion.label);
   } catch (error) {
     console.error("Error detecting emotions with FastAPI:", error.message);
     // Return empty array on error, fallback emotions will be used in generateInsights
@@ -237,11 +250,17 @@ async function detectEmotionsWithFastAPI(journalContent) {
   }
 }
 
-async function generateInsights(journalContent, journalType, metadata, detectedEmotions = []) {
+async function generateInsights(
+  journalContent,
+  journalType,
+  metadata,
+  detectedEmotions = []
+) {
   // Use detected emotions or fallback to default ones
-  const dominantEmotions = detectedEmotions.length > 0 
-    ? detectedEmotions 
-    : ["reflective", "hopeful", "thoughtful"];
+  const dominantEmotions =
+    detectedEmotions.length > 0
+      ? detectedEmotions
+      : ["reflective", "hopeful", "thoughtful"];
 
   const prompt = `You are a thoughtful and empathetic therapist assisting users with emotional reflection through AI-assisted journaling. Your task is to analyze journal entries and generate meaningful insights that encourage self-awareness, personal growth, and well-being.
 
@@ -252,9 +271,15 @@ ${journalContent}
 
 Journal Type: ${journalType}
 Entry Date: ${metadata.created_at}
-${journalType === 'freeform' ? `Mood: ${metadata.mood || 'Not specified'}` : `Session Type: ${metadata.session_type}`}
+${
+  journalType === "freeform"
+    ? `Mood: ${metadata.mood || "Not specified"}`
+    : `Session Type: ${metadata.session_type}`
+}
 
-**IMPORTANT: The dominant emotions detected from this journal entry are: ${dominantEmotions.join(', ')}**
+**IMPORTANT: The dominant emotions detected from this journal entry are: ${dominantEmotions.join(
+    ", "
+  )}**
 Please use these specific emotions in your analysis and ensure they are reflected in the "dominant_emotions" field exactly as provided.
 
 Please analyze the journal entry and provide supportive insights based on the following focus areas:
@@ -289,7 +314,9 @@ Maintain these important stylistic and ethical guidelines:
 - Always provide helpful feedback, even when content is vague
 - Keep "growth_indicator" to just **1-2 meaningful words**
 
-Now generate a complete response in the EXACT JSON format below:
+**CRITICAL: Your response must be ONLY valid JSON. Do not include any text before or after the JSON. Do not wrap it in markdown code blocks. Start your response with { and end with }.**
+
+Generate a complete response in the EXACT JSON format below:
 
 {
   "header_insights": {
@@ -338,7 +365,9 @@ Now generate a complete response in the EXACT JSON format below:
     ]
   },
   "emotional_data": {
-    "dominant_emotions": [${dominantEmotions.map(emotion => `"${emotion}"`).join(', ')}],
+    "dominant_emotions": [${dominantEmotions
+      .map((emotion) => `"${emotion}"`)
+      .join(", ")}],
     "emotional_intensity": "Low/Medium/High",
     "growth_areas": ["area1", "area2"],
     "strengths": ["strength1", "strength2"]
@@ -348,25 +377,28 @@ Now generate a complete response in the EXACT JSON format below:
 Ensure that the response is empathetic, self-reflective, and empowering. Do not be overly clinical. Support emotional exploration and personal insight in a caring and accessible tone.`;
 
   try {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        "X-Title": "Journal Insights App",
-      },
-      body: JSON.stringify({
-        model: "nvidia/llama-3.3-nemotron-super-49b-v1:free",
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        temperature: 0.7,
-        max_tokens: 2000,
-      }),
-    });
+    const response = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json",
+          "X-Title": "Journal Insights App",
+        },
+        body: JSON.stringify({
+          model: "nousresearch/deephermes-3-llama-3-8b-preview:free",
+          messages: [
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          temperature: 0.7,
+          max_tokens: 50000,
+        }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`OpenRouter API error: ${response.status}`);
@@ -394,16 +426,54 @@ Ensure that the response is empathetic, self-reflective, and empowering. Do not 
     } catch (parseError) {
       console.error("Initial parse error:", parseError);
       console.log("Raw insights text:", insightsText);
+      console.log("Text length:", insightsText.length);
 
-      // Second attempt: try to extract JSON if wrapped in other text
-      const jsonMatch = insightsText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const extractedJson = JSON.parse(jsonMatch[0]);
-        if (extractedJson.header_insights && extractedJson.wellbeing_insights) {
-          return extractedJson;
+      // Check if the response appears to be truncated
+      const isTruncated =
+        !insightsText.trim().endsWith("}") ||
+        (insightsText.includes('"actionable_advice":') &&
+          !insightsText.includes('"emotional_data"'));
+
+      if (isTruncated) {
+        console.warn(
+          "Response appears to be truncated - using fallback insights"
+        );
+        throw new Error("Response truncated, using fallback");
+      }
+
+      // Second attempt: try to extract JSON from markdown code blocks
+      const codeBlockMatch = insightsText.match(/```json\s*([\s\S]*?)\s*```/);
+      if (codeBlockMatch) {
+        try {
+          const extractedJson = JSON.parse(codeBlockMatch[1].trim());
+          if (
+            extractedJson.header_insights &&
+            extractedJson.wellbeing_insights
+          ) {
+            return extractedJson;
+          }
+        } catch (codeBlockError) {
+          console.error("Code block parse error:", codeBlockError);
         }
       }
 
+      // Third attempt: try to extract JSON from curly braces
+      const jsonMatch = insightsText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          const extractedJson = JSON.parse(jsonMatch[0]);
+          if (
+            extractedJson.header_insights &&
+            extractedJson.wellbeing_insights
+          ) {
+            return extractedJson;
+          }
+        } catch (bracesError) {
+          console.error("Braces extraction error:", bracesError);
+        }
+      }
+
+      console.warn("All parsing attempts failed - using fallback insights");
       throw parseError;
     }
   } catch (error) {
@@ -412,7 +482,9 @@ Ensure that the response is empathetic, self-reflective, and empowering. Do not 
   }
 }
 
-function getFallbackInsights(dominantEmotions = ["reflective", "hopeful", "thoughtful"]) {
+function getFallbackInsights(
+  dominantEmotions = ["reflective", "hopeful", "thoughtful"]
+) {
   return {
     header_insights: {
       resilience_insight:
