@@ -44,7 +44,6 @@ export default function Navbar() {
       if (error) throw error;
       router.push("/");
     } catch (error) {
-      console.error("Error logging out:", error);
       alert("Logout failed");
     }
   };

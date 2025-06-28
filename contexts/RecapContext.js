@@ -19,7 +19,6 @@ export const RecapProvider = ({ children, user }) => {
   useEffect(() => {
     // Only run if user exists, has changed, and we haven't initialized for this user
     if (user && user.id && user.id !== currentUserId && !recapLoading) {
-      console.log("Initializing recap for user:", user.id);
       setCurrentUserId(user.id);
       setRecapInitialized(false);
       fetchRecap();
@@ -27,7 +26,6 @@ export const RecapProvider = ({ children, user }) => {
   }, [user?.id, currentUserId, recapLoading]);
 
   const fetchRecap = async () => {
-    console.log("fetchRecap called, setting loading to true");
     setRecapLoading(true);
     try {
       const response = await fetch("/api/recap/recap", {
@@ -41,11 +39,8 @@ export const RecapProvider = ({ children, user }) => {
       if (response.ok) {
         const data = await response.json();
         setRecapData(data);
-        console.log("Recap data loaded:", data);
 
         if (!data.existingRecap && data.analysisData) {
-          console.log("No existing recap found, analyzing with AI...");
-
           try {
             const analyzerResponse = await fetch("/api/recap/recap-analyzer", {
               method: "POST",
@@ -62,24 +57,18 @@ export const RecapProvider = ({ children, user }) => {
 
             if (analyzerResponse.ok) {
               const analyzerData = await analyzerResponse.json();
-              console.log("AI Analysis Result:", analyzerData);
               setRecapData((prev) => ({
                 ...prev,
                 aiAnalysis: analyzerData,
               }));
             } else {
-              console.error("Failed to analyze with AI");
             }
-          } catch (error) {
-            console.error("Error calling recap analyzer:", error);
-          }
+          } catch (error) {}
         }
       } else {
         const errorData = await response.json();
-        console.error("Failed to fetch recap:", errorData.message);
       }
     } catch (error) {
-      console.error("Error fetching recap:", error);
     } finally {
       setRecapLoading(false);
       setRecapInitialized(true);

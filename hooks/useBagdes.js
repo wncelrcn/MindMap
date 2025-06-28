@@ -1,23 +1,23 @@
 // hooks/useBadges.js
-import { useState, useEffect, useCallback } from 'react';
-import badgeService from '@/utils/badgeService';
+import { useState, useEffect, useCallback } from "react";
+import badgeService from "@/utils/badgeService";
 
 // Session storage helpers with error handling
 const getShownBadges = () => {
   try {
-    const stored = sessionStorage.getItem('shownBadges');
+    const stored = sessionStorage.getItem("shownBadges");
     return stored ? JSON.parse(stored) : [];
   } catch (error) {
-    console.warn('Error reading shown badges from session storage:', error);
+    console.warn("Error reading shown badges from session storage:", error);
     return [];
   }
 };
 
 const setShownBadges = (badges) => {
   try {
-    sessionStorage.setItem('shownBadges', JSON.stringify(badges));
+    sessionStorage.setItem("shownBadges", JSON.stringify(badges));
   } catch (error) {
-    console.warn('Error saving shown badges to session storage:', error);
+    console.warn("Error saving shown badges to session storage:", error);
   }
 };
 
@@ -30,18 +30,21 @@ export const useBadges = () => {
   // Handle new badge unlocks
   const handleBadgeUnlock = useCallback((newBadges) => {
     const shownBadges = getShownBadges();
-    
+
     // Filter out badges that have already been shown
     const unseenBadges = newBadges.filter(
-      badge => !shownBadges.includes(badge.badge_id)
+      (badge) => !shownBadges.includes(badge.badge_id)
     );
 
     if (unseenBadges.length > 0) {
       // Add to queue
-      setBadgeQueue(prev => [...prev, ...unseenBadges]);
-      
+      setBadgeQueue((prev) => [...prev, ...unseenBadges]);
+
       // Mark as shown
-      const newShownBadges = [...shownBadges, ...unseenBadges.map(b => b.badge_id)];
+      const newShownBadges = [
+        ...shownBadges,
+        ...unseenBadges.map((b) => b.badge_id),
+      ];
       setShownBadges(newShownBadges);
     }
   }, []);
@@ -50,7 +53,7 @@ export const useBadges = () => {
   useEffect(() => {
     if (badgeQueue.length > 0 && !showModal) {
       const nextBadge = badgeQueue[0];
-      setBadgeQueue(prev => prev.slice(1));
+      setBadgeQueue((prev) => prev.slice(1));
       setCurrentBadge(nextBadge);
       setShowModal(true);
     }
@@ -68,7 +71,6 @@ export const useBadges = () => {
     try {
       await badgeService.checkBadgeUnlocks();
     } catch (error) {
-      console.error('Failed to check badges:', error);
     } finally {
       setIsLoading(false);
     }
@@ -84,7 +86,7 @@ export const useBadges = () => {
     setShowModal(false);
     setCurrentBadge(null);
     // Return navigation function for flexibility
-    return () => window.location.href = '/profile#badges';
+    return () => (window.location.href = "/profile#badges");
   }, []);
 
   return {

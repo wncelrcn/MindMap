@@ -8,6 +8,7 @@ import {
 import { Raleway, Poppins, Quicksand } from "next/font/google";
 import NextImage from "next/image";
 import { badgeEffects } from "@/utils/helper/profile/badgeEffects";
+import { getBadgeImagePath } from "@/utils/helper/profile/badgeImages";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -182,9 +183,7 @@ const Badges = ({ badges, badgesLoading }) => {
                       }}
                     >
                       <NextImage
-                        src={
-                          badge.badges.image_url || "/assets/Group 47671.png"
-                        }
+                        src={getBadgeImagePath(badge.badges.name)}
                         alt={badge.badges.name}
                         fill
                         style={{ objectFit: "contain" }}

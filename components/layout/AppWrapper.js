@@ -18,7 +18,6 @@ export default function AppWrapper({ children }) {
         setUser(session?.user || null);
         setLoading(false);
         if (session?.user) {
-          console.log("Initial session found, user authenticated");
         }
       }
     };
@@ -29,8 +28,6 @@ export default function AppWrapper({ children }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
-
-      console.log("Auth event:", event);
 
       const newUser = session?.user || null;
       setUser(newUser);
