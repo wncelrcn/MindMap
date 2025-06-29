@@ -303,7 +303,7 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
             Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
           },
           body: JSON.stringify({
-            model: "nvidia/llama-3.3-nemotron-super-49b-v1",
+            model: "meta/llama-4-maverick-17b-128e-instruct",
             messages: [
               {
                 role: "system",
