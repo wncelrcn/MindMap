@@ -1,4 +1,3 @@
-// pages/api/analyze-journal/journal_insights.js
 import { createClient } from "@/utils/supabase/server-props";
 import { decryptJournalEntry } from "@/lib/encryption";
 import axios from "axios";
@@ -22,22 +21,19 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Missing required parameters" });
     }
 
-    // Create Supabase client
     const supabase = createClient({ req, res });
 
-    // First, check if insights already exist
     const { data: existingInsights, error: fetchError } = await supabase
       .from("insights")
-      .select("*") // Select all fields instead of just insight_id
+      .select("*")
       .eq("journal_id", journalId)
       .eq("journal_type", journalType)
       .single();
 
-    // Check if existing insights are null or empty and handle appropriately
     if (existingInsights && !forceRegenerate) {
-      // Check if the insights data is actually populated
-      const hasValidInsights = existingInsights.header_insights && 
-        existingInsights.wellbeing_insights && 
+      const hasValidInsights =
+        existingInsights.header_insights &&
+        existingInsights.wellbeing_insights &&
         Object.keys(existingInsights.header_insights).length > 0 &&
         Object.keys(existingInsights.wellbeing_insights).length > 0;
 
@@ -45,13 +41,12 @@ export default async function handler(req, res) {
         console.log("Found existing insights, returning...");
         return res.status(200).json({ insights: existingInsights });
       } else {
-        console.log("Found existing record but insights are empty/null, regenerating...");
-        // Continue to regenerate insights
+        console.log(
+          "Found existing record but insights are empty/null, regenerating..."
+        );
       }
     }
 
-    // If we get here, either there are no existing insights or we're forcing regeneration
-    // Fetch journal entry content
     let journalContent = "";
     let journalMetadata = {};
 
@@ -70,7 +65,6 @@ export default async function handler(req, res) {
       // Decrypt the journal entry before processing
       const decryptedEntry = decryptJournalEntry(freeformEntry);
 
-      // Update this part to match your database structure
       journalContent =
         decryptedEntry.journal_entry?.default || decryptedEntry.journal_entry;
       journalMetadata = {
@@ -126,9 +120,9 @@ export default async function handler(req, res) {
 
     // Check if insights generation returned null or empty
     if (!insights || Object.keys(insights).length === 0) {
-      return res.status(200).json({ 
+      return res.status(200).json({
         insights: getRetryPromptResponse(),
-        needsRetry: true 
+        needsRetry: true,
       });
     }
 
@@ -200,7 +194,6 @@ export default async function handler(req, res) {
   }
 }
 
-// New function to detect emotions using FastAPI (adapted from journal_emotions_fastapi.js)
 async function detectEmotionsWithFastAPI(journalContent) {
   try {
     console.log("Analyzing emotions using FastAPI backend...");
@@ -335,7 +328,7 @@ Maintain these important stylistic and ethical guidelines:
 
 **CRITICAL: Your response must be ONLY valid JSON. Do not include any text before or after the JSON. Do not wrap it in markdown code blocks. Start your response with { and end with }.**
 
-Generate a complete response in the EXACT JSON format below:
+Generate a COMPLETE RESPONSE in the *EXACT* JSON format below:
 
 {
   "header_insights": {
@@ -397,16 +390,16 @@ Ensure that the response is empathetic, self-reflective, and empowering. Do not 
 
   try {
     const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
+      "https://integrate.api.nvidia.com/v1/chat/completions",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
           "Content-Type": "application/json",
           "X-Title": "Journal Insights App",
         },
         body: JSON.stringify({
-          model: "nousresearch/deephermes-3-llama-3-8b-preview:free",
+          model: "nvidia/llama-3.3-nemotron-super-49b-v1",
           messages: [
             {
               role: "user",
@@ -414,13 +407,13 @@ Ensure that the response is empathetic, self-reflective, and empowering. Do not 
             },
           ],
           temperature: 0.7,
-          max_tokens: 50000,
+          max_tokens: 8192,
         }),
       }
     );
 
     if (!response.ok) {
-      throw new Error(`OpenRouter API error: ${response.status}`);
+      throw new Error(`Nvidia API error: ${response.status}`);
     }
 
     const data = await response.json();
@@ -504,55 +497,66 @@ Ensure that the response is empathetic, self-reflective, and empowering. Do not 
 function getRetryPromptResponse() {
   return {
     header_insights: {
-      resilience_insight: "We're having trouble processing your journal entry right now. This sometimes happens when we want to make sure we give you the most thoughtful and appropriate response possible.",
+      resilience_insight:
+        "We're having trouble processing your journal entry right now. This sometimes happens when we want to make sure we give you the most thoughtful and appropriate response possible.",
       primary_motivation: "understanding",
       growth_indicator: "gentle patience",
-      emotional_tone: "Your journal entry is important to us, and we want to provide you with meaningful insights that truly reflect your experience."
+      emotional_tone:
+        "Your journal entry is important to us, and we want to provide you with meaningful insights that truly reflect your experience.",
     },
     wellbeing_insights: {
-      main_observation: "We encountered an issue while analyzing your journal entry. This could be due to various technical reasons, and we want to ensure you receive insights that are both helpful and appropriate for your specific situation.",
+      main_observation:
+        "We encountered an issue while analyzing your journal entry. This could be due to various technical reasons, and we want to ensure you receive insights that are both helpful and appropriate for your specific situation.",
       actionable_advice: [
         {
           title: "Try Again",
-          description: "Please try generating your insights again. Sometimes a fresh attempt helps our system provide better, more personalized responses to your journal entry."
+          description:
+            "Please try generating your insights again. Sometimes a fresh attempt helps our system provide better, more personalized responses to your journal entry.",
         },
         {
           title: "Take a Moment",
-          description: "If you're comfortable, you might also take a moment to reflect on your entry yourself while we work on providing you with AI-generated insights."
-        }
-      ]
+          description:
+            "If you're comfortable, you might also take a moment to reflect on your entry yourself while we work on providing you with AI-generated insights.",
+        },
+      ],
     },
     coping_strategies: {
-      main_observation: "While we work on generating your personalized insights, remember that the act of journaling itself is a valuable coping strategy that shows your commitment to self-reflection and emotional wellbeing.",
+      main_observation:
+        "While we work on generating your personalized insights, remember that the act of journaling itself is a valuable coping strategy that shows your commitment to self-reflection and emotional wellbeing.",
       recommended_strategies: [
         {
           title: "Continue Journaling",
-          description: "Keep writing in your journal as you feel comfortable. The process of putting thoughts and feelings into words is beneficial regardless of the AI insights."
+          description:
+            "Keep writing in your journal as you feel comfortable. The process of putting thoughts and feelings into words is beneficial regardless of the AI insights.",
         },
         {
           title: "Patience with Technology",
-          description: "Technical hiccups happen sometimes. Being gentle with yourself during these moments is a form of self-compassion that's worth practicing."
-        }
-      ]
+          description:
+            "Technical hiccups happen sometimes. Being gentle with yourself during these moments is a form of self-compassion that's worth practicing.",
+        },
+      ],
     },
     goals: {
-      main_observation: "Your goal of seeking insights from your journal shows a desire for growth and self-understanding. This intention itself is meaningful, even when technology doesn't cooperate perfectly.",
+      main_observation:
+        "Your goal of seeking insights from your journal shows a desire for growth and self-understanding. This intention itself is meaningful, even when technology doesn't cooperate perfectly.",
       suggested_goals: [
         {
           title: "Retry When Ready",
-          description: "When you feel ready, try generating insights again. There's no rush - your journal and your reflections will be here when you're ready to revisit them."
+          description:
+            "When you feel ready, try generating insights again. There's no rush - your journal and your reflections will be here when you're ready to revisit them.",
         },
         {
           title: "Self-Reflection",
-          description: "Consider what insights you might draw from your journal entry on your own. Sometimes our own reflections can be just as valuable as AI-generated ones."
-        }
-      ]
+          description:
+            "Consider what insights you might draw from your journal entry on your own. Sometimes our own reflections can be just as valuable as AI-generated ones.",
+        },
+      ],
     },
     emotional_data: {
       dominant_emotions: ["curious", "patient", "hopeful"],
       emotional_intensity: "Medium",
       growth_areas: ["patience", "self-compassion"],
-      strengths: ["persistence", "self-reflection"]
-    }
+      strengths: ["persistence", "self-reflection"],
+    },
   };
 }

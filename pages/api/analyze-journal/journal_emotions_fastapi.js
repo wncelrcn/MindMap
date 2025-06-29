@@ -12,14 +12,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: "Journal text is required" });
   }
 
-  // Check if OpenRouter API key exists for descriptions
-  if (!process.env.OPENROUTER_API_KEY) {
-    return res
-      .status(500)
-      .json({ message: "OpenRouter API key not configured" });
+  if (!process.env.NVIDIA_API_KEY) {
+    return res.status(500).json({ message: "Nvidia API key not configured" });
   }
 
-  // Process journal text the same way as the original
   let journalString = "";
   if (Array.isArray(journal_text)) {
     journal_text.forEach((entry) => {
@@ -58,7 +54,6 @@ export default async function handler(req, res) {
       throw new Error("Invalid response from FastAPI backend");
     }
 
-    // Take top 5 emotions and format for frontend
     const topEmotions = emotions.slice(0, 5);
 
     console.log(
@@ -66,7 +61,6 @@ export default async function handler(req, res) {
       topEmotions.map((e) => `${e.label}: ${Math.round(e.score * 100)}%`)
     );
 
-    // Generate personalized descriptions for each emotion using OpenRouter
     const emotionsWithDescriptions = [];
 
     for (const emotion of topEmotions) {
@@ -96,16 +90,16 @@ If the journal contains extreme negativity, suicidal thoughts, criminal ideation
           )}%)...`
         );
 
-        const openRouterResponse = await fetch(
-          "https://openrouter.ai/api/v1/chat/completions",
+        const nvidiaResponse = await fetch(
+          "https://integrate.api.nvidia.com/v1/chat/completions",
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+              Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
             },
             body: JSON.stringify({
-              model: "nousresearch/deephermes-3-llama-3-8b-preview:free",
+              model: "nvidia/llama-3.3-nemotron-super-49b-v1",
               messages: [
                 {
                   role: "system",
@@ -122,10 +116,10 @@ If the journal contains extreme negativity, suicidal thoughts, criminal ideation
           }
         );
 
-        if (!openRouterResponse.ok) {
-          const errorText = await openRouterResponse.text();
-          console.error(`OpenRouter API error for ${emotion.label}:`, {
-            status: openRouterResponse.status,
+        if (!nvidiaResponse.ok) {
+          const errorText = await nvidiaResponse.text();
+          console.error(`Nvidia API error for ${emotion.label}:`, {
+            status: nvidiaResponse.status,
             details: errorText,
           });
 
@@ -138,9 +132,9 @@ If the journal contains extreme negativity, suicidal thoughts, criminal ideation
           continue;
         }
 
-        const openRouterResult = await openRouterResponse.json();
+        const nvidiaResult = await nvidiaResponse.json();
         const description =
-          openRouterResult?.choices?.[0]?.message?.content?.trim();
+          nvidiaResult?.choices?.[0]?.message?.content?.trim();
 
         emotionsWithDescriptions.push({
           label: emotion.label,
@@ -176,8 +170,8 @@ If the journal contains extreme negativity, suicidal thoughts, criminal ideation
     return res.status(200).json({
       success: true,
       emotions: emotionsWithDescriptions,
-      source: "fastapi_bert_emotion_with_openrouter",
-      model_used: "boltuix/bert-emotion + OpenRouter descriptions",
+      source: "fastapi_bert_emotion_with_nvidia",
+      model_used: "boltuix/bert-emotion + Nvidia descriptions",
       backend_status: "connected",
     });
   } catch (error) {

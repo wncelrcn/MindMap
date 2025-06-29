@@ -8,11 +8,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Check if OpenRouter API key exists
-    if (!process.env.OPENROUTER_API_KEY) {
-      return res
-        .status(500)
-        .json({ message: "OpenRouter API key not configured" });
+    // Check if Nvidia API key exists
+    if (!process.env.NVIDIA_API_KEY) {
+      return res.status(500).json({ message: "Nvidia API key not configured" });
     }
 
     // Create authenticated Supabase client
@@ -295,17 +293,17 @@ Provide your analysis in the following JSON format ONLY:
 Do not include any other text, formatting, or markdown. Focus on positive traits while being authentic to what the journal entries reveal.`;
 
     try {
-      // Make request to OpenRouter API
-      const openRouterResponse = await fetch(
-        "https://openrouter.ai/api/v1/chat/completions",
+      // Make request to Nvidia API
+      const nvidiaResponse = await fetch(
+        "https://integrate.api.nvidia.com/v1/chat/completions",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
           },
           body: JSON.stringify({
-            model: "nousresearch/deephermes-3-llama-3-8b-preview:free",
+            model: "nvidia/llama-3.3-nemotron-super-49b-v1",
             messages: [
               {
                 role: "system",
@@ -322,10 +320,10 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
         }
       );
 
-      if (!openRouterResponse.ok) {
-        const errorText = await openRouterResponse.text();
-        console.error("OpenRouter API error:", {
-          status: openRouterResponse.status,
+      if (!nvidiaResponse.ok) {
+        const errorText = await nvidiaResponse.text();
+        console.error("Nvidia API error:", {
+          status: nvidiaResponse.status,
           error: errorText,
         });
 
@@ -356,14 +354,14 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
         });
       }
 
-      const openRouterResult = await openRouterResponse.json();
-      const openRouterContent =
-        openRouterResult?.choices?.[0]?.message?.content?.trim();
+      const nvidiaResult = await nvidiaResponse.json();
+      const nvidiaContent =
+        nvidiaResult?.choices?.[0]?.message?.content?.trim();
 
-      if (openRouterContent) {
+      if (nvidiaContent) {
         try {
           // Clean the response - remove markdown code blocks if present
-          let cleanedContent = openRouterContent;
+          let cleanedContent = nvidiaContent;
           if (cleanedContent.includes("```json")) {
             cleanedContent = cleanedContent
               .replace(/```json\s*/g, "")
@@ -401,11 +399,11 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
               to: new Date().toISOString().split("T")[0],
             },
             lastUpdated: currentTimestamp,
-            source: "openrouter",
+            source: "nvidia",
           });
         } catch (parseError) {
           console.error("JSON parsing error:", parseError);
-          console.log("Original content:", openRouterContent);
+          console.log("Original content:", nvidiaContent);
 
           // Save parsing fallback personality data to user_stats table
           const parseTitle = "Introspective Writer";
@@ -444,7 +442,7 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
           description: noContentDescription,
         });
 
-        // If no content from OpenRouter
+        // If no content from Nvidia
         res.status(200).json({
           message: "Personality analysis completed with content fallback",
           personality: {
@@ -461,7 +459,7 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
         });
       }
     } catch (apiError) {
-      console.error("OpenRouter API request failed:", apiError);
+      console.error("Nvidia API request failed:", apiError);
 
       // Save API error fallback personality data to user_stats table
       const apiErrorTitle = "Thoughtful Individual";

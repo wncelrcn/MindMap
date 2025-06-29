@@ -43,8 +43,8 @@ export default async function handler(req, res) {
     }
 
     // Validate API key exists
-    if (!process.env.OPENROUTER_API_KEY) {
-      console.error("OpenRouter API key not configured");
+    if (!process.env.NVIDIA_API_KEY) {
+      console.error("Nvidia API key not configured");
       return res.status(500).json({
         message: "AI analysis service not configured",
         details: "Missing API key configuration",
@@ -91,53 +91,54 @@ Format your response as JSON with this exact structure:
 }
     `;
 
-    let openRouterResponse;
-    let openRouterResult;
-    let openRouterContent;
+    let nvidiaResponse;
+    let nvidiaResult;
+    let nvidiaContent;
 
     try {
-      openRouterResponse = await fetch(
-        "https://openrouter.ai/api/v1/chat/completions",
+      nvidiaResponse = await fetch(
+        "https://integrate.api.nvidia.com/v1/chat/completions",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
           },
           body: JSON.stringify({
-            model: "nousresearch/deephermes-3-llama-3-8b-preview:free",
+            model: "nvidia/llama-3.3-nemotron-super-49b-v1",
             messages: [{ role: "user", content: prompt }],
+            max_tokens: 4096,
+            temperature: 0.7,
           }),
         }
       );
 
-      if (!openRouterResponse.ok) {
-        const errorText = await openRouterResponse.text();
+      if (!nvidiaResponse.ok) {
+        const errorText = await nvidiaResponse.text();
         return res.status(500).json({
-          message: "OpenRouter API error",
-          status: openRouterResponse.status,
+          message: "Nvidia API error",
+          status: nvidiaResponse.status,
           details: errorText,
         });
       }
 
-      openRouterResult = await openRouterResponse.json();
-      openRouterContent =
-        openRouterResult?.choices?.[0]?.message?.content?.trim();
+      nvidiaResult = await nvidiaResponse.json();
+      nvidiaContent = nvidiaResult?.choices?.[0]?.message?.content?.trim();
 
-      if (!openRouterContent) {
-        throw new Error("No content received from OpenRouter API");
+      if (!nvidiaContent) {
+        throw new Error("No content received from Nvidia API");
       }
     } catch (apiError) {
-      console.error("OpenRouter API request failed:", apiError);
+      console.error("Nvidia API request failed:", apiError);
       return res.status(500).json({
         message: "Failed to connect to AI analysis service",
         details: apiError.message,
       });
     }
 
-    console.log("AI Analysis Result:", openRouterContent);
+    console.log("AI Analysis Result:", nvidiaContent);
 
-    let cleanedContent = openRouterContent;
+    let cleanedContent = nvidiaContent;
     if (cleanedContent.includes("```json")) {
       cleanedContent = cleanedContent
         .replace(/```json\s*/g, "")
@@ -151,12 +152,12 @@ Format your response as JSON with this exact structure:
       aiAnalysis = JSON.parse(cleanedContent);
     } catch (parseError) {
       console.error("Error parsing AI response:", parseError);
-      console.error("Original content:", openRouterContent);
+      console.error("Original content:", nvidiaContent);
       console.error("Cleaned content:", cleanedContent);
       return res.status(500).json({
         message: "Error parsing AI response",
         details: parseError.message,
-        originalContent: openRouterContent,
+        originalContent: nvidiaContent,
         cleanedContent: cleanedContent,
       });
     }

@@ -909,7 +909,8 @@ export default function ViewInsights({ user }) {
                   textAlign: "center",
                 }}
               >
-                A comprehensive analysis of your emotional patterns and strengths.
+                A comprehensive analysis of your emotional patterns and
+                strengths.
               </Typography>
 
               {/* Dominant Emotions Section */}
@@ -944,34 +945,48 @@ export default function ViewInsights({ user }) {
                       mb: 2,
                     }}
                   >
-                    Your emotional landscape reveals the core feelings that shaped this journal entry, 
-                    providing insight into your current state of mind.
+                    Your emotional landscape reveals the core feelings that
+                    shaped this journal entry, providing insight into your
+                    current state of mind.
                   </Typography>
-                  
+
                   {/* Dominant Emotions Display */}
                   {insights.emotional_data.dominant_emotions &&
                   insights.emotional_data.dominant_emotions.length > 0 ? (
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, justifyContent: "center" }}>
-                      {insights.emotional_data.dominant_emotions.map((emotion, index) => (
-                        <Chip
-                          key={index}
-                          label={emotion.charAt(0).toUpperCase() + emotion.slice(1)} // Capitalize first letter
-                          sx={{
-                            background: "linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)",
-                            color: "#1565c0",
-                            fontFamily: poppins.style.fontFamily,
-                            fontWeight: 500,
-                            borderRadius: "12px",
-                            px: 1.5,
-                            py: 0.8,
-                            border: "1px solid #90caf9",
-                            fontSize: { xs: "0.85rem", sm: "0.9rem" },
-                            "&:hover": {
-                              background: "linear-gradient(135deg, #bbdefb 0%, #90caf9 100%)",
-                            },
-                          }}
-                        />
-                      ))}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 1.5,
+                        justifyContent: "center",
+                      }}
+                    >
+                      {insights.emotional_data.dominant_emotions.map(
+                        (emotion, index) => (
+                          <Chip
+                            key={index}
+                            label={
+                              emotion.charAt(0).toUpperCase() + emotion.slice(1)
+                            } // Capitalize first letter
+                            sx={{
+                              background:
+                                "linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)",
+                              color: "#1565c0",
+                              fontFamily: poppins.style.fontFamily,
+                              fontWeight: 500,
+                              borderRadius: "12px",
+                              px: 1.5,
+                              py: 0.8,
+                              border: "1px solid #90caf9",
+                              fontSize: { xs: "0.85rem", sm: "0.9rem" },
+                              "&:hover": {
+                                background:
+                                  "linear-gradient(135deg, #bbdefb 0%, #90caf9 100%)",
+                              },
+                            }}
+                          />
+                        )
+                      )}
                     </Box>
                   ) : (
                     <Typography
@@ -994,7 +1009,13 @@ export default function ViewInsights({ user }) {
               </Box>
 
               {/* Personal Strengths */}
-              <Box sx={{ mt: { xs: 2, sm: 2.5, md: 3 }, mb: { xs: 2, sm: 2.5, md: 3 }, textAlign: "center" }}>
+              <Box
+                sx={{
+                  mt: { xs: 2, sm: 2.5, md: 3 },
+                  mb: { xs: 2, sm: 2.5, md: 3 },
+                  textAlign: "center",
+                }}
+              >
                 <Typography
                   sx={{
                     fontSize: { xs: "1rem", sm: "1.1rem", md: "20px" },
@@ -1019,15 +1040,22 @@ export default function ViewInsights({ user }) {
                     padding: { xs: "0.5rem 0", sm: "0.6rem 0" },
                   }}
                 >
-                  {insights.emotional_data.strengths && insights.emotional_data.strengths.length > 0 ? (
+                  {insights.emotional_data.strengths &&
+                  insights.emotional_data.strengths.length > 0 ? (
                     <>
-                      You're showing the following strengths based on this entry:&nbsp;
+                      You're showing the following strengths based on this
+                      entry:&nbsp;
                       <strong>
                         {insights.emotional_data.strengths
-                          .map(strength => strength.charAt(0).toUpperCase() + strength.slice(1))
+                          .map(
+                            (strength) =>
+                              strength.charAt(0).toUpperCase() +
+                              strength.slice(1)
+                          )
                           .join(", ")}
                       </strong>
-                      . These strengths reflect the qualities that are helping you face what you're going through.
+                      . These strengths reflect the qualities that are helping
+                      you face what you're going through.
                     </>
                   ) : (
                     "Your personal strengths could not be determined clearly from this entry. You may try regenerating insights for a more tailored reflection."
@@ -1036,7 +1064,13 @@ export default function ViewInsights({ user }) {
               </Box>
 
               {/* Emotional Intensity */}
-              <Box sx={{ mt: { xs: 2, sm: 2.5, md: 3 }, mb: { xs: 2, sm: 2.5, md: 3 }, textAlign: "center" }}>
+              <Box
+                sx={{
+                  mt: { xs: 2, sm: 2.5, md: 3 },
+                  mb: { xs: 2, sm: 2.5, md: 3 },
+                  textAlign: "center",
+                }}
+              >
                 <Typography
                   sx={{
                     fontSize: { xs: "1rem", sm: "1.1rem", md: "20px" },
@@ -1065,10 +1099,13 @@ export default function ViewInsights({ user }) {
                     <>
                       Your emotional intensity for this entry is:&nbsp;
                       <strong>
-                        {insights.emotional_data.emotional_intensity.charAt(0).toUpperCase() +
+                        {insights.emotional_data.emotional_intensity
+                          .charAt(0)
+                          .toUpperCase() +
                           insights.emotional_data.emotional_intensity.slice(1)}
                       </strong>
-                      . This reflects how strongly you're experiencing your emotions in this moment.
+                      . This reflects how strongly you're experiencing your
+                      emotions in this moment.
                     </>
                   ) : (
                     "Your emotional intensity level could not be determined for this entry. Please try regenerating the insights to receive a clearer reflection."

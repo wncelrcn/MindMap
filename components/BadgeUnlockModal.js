@@ -1,13 +1,8 @@
-import {
-  Box,
-  Typography,
-  Modal,
-  Fade,
-  Button,
-} from "@mui/material";
+import { Box, Typography, Modal, Fade, Button } from "@mui/material";
 import Confetti from "react-confetti";
 import { useEffect, useState } from "react";
 import { Poppins } from "next/font/google";
+import { getBadgeImagePath } from "../utils/helper/profile/badgeImages";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -15,7 +10,12 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
-export default function BadgeUnlockModal({ open, badge, onClose, onViewBadges }) {
+export default function BadgeUnlockModal({
+  open,
+  badge,
+  onClose,
+  onViewBadges,
+}) {
   const [dimensions, setDimensions] = useState({ width: 300, height: 300 });
 
   useEffect(() => {
@@ -118,7 +118,7 @@ export default function BadgeUnlockModal({ open, badge, onClose, onViewBadges })
             >
               <Box
                 component="img"
-                src={badge.image_url}
+                src={getBadgeImagePath(badge.name)}
                 alt={badge.name}
                 sx={{
                   width: "100%",
@@ -191,7 +191,8 @@ export default function BadgeUnlockModal({ open, badge, onClose, onViewBadges })
                 py: 1,
                 textTransform: "none",
                 "&:hover": {
-                  background: "linear-gradient(90deg, #45249C 0%, #7B2CBF 100%)",
+                  background:
+                    "linear-gradient(90deg, #45249C 0%, #7B2CBF 100%)",
                 },
               }}
             >
