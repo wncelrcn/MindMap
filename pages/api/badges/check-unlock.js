@@ -80,22 +80,58 @@ function countWordsInAnswer(answerText) {
   return cleanText.split(" ").length;
 }
 
-// Helper function to get max word count from journal entry JSONB
 function getMaxWordCountFromEntry(journalEntry) {
-  if (!journalEntry || !Array.isArray(journalEntry)) {
+  if (!journalEntry) return 0;
+  
+  let totalWordCount = 0;
+  
+  try {
+    // Handle different JSON structures
+    if (Array.isArray(journalEntry)) {
+      // Array of objects (survey responses)
+      for (const item of journalEntry) {
+        if (typeof item === 'object' && item !== null) {
+          // Try different field names
+          const textFields = ['answer', 'text', 'content', 'response'];
+          for (const field of textFields) {
+            if (item[field] && typeof item[field] === 'string') {
+              totalWordCount += countWordsInText(item[field]);
+            }
+          }
+        }
+      }
+    } else if (typeof journalEntry === 'object' && journalEntry !== null) {
+      // Single object
+      const textFields = ['answer', 'text', 'content', 'response'];
+      for (const field of textFields) {
+        if (journalEntry[field] && typeof journalEntry[field] === 'string') {
+          totalWordCount += countWordsInText(journalEntry[field]);
+        }
+      }
+    } else if (typeof journalEntry === 'string') {
+      // Direct string
+      totalWordCount = countWordsInText(journalEntry);
+    }
+    
+    return totalWordCount;
+  } catch (error) {
+    console.error('Error counting words in journal entry:', error);
     return 0;
   }
+}
 
-  let maxWords = 0;
-
-  for (const element of journalEntry) {
-    if (element && element.answer) {
-      const wordCount = countWordsInAnswer(element.answer);
-      maxWords = Math.max(maxWords, wordCount);
-    }
-  }
-
-  return maxWords;
+function countWordsInText(text) {
+  if (!text || typeof text !== 'string') return 0;
+  
+  // Clean the text and split into words
+  const cleanText = text
+    .replace(/[\n\r\t]+/g, ' ')  // Replace newlines/tabs with spaces
+    .replace(/\s+/g, ' ')        // Replace multiple spaces with single space
+    .trim();
+    
+  if (!cleanText) return 0;
+  
+  return cleanText.split(' ').length;
 }
 
 export default async function handler(req, res) {
@@ -395,59 +431,56 @@ export default async function handler(req, res) {
 
           case "special":
             if (badge.name === "Inner Voyager") {
-              // Use the updated user_stats value first
-              console.log(
-                `Inner Voyager check: user_stats.longest_entry_words = ${userStats.longest_entry_words}`
-              );
-
+              console.log(`Inner Voyager check: user_stats.longest_entry_words = ${userStats.longest_entry_words}`);
+              
               if (userStats.longest_entry_words >= 500) {
                 shouldUnlock = true;
                 debugMessage = `Inner Voyager check: user_stats shows ${userStats.longest_entry_words} words >= 500 = true`;
               } else {
-                // Fallback: Double-check by querying freeform entries directly
                 console.log("Double-checking freeform entries directly...");
-                try {
-                  const { data: longEntries, error: entriesError } =
-                    await supabase
-                      .from("freeform_journaling_table")
-                      .select("journal_entry")
-                      .eq("user_UID", userUID);
-
-                  if (entriesError) {
-                    console.error(
-                      "Error fetching freeform entries:",
-                      entriesError
-                    );
-                    debugMessage = `Inner Voyager check: Error fetching entries - ${entriesError.message}`;
-                  } else if (longEntries && longEntries.length > 0) {
-                    let maxWordCount = 0;
-
-                    for (const entry of longEntries) {
-                      const wordCount = getMaxWordCountFromEntry(
-                        entry.journal_entry
-                      );
-                      maxWordCount = Math.max(maxWordCount, wordCount);
-
-                      if (wordCount >= 500) {
-                        shouldUnlock = true;
-                        break;
-                      }
+                const { data: longEntries, error: entriesError } = await supabase
+                  .from("freeform_journaling_table")
+                  .select("journal_entry, journal_id")
+                  .eq("user_UID", userUID);
+                  
+                if (entriesError) {
+                  console.error("Error fetching freeform entries:", entriesError);
+                  debugMessage = `Inner Voyager check: Error fetching entries - ${entriesError.message}`;
+                } else if (longEntries && longEntries.length > 0) {
+                  let maxWordCount = 0;
+                  
+                  for (const entry of longEntries) {
+                    const wordCount = getMaxWordCountFromEntry(entry.journal_entry);
+                    console.log(`Entry ${entry.journal_id}: ${wordCount} words`);
+                    maxWordCount = Math.max(maxWordCount, wordCount);
+                    
+                    if (wordCount >= 500) {
+                      shouldUnlock = true;
+                      break;
                     }
-
-                    debugMessage = `Inner Voyager check: Found ${longEntries.length} freeform entries, max word count = ${maxWordCount}, has 500+ word entry = ${shouldUnlock}`;
-                  } else {
-                    debugMessage =
-                      "Inner Voyager check: No freeform entries found";
                   }
-                } catch (error) {
-                  console.error(
-                    "Error in Inner Voyager fallback check:",
-                    error
-                  );
-                  debugMessage = `Inner Voyager check: Error in fallback - ${error.message}`;
+                  
+                  debugMessage = `Inner Voyager check: Found ${longEntries.length} entries, max word count = ${maxWordCount}, has 500+ word entry = ${shouldUnlock}`;
+                  
+                  // If we found a long entry but user_stats wasn't updated, manually trigger update
+                  if (shouldUnlock && userStats.longest_entry_words < 500) {
+                    console.log("Manually triggering user stats update...");
+                    const { error: updateError } = await supabase.rpc('update_user_stats', {
+                      p_user_uid: userUID
+                    });
+                    
+                    if (updateError) {
+                      console.error("Error updating user stats:", updateError);
+                    } else {
+                      console.log("User stats updated successfully");
+                    }
+                  }
+                } else {
+                  debugMessage = "Inner Voyager check: No freeform entries found";
                 }
               }
             }
+
 
             if (badge.name === "Reflection Star") {
               try {
