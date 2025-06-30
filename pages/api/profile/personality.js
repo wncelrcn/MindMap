@@ -46,7 +46,6 @@ export default async function handler(req, res) {
     }
 
     const user_UID = user.id;
-    console.log("Personality API - Authenticated User UID:", user_UID);
 
     // Helper function to safely update user stats with RLS compliance
     const updateUserStats = async (personalityData) => {
@@ -403,7 +402,6 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
           });
         } catch (parseError) {
           console.error("JSON parsing error:", parseError);
-          console.log("Original content:", nvidiaContent);
 
           // Save parsing fallback personality data to user_stats table
           const parseTitle = "Introspective Writer";

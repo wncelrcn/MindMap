@@ -1,8 +1,6 @@
 import createClient from "@/utils/supabase/api";
 
 export default async function handler(req, res) {
-  console.log("Recap API called");
-
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
@@ -38,8 +36,6 @@ export default async function handler(req, res) {
     const startDate = lastWeekSunday.toISOString().split("T")[0];
     const endDate = lastWeekSaturday.toISOString().split("T")[0];
 
-    console.log(`Checking for existing recap from ${startDate} to ${endDate}`);
-
     const { data: existingRecap, error: recapCheckError } = await supabase
       .from("recap")
       .select("*")
@@ -57,7 +53,6 @@ export default async function handler(req, res) {
     }
 
     if (existingRecap) {
-      console.log("Recap already exists for this week, skipping journal fetch");
       return res.status(200).json({
         message: "Recap already exists for this week",
         user_UID,
@@ -70,10 +65,6 @@ export default async function handler(req, res) {
         recapData: existingRecap,
       });
     }
-
-    console.log(
-      "No existing recap found, proceeding to fetch journal summaries"
-    );
 
     const { data: freeformData, error: freeformError } = await supabase
       .from("freeform_journaling_table")
@@ -137,10 +128,6 @@ export default async function handler(req, res) {
       .filter((summary) => summary && summary.trim() !== "");
 
     const combinedSummaryText = summaryTexts.join("\n\n");
-
-    console.log(
-      `Found ${combinedSummaries.length} journal summaries for analysis`
-    );
 
     res.status(200).json({
       message: "Journal summaries prepared for analysis",

@@ -364,16 +364,8 @@ export default function Profile({ user }) {
       };
 
       if (selectedFile) {
-        console.log("Original file size:", selectedFile.size);
-
         // Compress the image regardless of original size
         const compressed = await compressImage(selectedFile, 300, 0.7);
-        console.log(
-          "Compressed base64 size:",
-          compressed.size,
-          "Quality used:",
-          compressed.quality
-        );
 
         if (compressed.size > 1000000) {
           // If still > 1MB base64

@@ -89,10 +89,6 @@ export default async function handler(req, res) {
           .png({ quality: 80 })
           .toBuffer();
 
-        console.log("Original image size:", imageBuffer.length);
-        console.log("Optimized image size:", optimizedImageBuffer.length);
-        console.log("Uploading to path:", filePath);
-
         // Upload the optimized file to Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("profile-pics")
@@ -107,24 +103,15 @@ export default async function handler(req, res) {
           throw uploadError;
         }
 
-        console.log("Upload successful:", uploadData);
-
         // Get public URL
         const {
           data: { publicUrl },
         } = supabase.storage.from("profile-pics").getPublicUrl(filePath);
 
-        console.log("Generated public URL:", publicUrl);
-
         // Add the URL to updates with a cache-busting parameter to force refresh
         updates.profile_pic_url = `${publicUrl}?t=${Date.now()}`;
       } catch (error) {
         console.error("Error uploading profile image:", error);
-        // Don't return immediately, continue with about_me update even if image upload fails
-        console.log(
-          "Continuing with about_me update despite image upload failure"
-        );
-        // Just don't add the profile_pic_url to updates
       }
     }
 
@@ -145,7 +132,6 @@ export default async function handler(req, res) {
 
     // If no results by ID or ID wasn't provided, try email lookup
     if (!userCheck || userCheck.length === 0) {
-      console.log("User not found by ID, trying email lookup");
       const result = await supabaseAdmin
         .from("user_table")
         .select("*")
@@ -178,7 +164,6 @@ export default async function handler(req, res) {
 
     // Check if we have any fields to update
     if (Object.keys(updateFields).length === 0) {
-      console.log("No fields to update, returning existing user data");
       return res.status(200).json({
         success: true,
         data: userCheck[0],
@@ -192,8 +177,6 @@ export default async function handler(req, res) {
       .update(updateFields)
       .eq("user_UID", user_UID)
       .select();
-
-    console.log("Update response:", { userData, userError });
 
     if (userError) {
       console.error("Error updating user_table:", userError);

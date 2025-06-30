@@ -61,7 +61,6 @@ export async function getServerSideProps(context) {
 
 export default function Journal({ user }) {
   const [user_UID, setUser_UID] = useState(user.id);
-  console.log("user_UID", user_UID);
   const [title, setTitle] = useState("Journal Title");
   const [editingTitle, setEditingTitle] = useState(false);
   const [content, setContent] = useState("");

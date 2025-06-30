@@ -26,8 +26,6 @@ export default async function handler(req, res) {
     }
 
     const userUID = user.id;
-    console.log("=== USER BADGES DEBUG START ===");
-    console.log("Fetching badges for user:", userUID);
 
     // Check if user exists in user_table
     const { data: userTableData, error: userTableError } = await supabase
@@ -37,9 +35,7 @@ export default async function handler(req, res) {
       .single();
 
     if (userTableError) {
-      console.log("User not found in user_table:", userTableError);
-    } else {
-      console.log("User found in user_table:", userTableData);
+      console.error("User not found in user_table:", userTableError);
     }
 
     // Get user's unlocked badges with badge details
@@ -65,17 +61,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Failed to fetch user badges" });
     }
 
-    console.log("User badges found:", userBadges?.length || 0);
-    if (userBadges) {
-      userBadges.forEach((badge) => {
-        console.log(
-          `- Badge: ${badge.badges?.name || "Unknown"} (Unlocked: ${
-            badge.unlocked_at
-          })`
-        );
-      });
-    }
-
     // Get user stats (using admin client to bypass RLS)
     let userStats;
     const { data: statsData, error: statsError } = await supabaseAdmin
@@ -89,7 +74,6 @@ export default async function handler(req, res) {
 
       // If no stats exist, create them
       if (statsError.code === "PGRST116") {
-        console.log("Creating initial user stats...");
         const { error: createError } = await supabaseAdmin
           .from("user_stats")
           .insert({
@@ -116,13 +100,11 @@ export default async function handler(req, res) {
           .eq("user_UID", userUID)
           .single();
 
-        console.log("Created new user stats:", newStats);
         userStats = newStats;
       } else {
         return res.status(500).json({ error: "Failed to fetch user stats" });
       }
     } else {
-      console.log("User stats:", statsData);
       userStats = statsData;
     }
 
@@ -137,18 +119,11 @@ export default async function handler(req, res) {
       .select("id, date_created, theme_id")
       .eq("user_UID", userUID);
 
-    console.log("Freeform entries:", freeformEntries?.length || 0);
-    console.log("Guided entries:", guidedEntries?.length || 0);
-
     // Check all available badges (using admin client to bypass RLS)
     const { data: allBadges, error: allBadgesError } = await supabaseAdmin
       .from("badges")
       .select("*")
       .order("badge_id");
-
-    console.log("Total available badges:", allBadges?.length || 0);
-
-    console.log("=== USER BADGES DEBUG END ===");
 
     res.status(200).json({
       success: true,

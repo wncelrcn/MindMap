@@ -82,56 +82,56 @@ function countWordsInAnswer(answerText) {
 
 function getMaxWordCountFromEntry(journalEntry) {
   if (!journalEntry) return 0;
-  
+
   let totalWordCount = 0;
-  
+
   try {
     // Handle different JSON structures
     if (Array.isArray(journalEntry)) {
       // Array of objects (survey responses)
       for (const item of journalEntry) {
-        if (typeof item === 'object' && item !== null) {
+        if (typeof item === "object" && item !== null) {
           // Try different field names
-          const textFields = ['answer', 'text', 'content', 'response'];
+          const textFields = ["answer", "text", "content", "response"];
           for (const field of textFields) {
-            if (item[field] && typeof item[field] === 'string') {
+            if (item[field] && typeof item[field] === "string") {
               totalWordCount += countWordsInText(item[field]);
             }
           }
         }
       }
-    } else if (typeof journalEntry === 'object' && journalEntry !== null) {
+    } else if (typeof journalEntry === "object" && journalEntry !== null) {
       // Single object
-      const textFields = ['answer', 'text', 'content', 'response'];
+      const textFields = ["answer", "text", "content", "response"];
       for (const field of textFields) {
-        if (journalEntry[field] && typeof journalEntry[field] === 'string') {
+        if (journalEntry[field] && typeof journalEntry[field] === "string") {
           totalWordCount += countWordsInText(journalEntry[field]);
         }
       }
-    } else if (typeof journalEntry === 'string') {
+    } else if (typeof journalEntry === "string") {
       // Direct string
       totalWordCount = countWordsInText(journalEntry);
     }
-    
+
     return totalWordCount;
   } catch (error) {
-    console.error('Error counting words in journal entry:', error);
+    console.error("Error counting words in journal entry:", error);
     return 0;
   }
 }
 
 function countWordsInText(text) {
-  if (!text || typeof text !== 'string') return 0;
-  
+  if (!text || typeof text !== "string") return 0;
+
   // Clean the text and split into words
   const cleanText = text
-    .replace(/[\n\r\t]+/g, ' ')  // Replace newlines/tabs with spaces
-    .replace(/\s+/g, ' ')        // Replace multiple spaces with single space
+    .replace(/[\n\r\t]+/g, " ") // Replace newlines/tabs with spaces
+    .replace(/\s+/g, " ") // Replace multiple spaces with single space
     .trim();
-    
+
   if (!cleanText) return 0;
-  
-  return cleanText.split(' ').length;
+
+  return cleanText.split(" ").length;
 }
 
 export default async function handler(req, res) {
@@ -169,12 +169,9 @@ export default async function handler(req, res) {
     }
 
     userUID = user.id;
-    console.log("=== BADGE CHECK DEBUG START ===");
-    console.log("User UID:", userUID);
 
     // Run RLS debug check
     const rlsDebug = await debugRLSConfiguration(supabase, userUID);
-    console.log("RLS Debug Info:", JSON.stringify(rlsDebug, null, 2));
 
     // Check if user_stats exists for this user (using admin client to bypass RLS)
     let existingStats;
@@ -204,7 +201,6 @@ export default async function handler(req, res) {
 
     // Create user_stats if it doesn't exist (using admin client to bypass RLS)
     if (!existingStats) {
-      console.log("Creating user_stats entry for user...");
       try {
         const { error: createStatsError } = await supabaseAdmin
           .from("user_stats")
@@ -227,7 +223,6 @@ export default async function handler(req, res) {
             details: createStatsError.message,
           });
         }
-        console.log("User stats created successfully");
       } catch (error) {
         console.error("Exception creating user stats:", error);
         return res.status(500).json({
@@ -236,11 +231,9 @@ export default async function handler(req, res) {
         });
       }
     } else {
-      console.log("Existing user stats found:", existingStats);
     }
 
     // Update user stats using RPC with timeout and retry (using admin client to bypass RLS)
-    console.log("Calling update_user_stats for user:", userUID);
     try {
       const { error: updateError } = await Promise.race([
         supabaseAdmin.rpc("update_user_stats", { p_user_uid: userUID }),
@@ -258,7 +251,6 @@ export default async function handler(req, res) {
           code: updateError.code,
         });
       }
-      console.log("update_user_stats completed successfully");
     } catch (error) {
       console.error("Exception in update_user_stats:", error);
       return res.status(500).json({
@@ -285,7 +277,6 @@ export default async function handler(req, res) {
       }
 
       userStats = statsData;
-      console.log("Updated user stats:", userStats);
     } catch (error) {
       console.error("Exception fetching user stats:", error);
       return res.status(500).json({
@@ -311,7 +302,6 @@ export default async function handler(req, res) {
       }
 
       allBadges = badgesData || [];
-      console.log("All available badges:", allBadges.length);
     } catch (error) {
       console.error("Exception fetching badges:", error);
       return res.status(500).json({
@@ -337,7 +327,6 @@ export default async function handler(req, res) {
       }
 
       unlockedBadges = unlockedData || [];
-      console.log("Already unlocked badges:", unlockedBadges);
     } catch (error) {
       console.error("Exception fetching unlocked badges:", error);
       return res.status(500).json({
@@ -352,12 +341,7 @@ export default async function handler(req, res) {
 
     // Check each badge for unlock criteria
     for (const badge of allBadges) {
-      console.log(
-        `\n--- Checking badge: ${badge.name} (ID: ${badge.badge_id}) ---`
-      );
-
       if (unlockedBadgeIds.has(badge.badge_id)) {
-        console.log("Badge already unlocked, skipping");
         continue;
       }
 
@@ -431,56 +415,59 @@ export default async function handler(req, res) {
 
           case "special":
             if (badge.name === "Inner Voyager") {
-              console.log(`Inner Voyager check: user_stats.longest_entry_words = ${userStats.longest_entry_words}`);
-              
               if (userStats.longest_entry_words >= 500) {
                 shouldUnlock = true;
                 debugMessage = `Inner Voyager check: user_stats shows ${userStats.longest_entry_words} words >= 500 = true`;
               } else {
-                console.log("Double-checking freeform entries directly...");
-                const { data: longEntries, error: entriesError } = await supabase
-                  .from("freeform_journaling_table")
-                  .select("journal_entry, journal_id")
-                  .eq("user_UID", userUID);
-                  
+                const { data: longEntries, error: entriesError } =
+                  await supabase
+                    .from("freeform_journaling_table")
+                    .select("journal_entry, journal_id")
+                    .eq("user_UID", userUID);
+
                 if (entriesError) {
-                  console.error("Error fetching freeform entries:", entriesError);
+                  console.error(
+                    "Error fetching freeform entries:",
+                    entriesError
+                  );
                   debugMessage = `Inner Voyager check: Error fetching entries - ${entriesError.message}`;
                 } else if (longEntries && longEntries.length > 0) {
                   let maxWordCount = 0;
-                  
+
                   for (const entry of longEntries) {
-                    const wordCount = getMaxWordCountFromEntry(entry.journal_entry);
-                    console.log(`Entry ${entry.journal_id}: ${wordCount} words`);
+                    const wordCount = getMaxWordCountFromEntry(
+                      entry.journal_entry
+                    );
                     maxWordCount = Math.max(maxWordCount, wordCount);
-                    
+
                     if (wordCount >= 500) {
                       shouldUnlock = true;
                       break;
                     }
                   }
-                  
+
                   debugMessage = `Inner Voyager check: Found ${longEntries.length} entries, max word count = ${maxWordCount}, has 500+ word entry = ${shouldUnlock}`;
-                  
+
                   // If we found a long entry but user_stats wasn't updated, manually trigger update
                   if (shouldUnlock && userStats.longest_entry_words < 500) {
-                    console.log("Manually triggering user stats update...");
-                    const { error: updateError } = await supabase.rpc('update_user_stats', {
-                      p_user_uid: userUID
-                    });
-                    
+                    const { error: updateError } = await supabase.rpc(
+                      "update_user_stats",
+                      {
+                        p_user_uid: userUID,
+                      }
+                    );
+
                     if (updateError) {
                       console.error("Error updating user stats:", updateError);
                     } else {
-                      console.log("User stats updated successfully");
                     }
                   }
                 } else {
-                  debugMessage = "Inner Voyager check: No freeform entries found";
+                  debugMessage =
+                    "Inner Voyager check: No freeform entries found";
                 }
               }
             }
-
 
             if (badge.name === "Reflection Star") {
               try {
@@ -552,7 +539,6 @@ export default async function handler(req, res) {
         debugMessage = `Error checking badge: ${error.message}`;
       }
 
-      console.log(debugMessage);
       debugInfo.push({
         badge_name: badge.name,
         badge_type: badge.badge_type,
@@ -562,7 +548,6 @@ export default async function handler(req, res) {
       });
 
       if (shouldUnlock) {
-        console.log(`🎉 Attempting to unlock badge: ${badge.name}`);
         try {
           const { error: unlockError } = await supabase
             .from("user_badges")
@@ -573,17 +558,14 @@ export default async function handler(req, res) {
 
           if (!unlockError) {
             newlyUnlocked.push(badge);
-            console.log(`✅ Successfully unlocked badge: ${badge.name}`);
           } else {
-            console.error("❌ Error unlocking badge:", badge.name, unlockError);
+            console.error("Error unlocking badge:", badge.name, unlockError);
           }
         } catch (error) {
           console.error("❌ Exception unlocking badge:", badge.name, error);
         }
       }
     }
-
-    console.log("=== BADGE CHECK DEBUG END ===");
 
     res.status(200).json({
       success: true,

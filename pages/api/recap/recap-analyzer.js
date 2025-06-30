@@ -34,7 +34,6 @@ export default async function handler(req, res) {
       journalData.length === 0 ||
       (typeof journalData === "string" && journalData.trim() === "")
     ) {
-      console.log("No journal entries found for the specified date range");
       return res.status(200).json({
         message: "No journal entries found for the specified date range",
         dateRange: dateRange,
@@ -136,8 +135,6 @@ Format your response as JSON with this exact structure:
       });
     }
 
-    console.log("AI Analysis Result:", nvidiaContent);
-
     let cleanedContent = nvidiaContent;
     if (cleanedContent.includes("```json")) {
       cleanedContent = cleanedContent
@@ -161,8 +158,6 @@ Format your response as JSON with this exact structure:
         cleanedContent: cleanedContent,
       });
     }
-
-    console.log(aiAnalysis);
 
     // Check for existing recap with better error handling
     let existingCheck;
@@ -189,7 +184,6 @@ Format your response as JSON with this exact structure:
     }
 
     if (existingCheck) {
-      console.log("Recap already exists, skipping save");
       return res.status(200).json({
         message: "Recap already exists for this week",
         recap: existingCheck,
@@ -230,8 +224,6 @@ Format your response as JSON with this exact structure:
         details: saveDbError.message,
       });
     }
-
-    console.log("Recap saved successfully:", savedRecap);
 
     res.status(200).json({
       message: "Weekly recap analyzed and saved successfully",

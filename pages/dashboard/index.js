@@ -108,7 +108,6 @@ export default function DashboardPage({ user }) {
       setIsCheckingBadges(true);
 
       try {
-        console.log("Checking for new badges...");
         const response = await axios.post(
           "/api/badges/check-unlock",
           {},
@@ -121,7 +120,6 @@ export default function DashboardPage({ user }) {
         if (response.data.success) {
           // Fix: Use 'newlyUnlocked' instead of 'newBadges'
           const newBadges = response.data.newlyUnlocked || [];
-          console.log("New badges found:", newBadges);
 
           if (newBadges.length > 0) {
             const shownBadges = getShownBadges();
@@ -132,8 +130,6 @@ export default function DashboardPage({ user }) {
             );
 
             if (unseenBadges.length > 0) {
-              console.log("Unseen badges:", unseenBadges);
-
               // Add all unseen badges to queue
               setBadgeQueue((prev) => [...prev, ...unseenBadges]);
 
@@ -154,7 +150,6 @@ export default function DashboardPage({ user }) {
           retryCount < 2 &&
           (error.code === "ECONNABORTED" || error.response?.status >= 500)
         ) {
-          console.log(`Retrying badge check (attempt ${retryCount + 1})...`);
           setTimeout(() => checkNewBadges(retryCount + 1), 2000);
         }
       } finally {
@@ -186,7 +181,6 @@ export default function DashboardPage({ user }) {
   // Listen for badge unlock events from other parts of the app
   useEffect(() => {
     const handleBadgeUnlock = (event) => {
-      console.log("Badge unlock event received:", event.detail);
       checkNewBadges();
     };
 
