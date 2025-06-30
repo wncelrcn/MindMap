@@ -78,7 +78,7 @@ If the journal entry is brief or lacks emotional detail, still offer thoughtful 
 Special Handling for Sensitive Content:
 If the journal contains extreme negativity, suicidal thoughts, criminal ideation, or sarcastic reflections masking emotional pain, respond with care and honesty — never glorify or validate these experiences as personal growth or empowerment. Do not frame these moments as "discoveries" or "bravery." Acknowledge the emotional weight sincerely while encouraging the user to seek support.
 
-Format your response as JSON with this exact structure:
+Format your response as JSON with this *exact* structure:
 {
   "summary": "your summary here",
   "mood": "list of your mood here (e.g. happy, sad, anxious, etc.)",
@@ -88,6 +88,8 @@ Format your response as JSON with this exact structure:
   "What Helped You Cope": "Mention the strategies, activities, or support systems that helped you manage your feelings (in 3-4 sentences).",
   "Remember": "Provide a gentle, personalized reminder or affirmation based on the journal (in 3-4 sentences)."
 }
+
+Do not include any other text or comments in your response.
     `;
 
     let nvidiaResponse;
