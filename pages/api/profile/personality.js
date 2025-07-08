@@ -314,7 +314,7 @@ Please provide your response without detailed thinking or reasoning steps.`;
                 content: `Please analyze the following journal entries from the past week to identify the user's dominant personality trait:\n\n${journalContent}`,
               },
             ],
-            max_tokens: 4096,
+            max_tokens: 512,
             temperature: 0.7,
           }),
         }
