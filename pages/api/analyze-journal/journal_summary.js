@@ -99,7 +99,7 @@ Please provide your response without detailed thinking or reasoning steps.`;
               content: `The journal entry is:\n${journalString}`,
             },
           ],
-          max_tokens: 512,
+          max_tokens: 256,
           temperature: 0.5,
         }),
       }
