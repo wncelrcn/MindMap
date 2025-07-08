@@ -47,6 +47,41 @@ export default async function handler(req, res) {
       }
     }
 
+    // Check if emotions exist in the respective table when no existing insights
+    let existingEmotionsData = null;
+    if (!existingInsights) {
+      let emotionTableName = "";
+      if (journalType === "freeform") {
+        emotionTableName = "freeform_journal_emotions_table";
+      } else if (journalType === "guided") {
+        emotionTableName = "guided_journal_emotions_table";
+      }
+
+      if (emotionTableName) {
+        const { data: existingEmotions, error: emotionFetchError } =
+          await supabase
+            .from(emotionTableName)
+            .select("*")
+            .eq("journal_id", journalId)
+            .single();
+
+        if (emotionFetchError && emotionFetchError.code !== "PGRST116") {
+          console.error("Error checking existing emotions:", emotionFetchError);
+        }
+
+        if (!existingEmotions) {
+          console.log(
+            `No emotions found in ${emotionTableName} for journal_id: ${journalId}, will use FastAPI for emotion detection...`
+          );
+        } else {
+          console.log(
+            `Found existing emotions in ${emotionTableName} for journal_id: ${journalId}, will use these for insights`
+          );
+          existingEmotionsData = existingEmotions;
+        }
+      }
+    }
+
     let journalContent = "";
     let journalMetadata = {};
 
@@ -107,8 +142,30 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "No journal content found" });
     }
 
-    // Detect emotions using FastAPI before generating insights
-    const detectedEmotions = await detectEmotionsWithFastAPI(journalContent);
+    // Use existing emotions if available, otherwise detect emotions using FastAPI
+    let detectedEmotions = [];
+    if (existingEmotionsData && existingEmotionsData.emotions) {
+      // Extract emotions from existing data - emotions should be an array like:
+      // [{"label":"realization","score":0.329,"desc":"..."},{"label":"fear","score":0.162,"desc":"..."},...]
+      if (Array.isArray(existingEmotionsData.emotions)) {
+        // Take top 3 emotions for insights (similar to FastAPI detection)
+        detectedEmotions = existingEmotionsData.emotions
+          .slice(0, 3)
+          .map((emotion) => emotion.label);
+        console.log(
+          "Using existing emotions from database for insights:",
+          detectedEmotions
+        );
+      }
+    }
+
+    // If no existing emotions found, detect emotions using FastAPI
+    if (detectedEmotions.length === 0) {
+      console.log(
+        "No existing emotions found, detecting emotions using FastAPI..."
+      );
+      detectedEmotions = await detectEmotionsWithFastAPI(journalContent);
+    }
 
     // Generate insights using OpenRouter API with detected emotions
     const insights = await generateInsights(

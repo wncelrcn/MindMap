@@ -36,7 +36,6 @@ export default async function handler(req, res) {
         .json({ message: "Unauthorized: User ID mismatch" });
     }
 
-    console.log("user_UID backend", user_UID);
     const now = new Date();
 
     // Create the journal entry object
