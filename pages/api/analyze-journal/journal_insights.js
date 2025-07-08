@@ -443,7 +443,8 @@ Generate a COMPLETE RESPONSE in the *EXACT* JSON format below:
   }
 }
 
-Ensure that the response is empathetic, self-reflective, and empowering. Do not be overly clinical. Support emotional exploration and personal insight in a caring and accessible tone.`;
+Ensure that the response is empathetic, self-reflective, and empowering. Do not be overly clinical. Support emotional exploration and personal insight in a caring and accessible tone.
+Please provide your response without detailed thinking or reasoning steps.`;
 
   try {
     const response = await fetch(
@@ -456,7 +457,7 @@ Ensure that the response is empathetic, self-reflective, and empowering. Do not 
           "X-Title": "Journal Insights App",
         },
         body: JSON.stringify({
-          model: "meta/llama-4-maverick-17b-128e-instruct",
+          model: "nvidia/llama-3.1-nemotron-ultra-253b-v1",
           messages: [
             {
               role: "user",

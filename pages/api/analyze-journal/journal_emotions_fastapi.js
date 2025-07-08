@@ -81,7 +81,8 @@ If the journal is unclear or seems intentionally manipulative, say:
 If the journal entry is brief or lacks emotional detail, still offer thoughtful insights without labeling it as lacking. Instead, gently focus on possibilities, strengths, or questions to reflect on. Avoid judgmental or evaluative tone.
 
 Special Handling for Sensitive Content:
-If the journal contains extreme negativity, suicidal thoughts, criminal ideation, or sarcastic reflections masking emotional pain, respond with care and honesty — never glorify or validate these experiences as personal growth or empowerment. Do not frame these moments as "discoveries" or "bravery." Acknowledge the emotional weight sincerely while encouraging the user to seek support.`;
+If the journal contains extreme negativity, suicidal thoughts, criminal ideation, or sarcastic reflections masking emotional pain, respond with care and honesty — never glorify or validate these experiences as personal growth or empowerment. Do not frame these moments as "discoveries" or "bravery." Acknowledge the emotional weight sincerely while encouraging the user to seek support.
+Please provide your response without detailed thinking or reasoning steps.`;
 
       try {
         console.log(
@@ -99,7 +100,7 @@ If the journal contains extreme negativity, suicidal thoughts, criminal ideation
               Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
             },
             body: JSON.stringify({
-              model: "meta/llama-4-maverick-17b-128e-instruct",
+              model: "nvidia/llama-3.1-nemotron-ultra-253b-v1",
               messages: [
                 {
                   role: "system",
@@ -110,7 +111,7 @@ If the journal contains extreme negativity, suicidal thoughts, criminal ideation
                   content: `The journal entry is:\n${journalString}\n\nWhy might the user be feeling "${emotion.label}"?`,
                 },
               ],
-              max_tokens: 256,
+              max_tokens: 4096,
               temperature: 0.3,
             }),
           }

@@ -52,8 +52,8 @@ const MoodDistributionChart = ({ emotions: rawEmotions }) => {
       const positions = [];
       const centerX = 50;
       const centerY = 50;
-      const radiusX = 35; // Increased horizontal radius for more spread
-      const radiusY = 30; // Increased vertical radius for more spread
+      const radiusX = 40; // Increased radius for bigger circles
+      const radiusY = 35; // Increased radius for bigger circles
 
       emotions.forEach((_, index) => {
         // Distribute emotions in a circular pattern with more spacing
@@ -62,8 +62,8 @@ const MoodDistributionChart = ({ emotions: rawEmotions }) => {
         const y = centerY + radiusY * Math.sin(angle);
 
         positions.push({
-          left: `${Math.max(12, Math.min(88, x))}%`,
-          top: `${Math.max(12, Math.min(88, y))}%`,
+          left: `${Math.max(10, Math.min(90, x))}%`,
+          top: `${Math.max(10, Math.min(90, y))}%`,
         });
       });
 
@@ -118,8 +118,8 @@ const MoodDistributionChart = ({ emotions: rawEmotions }) => {
     const positions = [];
     const centerX = 50;
     const centerY = 50;
-    const radiusX = 35; // Increased horizontal radius for more spread
-    const radiusY = 30; // Increased vertical radius for more spread
+    const radiusX = 40; // Increased radius for bigger circles
+    const radiusY = 35; // Increased radius for bigger circles
 
     emotions.forEach((_, index) => {
       // Distribute emotions in a circular pattern with more spacing
@@ -128,8 +128,8 @@ const MoodDistributionChart = ({ emotions: rawEmotions }) => {
       const y = centerY + radiusY * Math.sin(angle);
 
       positions.push({
-        left: `${Math.max(12, Math.min(88, x))}%`,
-        top: `${Math.max(12, Math.min(88, y))}%`,
+        left: `${Math.max(10, Math.min(90, x))}%`,
+        top: `${Math.max(10, Math.min(90, y))}%`,
       });
     });
 
@@ -148,7 +148,7 @@ const MoodDistributionChart = ({ emotions: rawEmotions }) => {
         mb: 4,
         position: "relative",
         overflow: "hidden",
-        minHeight: "365px",
+        minHeight: "400px", // Increased height for bigger circles
         backdropFilter: "blur(20px)",
         border: "0.5px solid #2D1B6B",
       }}
@@ -160,8 +160,8 @@ const MoodDistributionChart = ({ emotions: rawEmotions }) => {
 
         // Calculate circle size based on intensity and other emotions
         const calculateCircleSize = () => {
-          const minSize = 60;
-          const maxSize = 120;
+          const minSize = 100; // Increased minimum size
+          const maxSize = 160; // Increased maximum size
 
           // Base size from own intensity
           let baseSize =
@@ -182,7 +182,7 @@ const MoodDistributionChart = ({ emotions: rawEmotions }) => {
             (otherEmotionsIntensity / (emotions.length - 1 || 1) / 100) * 0.3;
           sizeFactor += otherEmotionsFactor;
 
-          return Math.min(baseSize * sizeFactor, 160); // Cap at 160px
+          return Math.min(baseSize * sizeFactor, 200); // Increased cap to 200px
         };
 
         const circleSize = calculateCircleSize();

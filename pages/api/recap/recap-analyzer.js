@@ -90,7 +90,7 @@ Format your response as JSON with this *exact* structure:
 }
 
 Do not include any other text or comments in your response.
-    `;
+Please provide your response without detailed thinking or reasoning steps.`;
 
     let nvidiaResponse;
     let nvidiaResult;
@@ -106,7 +106,7 @@ Do not include any other text or comments in your response.
             Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
           },
           body: JSON.stringify({
-            model: "meta/llama-4-maverick-17b-128e-instruct",
+            model: "nvidia/llama-3.1-nemotron-ultra-253b-v1",
             messages: [{ role: "user", content: prompt }],
             max_tokens: 4096,
             temperature: 0.7,

@@ -289,7 +289,8 @@ Provide your analysis in the following JSON format ONLY:
   "description": "A 2-3 sentence description that explains this personality trait and how it manifests in their journal entries. Use second person ('you') and be encouraging and insightful."
 }
 
-Do not include any other text, formatting, or markdown. Focus on positive traits while being authentic to what the journal entries reveal.`;
+Do not include any other text, formatting, or markdown. Focus on positive traits while being authentic to what the journal entries reveal.
+Please provide your response without detailed thinking or reasoning steps.`;
 
     try {
       // Make request to Nvidia API
@@ -302,7 +303,7 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
             Authorization: `Bearer ${process.env.NVIDIA_API_KEY}`,
           },
           body: JSON.stringify({
-            model: "meta/llama-4-maverick-17b-128e-instruct",
+            model: "nvidia/llama-3.1-nemotron-ultra-253b-v1",
             messages: [
               {
                 role: "system",
@@ -313,7 +314,7 @@ Do not include any other text, formatting, or markdown. Focus on positive traits
                 content: `Please analyze the following journal entries from the past week to identify the user's dominant personality trait:\n\n${journalContent}`,
               },
             ],
-            max_tokens: 300,
+            max_tokens: 4096,
             temperature: 0.7,
           }),
         }
