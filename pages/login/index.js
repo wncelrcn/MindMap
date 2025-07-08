@@ -346,6 +346,7 @@ export default function Login() {
                   Don't have an account?{" "}
                   <Link
                     component="button"
+                    type="button"
                     variant="body2"
                     onClick={() => router.push("/register")}
                     sx={{
