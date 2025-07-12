@@ -19,6 +19,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Poppins, Raleway, Quicksand } from "next/font/google";
 import { createClient } from "@/utils/supabase/server-props";
+import { useTypingDetection } from "@/hooks/useTypingDetection";
+import ExitConfirmationDialog, {
+  useExitConfirmation,
+} from "@/components/ExitConfirmationDialog";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -65,9 +69,8 @@ export default function Journal({ user }) {
   const [editingTitle, setEditingTitle] = useState(false);
   const [content, setContent] = useState("");
   const [sections, setSections] = useState([]);
-  const [lastActivity, setLastActivity] = useState(Date.now());
-  const [showButton, setShowButton] = useState(false);
   const [error, setError] = useState(null);
+  const [hasChanges, setHasChanges] = useState(false);
 
   // Loading states
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
@@ -77,15 +80,32 @@ export default function Journal({ user }) {
 
   const router = useRouter();
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (Date.now() - lastActivity >= 2000 && content) {
-        setShowButton(true);
-      }
-    }, 2000);
+  // Use the custom typing detection hook
+  const {
+    showButtons: showButton,
+    handleTyping,
+    hideButtons,
+  } = useTypingDetection(content);
 
-    return () => clearTimeout(timer);
-  }, [lastActivity, content]);
+  // Use the exit confirmation hook
+  const {
+    showExitDialog,
+    handleConfirmExit,
+    handleCancelExit,
+    handleCustomExit,
+  } = useExitConfirmation(hasChanges, () => setHasChanges(false));
+
+  // Track changes for exit confirmation
+  useEffect(() => {
+    const checkForChanges = () => {
+      const hasContent =
+        content.trim() !== "" ||
+        sections.some((section) => section.content.trim() !== "");
+      setHasChanges(hasContent);
+    };
+
+    checkForChanges();
+  }, [content, sections]);
 
   const handleTitleClick = () => setEditingTitle(true);
   const handleTitleBlur = () => {
@@ -97,11 +117,11 @@ export default function Journal({ user }) {
 
   const handleContentChange = (e) => {
     setContent(e.target.value);
-    setLastActivity(Date.now());
+    handleTyping();
   };
 
   const handleGoDeeper = async () => {
-    setShowButton(false);
+    hideButtons();
 
     let history = "";
     if (content.trim()) {
@@ -135,7 +155,7 @@ export default function Journal({ user }) {
     const newSections = [...sections];
     newSections[index] = { ...newSections[index], [field]: value };
     setSections(newSections);
-    setLastActivity(Date.now());
+    handleTyping();
   };
 
   const getFormattedDate = () => {
@@ -273,6 +293,7 @@ export default function Journal({ user }) {
       // Small delay to show completion
       setTimeout(() => {
         setIsGeneratingInsights(false);
+        setHasChanges(false); // Reset to prevent exit dialog
         router.push("/dashboard");
       }, 1000);
     } catch (error) {
@@ -393,20 +414,20 @@ export default function Journal({ user }) {
             zIndex={1}
             sx={{ padding: { xs: "1.5rem", md: "2rem 8rem" } }}
           >
-            <Link href="/dashboard" passHref legacyBehavior>
-              <a>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24px"
-                  viewBox="0 -960 960 960"
-                  width="24px"
-                  fill="#2D1B6B"
-                  style={{ cursor: "pointer" }}
-                >
-                  <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
-                </svg>
-              </a>
-            </Link>
+            <div
+              onClick={() => handleCustomExit("/dashboard")}
+              style={{ cursor: "pointer" }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 -960 960 960"
+                width="24px"
+                fill="#2D1B6B"
+              >
+                <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+              </svg>
+            </div>
           </Box>
           <Image
             src="/assets/header.png"
@@ -670,6 +691,13 @@ export default function Journal({ user }) {
             </Button>
           </Box>
         )}
+
+        {/* Exit Confirmation Dialog */}
+        <ExitConfirmationDialog
+          open={showExitDialog}
+          onConfirm={handleConfirmExit}
+          onCancel={handleCancelExit}
+        />
       </Box>
     </>
   );

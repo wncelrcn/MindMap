@@ -19,6 +19,10 @@ import { useRouter } from "next/router";
 import { Poppins, Quicksand } from "next/font/google";
 import { createClient } from "@/utils/supabase/server-props";
 import Loading from "@/components/Loading";
+import { useTypingDetection } from "@/hooks/useTypingDetection";
+import ExitConfirmationDialog, {
+  useExitConfirmation,
+} from "@/components/ExitConfirmationDialog";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -64,13 +68,9 @@ export default function Questions({ user }) {
 
   const [user_UID, setUser_UID] = useState(user.id);
 
-  const [lastActivity, setLastActivity] = useState(Date.now());
-  const [showButtons, setShowButtons] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
-  const [showExitDialog, setShowExitDialog] = useState(false);
-  const [exitDestination, setExitDestination] = useState(null);
   const [themeId, setThemeId] = useState(null);
   const [categoryId, setCategoryId] = useState(null);
   const [questionSetId, setQuestionSetId] = useState(null);
@@ -80,6 +80,19 @@ export default function Questions({ user }) {
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const [loadingStep, setLoadingStep] = useState("");
   const [progress, setProgress] = useState(0);
+
+  // Use the custom typing detection hook
+  const { showButtons, handleTyping, hideButtons } = useTypingDetection(
+    answers[`question${currentQuestionIndex + 1}`]
+  );
+
+  // Use the exit confirmation hook
+  const {
+    showExitDialog,
+    handleConfirmExit,
+    handleCancelExit,
+    handleCustomExit,
+  } = useExitConfirmation(hasChanges, () => setHasChanges(false));
 
   useEffect(() => {
     const fetchQuestionSet = async () => {
@@ -146,19 +159,6 @@ export default function Questions({ user }) {
   }, [theme, category]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (
-        Date.now() - lastActivity >= 2000 &&
-        answers[`question${currentQuestionIndex + 1}`]
-      ) {
-        setShowButtons(true);
-      }
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [lastActivity, answers, currentQuestionIndex]);
-
-  useEffect(() => {
     const checkForChanges = () => {
       const hasAnswer = Object.values(answers).some(
         (answer) => answer.trim() !== ""
@@ -168,44 +168,6 @@ export default function Questions({ user }) {
 
     checkForChanges();
   }, [answers]);
-
-  // Setup the navigation warning
-  useEffect(() => {
-    // Handle route change start
-    const handleRouteChangeStart = (url) => {
-      // If there are changes and it's not an explicit finish action
-      if (hasChanges && !url.includes("/dashboard?completed=true")) {
-        // Store the destination URL
-        setExitDestination(url);
-        // Show the dialog
-        setShowExitDialog(true);
-        // Prevent default navigation behavior
-        router.events.emit("routeChangeError");
-        // Keep the URL the same
-        throw "routeChange aborted to show dialog";
-      }
-    };
-
-    // Handle browser's back/forward buttons and window close
-    const handleBeforeUnload = (e) => {
-      if (hasChanges) {
-        const message =
-          "You have unsaved changes. Are you sure you want to leave?";
-        e.returnValue = message;
-        return message;
-      }
-    };
-
-    // Add event listeners
-    router.events.on("routeChangeStart", handleRouteChangeStart);
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    // Cleanup event listeners
-    return () => {
-      router.events.off("routeChangeStart", handleRouteChangeStart);
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [hasChanges, router]);
 
   const handleTitleClick = () => setEditingTitle(true);
   const handleTitleBlur = () => {
@@ -220,13 +182,13 @@ export default function Questions({ user }) {
       ...prev,
       [`question${index + 1}`]: value,
     }));
-    setLastActivity(Date.now());
+    handleTyping();
   };
 
   const handleNextQuestion = () => {
     if (currentQuestionIndex < questionSet.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
-      setShowButtons(false);
+      hideButtons();
     }
   };
 
@@ -364,8 +326,7 @@ export default function Questions({ user }) {
       // Small delay to show completion
       setTimeout(() => {
         setIsGeneratingInsights(false);
-        // Reset hasChanges to prevent the warning dialog
-        setHasChanges(false);
+        setHasChanges(false); // Reset to prevent exit dialog
         router.push("/dashboard?completed=true");
       }, 1000);
     } catch (error) {
@@ -375,36 +336,11 @@ export default function Questions({ user }) {
     }
   };
 
-  // Handle user confirmation to leave
-  const handleConfirmExit = () => {
-    setHasChanges(false); // Reset the flag to prevent future dialogs
-    setShowExitDialog(false);
-    // Navigate to the destination
-    if (exitDestination) {
-      router.push(exitDestination);
-    } else {
-      // If no specific destination (e.g., when using browser back button)
-      router.back();
-    }
-  };
-
-  // Handle user decision to stay on the page
-  const handleCancelExit = () => {
-    setShowExitDialog(false);
-  };
-
   // Custom back button handler
   const handleBackButtonClick = () => {
-    if (hasChanges) {
-      setExitDestination(
-        `/guided-journaling/${theme}/${encodeURIComponent(category)}`
-      );
-      setShowExitDialog(true);
-    } else {
-      router.push(
-        `/guided-journaling/${theme}/${encodeURIComponent(category)}`
-      );
-    }
+    handleCustomExit(
+      `/guided-journaling/${theme}/${encodeURIComponent(category)}`
+    );
   };
 
   // Display additional debugging information when there's an error
@@ -675,74 +611,11 @@ export default function Questions({ user }) {
       </Box>
 
       {/* Exit Confirmation Dialog */}
-      <Dialog
+      <ExitConfirmationDialog
         open={showExitDialog}
-        onClose={handleCancelExit}
-        aria-labelledby="exit-dialog-title"
-        aria-describedby="exit-dialog-description"
-        sx={{
-          "& .MuiDialog-paper": {
-            borderRadius: "16px",
-            padding: "1rem",
-            fontFamily: poppins.style.fontFamily,
-          },
-        }}
-      >
-        <DialogTitle
-          id="exit-dialog-title"
-          sx={{
-            fontFamily: poppins.style.fontFamily,
-            fontWeight: 600,
-            color: "#2D1B6B",
-          }}
-        >
-          Unsaved Changes
-        </DialogTitle>
-        <DialogContent>
-          <Typography
-            sx={{
-              fontFamily: poppins.style.fontFamily,
-              color: "#4A3E8E",
-            }}
-          >
-            You have unsaved content in your journal entry. Leaving this page
-            will cause your work to be lost. Are you sure you want to leave?
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ padding: "1rem" }}>
-          <Button
-            onClick={handleCancelExit}
-            sx={{
-              backgroundColor: "#E2DDF9",
-              color: "#4E2BBD",
-              textTransform: "none",
-              fontWeight: 500,
-              borderRadius: "16px",
-              padding: "0.75rem 1.5rem",
-              boxShadow: "none",
-              fontFamily: poppins.style.fontFamily,
-            }}
-          >
-            Stay on Page
-          </Button>
-          <Button
-            onClick={handleConfirmExit}
-            sx={{
-              backgroundColor: "#4E2BBD",
-              color: "#fff",
-              textTransform: "none",
-              fontWeight: 500,
-              borderRadius: "16px",
-              padding: "0.75rem 1.5rem",
-              boxShadow: "none",
-              fontFamily: poppins.style.fontFamily,
-              ml: 2,
-            }}
-          >
-            Leave Without Saving
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onConfirm={handleConfirmExit}
+        onCancel={handleCancelExit}
+      />
 
       <Dialog
         open={openShortEntryDialog}
