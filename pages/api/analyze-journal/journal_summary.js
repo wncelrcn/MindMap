@@ -21,6 +21,47 @@ const journalingThemes = [
   "Hobbies and Interests",
 ];
 
+// Function to parse simple text format response from AI
+function parseSimpleTextResponse(content) {
+  // Initialize default values
+  let summary = "The journal is about exploring your thoughts and experiences.";
+  let theme = "Self-Reflection";
+
+  try {
+    // Clean the content by removing any markdown formatting
+    let cleanedContent = content.trim();
+
+    // Extract summary
+    const summaryMatch = cleanedContent.match(
+      /SUMMARY:\s*(.+?)(?=\nTHEME:|$)/s
+    );
+    if (summaryMatch) {
+      summary = summaryMatch[1].trim();
+    }
+
+    // Extract theme
+    const themeMatch = cleanedContent.match(/THEME:\s*(.+?)(?=\n|$)/s);
+    if (themeMatch) {
+      theme = themeMatch[1].trim();
+    }
+
+    // If the format is not followed, try to extract from the entire content
+    if (!summaryMatch && !themeMatch) {
+      // If no structured format is found, treat the entire content as summary
+      summary = cleanedContent.startsWith("The journal is about")
+        ? cleanedContent
+        : `The journal is about ${cleanedContent}`;
+    }
+  } catch (error) {
+    console.error("Error parsing simple text response:", error);
+  }
+
+  return {
+    summary: summary,
+    theme: theme,
+  };
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
@@ -62,11 +103,9 @@ Summary Instructions:
 - Make the tone supportive, clear, and emotionally insightful.
 
 Output Format:
-Return only a JSON object using this exact structure:
-{
-  "summary": "your summary here",
-  "theme": "exact theme from the list"
-}
+PLEASE RETURN YOUR RESPONSE IN EXACTLY THIS FORMAT:
+SUMMARY: [your summary here]
+THEME: [exact theme from the list]
 
 If the journal entry is brief or lacks emotional detail, still offer thoughtful insights without labeling it as lacking. Instead, gently focus on possibilities, strengths, or questions to reflect on. Avoid judgmental or evaluative tone.
 
@@ -99,7 +138,7 @@ Please provide your response without detailed thinking or reasoning steps.`;
               content: `The journal entry is:\n${journalString}`,
             },
           ],
-          max_tokens: 256,
+          max_tokens: 2048,
           temperature: 0.5,
         }),
       }
@@ -118,47 +157,22 @@ Please provide your response without detailed thinking or reasoning steps.`;
     const nvidiaContent = nvidiaResult?.choices?.[0]?.message?.content?.trim();
 
     if (nvidiaContent) {
-      try {
-        // Clean the response - remove markdown code blocks if present
-        let cleanedContent = nvidiaContent;
-        if (cleanedContent.includes("```json")) {
-          cleanedContent = cleanedContent
-            .replace(/```json\s*/g, "")
-            .replace(/\s*```/g, "");
-        }
-        if (cleanedContent.includes("```")) {
-          cleanedContent = cleanedContent
-            .replace(/```\s*/g, "")
-            .replace(/\s*```/g, "");
-        }
+      // Parse the simple text format response from AI
+      const result = parseSimpleTextResponse(nvidiaContent);
 
-        // Parse the JSON response from the AI
-        const parsedResult = JSON.parse(cleanedContent);
+      // Validate that the theme is from our list
+      const validTheme = journalingThemes.includes(result.theme)
+        ? result.theme
+        : "Self-Reflection";
 
-        // Validate that the theme is from our list
-        const validTheme = journalingThemes.includes(parsedResult.theme)
-          ? parsedResult.theme
-          : "Self-Reflection";
+      console.log("Parsed result:", result);
+      console.log("Valid theme:", validTheme);
 
-        console.log("Parsed result:", parsedResult);
-        console.log("Valid theme:", validTheme);
-
-        return res.status(200).json({
-          summary: parsedResult.summary,
-          theme: validTheme,
-          source: "nvidia",
-        });
-      } catch (parseError) {
-        console.error("JSON parsing error:", parseError);
-        console.log("Original content:", nvidiaContent);
-
-        // If JSON parsing fails, treat as legacy format (summary only)
-        return res.status(200).json({
-          summary: nvidiaContent,
-          theme: "Self-Reflection",
-          source: "nvidia",
-        });
-      }
+      return res.status(200).json({
+        summary: result.summary,
+        theme: validTheme,
+        source: "nvidia",
+      });
     }
 
     // If Nvidia fails
