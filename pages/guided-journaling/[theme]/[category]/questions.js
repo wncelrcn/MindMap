@@ -283,6 +283,7 @@ export default function Questions({ user }) {
           journal_entry: journalData,
           title: title.trim() || "Untitled Entry",
           journal_summary: summaryData["summary"],
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         }),
       });
 

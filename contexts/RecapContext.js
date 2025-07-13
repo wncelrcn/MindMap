@@ -34,6 +34,9 @@ export const RecapProvider = ({ children, user }) => {
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        }),
       });
 
       if (response.ok) {
@@ -52,6 +55,7 @@ export const RecapProvider = ({ children, user }) => {
                 data: data.analysisData.combinedSummaryText,
                 dateRange: data.dateRange,
                 user_UID: data.user_UID,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
               }),
             });
 

@@ -1,5 +1,9 @@
 import createClient from "@/utils/supabase/api";
 import { encryptJournalEntry } from "@/lib/encryption";
+import {
+  getUserTimezoneDate,
+  getUserTimezoneTime,
+} from "@/utils/helper/timezone";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -23,7 +27,8 @@ export default async function handler(req, res) {
       });
     }
 
-    const { user_UID, journal_entry, title, journal_summary } = req.body;
+    const { user_UID, journal_entry, title, journal_summary, timezone } =
+      req.body;
 
     if (!user_UID || !journal_entry || !title || !journal_summary) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -36,15 +41,16 @@ export default async function handler(req, res) {
         .json({ message: "Unauthorized: User ID mismatch" });
     }
 
-    const now = new Date();
+    // Use user's timezone if provided, otherwise fall back to UTC
+    const userTimezone = timezone || "UTC";
 
     // Create the journal entry object
     const journalEntryData = {
       user_UID: user_UID,
       journal_entry: journal_entry,
       title: title,
-      date_created: now.toISOString(),
-      time_created: now.toTimeString().split(" ")[0],
+      date_created: getUserTimezoneDate(userTimezone),
+      time_created: getUserTimezoneTime(userTimezone),
       journal_summary: journal_summary,
     };
 

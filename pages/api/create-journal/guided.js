@@ -1,5 +1,9 @@
 import createClient from "@/utils/supabase/api";
 import { encryptJournalEntry } from "@/lib/encryption";
+import {
+  getUserTimezoneDate,
+  getUserTimezoneTime,
+} from "@/utils/helper/timezone";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -31,6 +35,7 @@ export default async function handler(req, res) {
       journal_entry,
       title,
       journal_summary,
+      timezone,
     } = req.body;
 
     // Validation
@@ -56,6 +61,9 @@ export default async function handler(req, res) {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Use user's timezone if provided, otherwise fall back to UTC
+    const userTimezone = timezone || "UTC";
+
     // Create the journal entry object
     const journalEntryData = {
       user_UID,
@@ -65,8 +73,8 @@ export default async function handler(req, res) {
       question_set_id,
       journal_entry,
       journal_summary,
-      date_created: new Date().toISOString().split("T")[0],
-      time_created: new Date().toTimeString().split(" ")[0],
+      date_created: getUserTimezoneDate(userTimezone),
+      time_created: getUserTimezoneTime(userTimezone),
     };
 
     // Encrypt sensitive fields before saving to database

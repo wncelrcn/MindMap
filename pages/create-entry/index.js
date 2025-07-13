@@ -254,6 +254,7 @@ export default function Journal({ user }) {
           user_UID: user_UID,
           journal_entry: journalData,
           title: title.trim() || "Untitled Entry",
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         }),
       });
 

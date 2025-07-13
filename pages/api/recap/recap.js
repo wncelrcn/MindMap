@@ -1,4 +1,5 @@
 import createClient from "@/utils/supabase/api";
+import { getUserTimezoneDate } from "@/utils/helper/timezone";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -21,18 +22,27 @@ export default async function handler(req, res) {
     }
 
     const user_UID = user.id;
+    const { timezone } = req.body;
+    const userTimezone = timezone || "UTC";
 
-    const today = new Date();
+    // Get today's date in user's timezone
+    const todayInUserTZ = new Date().toLocaleString("en-US", {
+      timeZone: userTimezone,
+    });
+    const today = new Date(todayInUserTZ);
     const currentDayOfWeek = today.getDay();
 
+    // Calculate days to last Sunday (previous week)
     const daysToLastSunday = currentDayOfWeek === 0 ? 7 : currentDayOfWeek + 7;
 
+    // Calculate last week's Sunday and Saturday in user's timezone
     const lastWeekSunday = new Date(today);
     lastWeekSunday.setDate(today.getDate() - daysToLastSunday);
 
     const lastWeekSaturday = new Date(lastWeekSunday);
     lastWeekSaturday.setDate(lastWeekSunday.getDate() + 6);
 
+    // Format dates as YYYY-MM-DD
     const startDate = lastWeekSunday.toISOString().split("T")[0];
     const endDate = lastWeekSaturday.toISOString().split("T")[0];
 

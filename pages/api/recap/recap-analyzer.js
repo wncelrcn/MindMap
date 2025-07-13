@@ -1,4 +1,5 @@
 import createClient from "@/utils/supabase/api";
+import { getUserTimezoneDateTime } from "@/utils/helper/timezone";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -20,7 +21,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const { data: journalData, dateRange, user_UID } = req.body;
+    const { data: journalData, dateRange, user_UID, timezone } = req.body;
 
     if (!dateRange || !user_UID) {
       return res.status(400).json({
@@ -204,7 +205,7 @@ Please provide your response without detailed thinking or reasoning steps.`;
           mood: aiAnalysis.mood,
           date_range_start: dateRange.startDate,
           date_range_end: dateRange.endDate,
-          created_at: new Date().toISOString(),
+          created_at: getUserTimezoneDateTime(timezone || "UTC"),
           feeling: aiAnalysis["How You Have Been Feeling"],
           contributing: aiAnalysis["What Might Be Contributing"],
           moments: aiAnalysis["Moments That Stood Out"],
