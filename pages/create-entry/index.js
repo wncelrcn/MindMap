@@ -186,6 +186,9 @@ export default function Journal({ user }) {
         return;
       }
 
+      // Reset changes state to prevent exit confirmation dialog
+      setHasChanges(false);
+
       // Start loading
       setIsGeneratingInsights(true);
       setProgress(0);
