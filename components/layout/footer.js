@@ -65,30 +65,42 @@ export default function Footer() {
                 fontFamily: quicksand.style.fontFamily,
               }}
             >
-              Email
+              Developers
             </Typography>
-            <Typography
-              sx={{ fontSize: "16px", fontFamily: quicksand.style.fontFamily }}
-            >
-              MindMap@gmail.com
-            </Typography>
-          </Box>
-          <Box>
-            <Typography
-              sx={{
-                fontSize: "14px",
-                opacity: 0.8,
-                mb: "4px",
-                fontFamily: quicksand.style.fontFamily,
-              }}
-            >
-              Phone Number
-            </Typography>
-            <Typography
-              sx={{ fontSize: "16px", fontFamily: quicksand.style.fontFamily }}
-            >
-              (049) 1122-234
-            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+              <Typography
+                sx={{
+                  fontSize: "16px",
+                  fontFamily: quicksand.style.fontFamily,
+                }}
+              >
+                Georgette Cadiz
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: "16px",
+                  fontFamily: quicksand.style.fontFamily,
+                }}
+              >
+                Joshua Dampil
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: "16px",
+                  fontFamily: quicksand.style.fontFamily,
+                }}
+              >
+                Adriel Groyon
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: "16px",
+                  fontFamily: quicksand.style.fontFamily,
+                }}
+              >
+                Wince Rivano
+              </Typography>
+            </Box>
           </Box>
         </Box>
       </Stack>

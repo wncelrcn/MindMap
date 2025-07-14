@@ -110,7 +110,7 @@ const myTestimonials = [
     role: "Mapúa MCL Student",
     quote:
       "I've tried many journaling apps, but this one stands out for its intuitive design and helpful features. It's become an essential part of my daily routine.",
-    image: "/assets/testimonials/1.png",
+    image: "/assets/testimonials/3.png",
   },
 ];
 
@@ -200,17 +200,16 @@ export default function Home() {
           {/* GIF Demo Placeholder */}
           <Box
             component="img"
-            src="/assets/wizzydemo.gif"
-            alt="Demo GIF Placeholder"
+            src="/assets/mindmap-demo.gif"
+            alt="MindMap Demo GIF"
             sx={{
               width: "100%",
-              maxWidth: 800,
+              maxWidth: 900,
               height: "auto",
               my: 5,
               mt: 15,
               mb: 15,
-              opacity: 0.4,
-              border: "2px dashed #ccc",
+              borderRadius: 2,
             }}
           />
         </Container>
