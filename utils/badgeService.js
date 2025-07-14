@@ -34,15 +34,12 @@ class BadgeService {
   // Check for badge unlocks with retry logic
   async checkBadgeUnlocks(retryCount = 0) {
     if (this.isChecking) {
-      console.log("Badge check already in progress");
       return [];
     }
 
     this.isChecking = true;
 
     try {
-      console.log("Checking for badge unlocks...");
-
       const response = await axios.post(
         "/api/badges/check-unlock",
         {},
@@ -59,7 +56,6 @@ class BadgeService {
         const newBadges = response.data.newlyUnlocked || [];
 
         if (newBadges.length > 0) {
-          console.log("New badges unlocked:", newBadges);
           this.notifyBadgeUnlock(newBadges);
           return newBadges;
         }
@@ -77,7 +73,6 @@ class BadgeService {
           !error.response; // Network error
 
         if (shouldRetry) {
-          console.log(`Retrying badge check (attempt ${retryCount + 1})`);
           await new Promise((resolve) => setTimeout(resolve, 2000));
           return this.checkBadgeUnlocks(retryCount + 1);
         }
